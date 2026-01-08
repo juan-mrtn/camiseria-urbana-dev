@@ -1,0 +1,256 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 2. ENUMS
+enum TipoPromocion {
+  Descuento
+  DosPorUno  @map("2x1") // Prisma no permite números al inicio
+}
+
+enum EstadoPago {
+  inactivo
+  procesando
+  confirmado
+  rechazado
+}
+
+enum EstadoCarrito {
+  abierto
+  confirmado
+  cancelado
+}
+
+enum RolUsuario {
+  cliente
+  admin
+}
+
+// 3. TABLAS Y MODELOS
+
+model Producto {
+  id          String   @id @default(uuid()) // VARCHAR PRIMARY KEY
+  nombre      String   @db.VarChar(100)
+  descripcion String?  @db.Text
+  codigo      String   @unique @db.VarChar(50)
+  
+  // Relaciones
+  variantes   ProductoVariante[]
+}
+
+model Promocion {
+  id          String        @id @default(uuid())
+  tipo        TipoPromocion
+  descripcion String?       @db.Text
+  fechaInicio DateTime      @map("fecha_inicio") @db.Date
+  fechaFin    DateTime      @map("fecha_fin") @db.Date
+  descuento   Decimal?      @db.Decimal(10, 2)
+  
+  // Relaciones
+  variantes   ProductoVariante[]
+  
+  // Nota: Los CHECK constraints (fechas y descuentos) se aplican a nivel de DB al migrar
+}
+
+model ProductoVariante {
+  id          String   @id @default(uuid())
+  productoId  String   @map("producto_id")
+  promocionId String?  @map("promocion_id")
+  precio      Decimal  @db.Decimal(12, 2)
+  material    String?  @db.VarChar(30)
+  talle       String?  @db.VarChar(4)
+
+  // Relaciones
+  producto    Producto   @relation(fields: [productoId], references: [id])
+  promocion   Promocion? @relation(fields: [promocionId], references: [id])
+  
+  imagenes       Imagen[]
+  comprasProv    CompraProveedor[]
+  opiniones      Opinion[]
+  favoritos      Favorito[]
+  itemsCarrito   CarritoItem[]
+  lineasCompra   LineaDeCompra[]
+  combosAsociados Combo[] // Si es representante de un combo
+  enCombos       ComboItem[] // Si es parte de un combo
+
+  @@map("producto_variante")
+}
+
+model Imagen {
+  id                 String @id @default(uuid())
+  productoVarianteId String @map("producto_variante_id")
+  urlImagen          String @map("url_imagen") @db.Text
+
+  variante ProductoVariante @relation(fields: [productoVarianteId], references: [id])
+  
+  @@map("imagen")
+}
+
+model Usuario {
+  id        String     @id @default(uuid()) // En NextAuth esto suele ser el ID del proveedor, pero uuid funciona bien
+  nombre    String     @db.VarChar(30)
+  email     String     @unique @db.VarChar(30)
+  password  String     @db.VarChar(30) // Ojo: En prod deberías hashear esto
+  rol       RolUsuario @default(cliente)
+  suscrito  Boolean    @default(false)
+
+  direcciones Direccion[]
+  opiniones   Opinion[]
+  favoritos   Favorito[]
+  carritos    Carrito[]
+  compras     Compra[]
+
+  @@map("usuario")
+}
+
+model Proveedor {
+  id       String @id @default(uuid())
+  nombre   String @db.VarChar(30)
+  contacto String? @db.Text
+
+  compras CompraProveedor[]
+
+  @@map("proveedor")
+}
+
+model CompraProveedor {
+  id                 String   @id @default(uuid())
+  proveedorId        String   @map("proveedor_id")
+  productoVarianteId String   @map("producto_variante_id")
+  cantidad           Int
+  fecha              DateTime @default(now()) @db.Date
+  costo              Decimal  @db.Decimal(12, 2)
+
+  proveedor Proveedor        @relation(fields: [proveedorId], references: [id])
+  variante  ProductoVariante @relation(fields: [productoVarianteId], references: [id])
+
+  @@map("compra_proveedor")
+}
+
+model Direccion {
+  id           String @id @default(uuid())
+  usuarioId    String @map("usuario_id")
+  calle        String @db.VarChar(30)
+  numero       String? @db.VarChar(30)
+  codigoPostal String @map("codigo_postal") @db.VarChar(5)
+  ciudad       String @db.VarChar(50)
+  provincia    String @db.VarChar(50)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@map("direccion")
+}
+
+model Opinion {
+  id                 String   @id @default(uuid())
+  usuarioId          String   @map("usuario_id")
+  productoVarianteId String   @map("producto_variante_id")
+  estrellas          Int
+  comentario         String?  @db.Text
+  fecha              DateTime @default(now()) @db.Date
+
+  usuario  Usuario          @relation(fields: [usuarioId], references: [id])
+  variante ProductoVariante @relation(fields: [productoVarianteId], references: [id])
+
+  @@map("opinion")
+}
+
+model Favorito {
+  id                 String @id @default(uuid())
+  usuarioId          String @map("usuario_id")
+  productoVarianteId String @map("producto_variante_id")
+
+  usuario  Usuario          @relation(fields: [usuarioId], references: [id])
+  variante ProductoVariante @relation(fields: [productoVarianteId], references: [id])
+
+  @@unique([usuarioId, productoVarianteId])
+  @@map("favorito")
+}
+
+model Carrito {
+  id             String        @id @default(uuid())
+  usuarioId      String        @map("usuario_id")
+  total          Decimal?      @default(0) @db.Decimal(12, 2)
+  descuentoTotal Decimal?      @default(0) @map("descuento_total") @db.Decimal(12, 2)
+  estado         EstadoCarrito @default(abierto)
+
+  usuario Usuario       @relation(fields: [usuarioId], references: [id])
+  items   CarritoItem[]
+
+  @@map("carrito")
+}
+
+model CarritoItem {
+  id                 String   @id @default(uuid())
+  carritoId          String   @map("carrito_id")
+  productoVarianteId String   @map("producto_variante_id")
+  cantidad           Int
+  precioUnitario     Decimal  @map("precio_unitario") @db.Decimal(12, 2)
+  descuentoUnitario  Decimal? @default(0) @map("descuento_unitario") @db.Decimal(12, 2)
+
+  carrito  Carrito          @relation(fields: [carritoId], references: [id])
+  variante ProductoVariante @relation(fields: [productoVarianteId], references: [id])
+
+  @@map("carrito_item")
+}
+
+model Compra {
+  id             String     @id @default(uuid())
+  usuarioId      String     @map("usuario_id")
+  numero         String     @unique
+  fecha          DateTime   @default(now()) @db.Date
+  total          Decimal    @db.Decimal(12, 2)
+  descuentoTotal Decimal?   @default(0) @map("descuento_total") @db.Decimal(12, 2)
+  estadoPago     EstadoPago @map("estado_pago")
+
+  usuario Usuario         @relation(fields: [usuarioId], references: [id])
+  lineas  LineaDeCompra[]
+
+  @@map("compra")
+}
+
+model LineaDeCompra {
+  id                 String   @id @default(uuid())
+  compraId           String   @map("compra_id")
+  productoVarianteId String   @map("producto_variante_id")
+  cantidad           Int
+  precioUnitario     Decimal  @map("precio_unitario") @db.Decimal(12, 2)
+  descuentoUnitario  Decimal? @default(0) @map("descuento_unitario") @db.Decimal(12, 2)
+
+  compra   Compra           @relation(fields: [compraId], references: [id])
+  variante ProductoVariante @relation(fields: [productoVarianteId], references: [id])
+
+  @@map("linea_de_compra")
+}
+
+model Combo {
+  id                 String  @id @default(uuid())
+  nombre             String  @db.VarChar(50)
+  descripcion        String? @db.Text
+  precio             Decimal @db.Decimal(10, 2)
+  productoVarianteId String  @map("producto_variante_id") // Representante
+
+  varianteRepresentante ProductoVariante @relation(fields: [productoVarianteId], references: [id])
+  items                 ComboItem[]
+
+  @@map("combo")
+}
+
+model ComboItem {
+  comboId            String @map("combo_id")
+  productoVarianteId String @map("producto_variante_id")
+  cantidad           Int
+
+  combo    Combo            @relation(fields: [comboId], references: [id])
+  variante ProductoVariante @relation(fields: [productoVarianteId], references: [id])
+
+  @@id([comboId, productoVarianteId])
+  @@map("combo_item")
+}
