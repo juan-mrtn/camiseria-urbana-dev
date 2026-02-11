@@ -6,10 +6,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
-// 2. ENUMS
+// 2. ENUMS (Basados en tu SQL)
 enum TipoPromocion {
   Descuento
   DosPorUno  @map("2x1") // Prisma no permite números al inicio
@@ -66,6 +65,7 @@ model ProductoVariante {
   precio      Decimal  @db.Decimal(12, 2)
   material    String?  @db.VarChar(30)
   talle       String?  @db.VarChar(4)
+  color       String?  @db.VarChar(30)
 
   // Relaciones
   producto    Producto   @relation(fields: [productoId], references: [id])
