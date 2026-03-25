@@ -4,11 +4,6 @@
 
 ```
 la-camiseria-urbana/
-├── prisma/
-│   ├── schema.prisma           # Esquema de base de datos
-│   ├── seed.ts                 # Datos iniciales
-│   └── migrations/             # Migraciones de BD
-│
 ├── src/
 │   ├── app/                    # Next.js App Router (Capa de Presentación)
 │   │   ├── (auth)/
@@ -71,7 +66,7 @@ la-camiseria-urbana/
 │   │   └── auth.ts             # NextAuth configuration
 │   │
 │   ├── lib/                    # Capa de Acceso a Datos y Utilidades
-│   │   ├── db.ts               # Prisma client
+│   │   ├── db.ts               # PostgreSQL pool (pg)
 │   │   ├── trpc.ts             # tRPC client config
 │   │   ├── mercadopago.ts      # MP SDK config
 │   │   ├── cloudinary.ts       # Image upload
@@ -199,7 +194,7 @@ class PromocionService {
 **Responsabilidades**:
 - Acceso directo a la base de datos
 - Operaciones CRUD
-- Queries complejas con Prisma
+- Queries complejas con SQL directo (pg)
 - Abstracción de la capa de datos
 
 **Ejemplo**:
@@ -280,7 +275,7 @@ export class EmailService {
    - StockService.actualizarStock()
    - CarritoRepository.limpiar()
    ↓
-6. Database (PostgreSQL + Prisma)
+6. Database (PostgreSQL)
    - Transacción para garantizar consistencia
    ↓
 7. Servicios Externos
@@ -324,7 +319,7 @@ export class EmailService {
 | Presentación | Next.js 14, React, Tailwind, shadcn/ui |
 | API | tRPC, NextAuth.js, Zod |
 | Lógica de Negocio | TypeScript, Class-based Services |
-| Repositorio | Prisma ORM |
+| Repositorio | SQL directo |
 | Base de Datos | PostgreSQL |
 | Integraciones | Mercado Pago SDK, Resend, Cloudinary |
 
@@ -364,7 +359,7 @@ EMAIL_FROM="noreply@camiseriaurbana.com"
 
 1. **Setup Inicial** (Sprint 0)
    - Crear proyecto Next.js
-   - Configurar Prisma + PostgreSQL
+   - Configurar PostgreSQL
    - Setup de autenticación
 
 2. **Sprint 1** (Semana 1)
