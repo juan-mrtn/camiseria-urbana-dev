@@ -87,7 +87,7 @@ export default async function HomePage(props: { searchParams: Promise<{ page?: s
                                 ))}
                             </div>
 
-                            {/* AQUI ESTÁ LA MAGIA: El componente de paginación */}
+                            {/*componente de paginación*/}
                             <Pagination totalPages={totalPages} />
                         </>
                     )}

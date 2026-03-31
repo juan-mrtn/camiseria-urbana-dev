@@ -21,15 +21,20 @@ export const ProductoRepository = {
       const offset = (page - 1) * take;
 
       const productsQuery = `
+        WITH paginated_productos AS (
+          SELECT id, nombre, codigo
+          FROM producto
+          ORDER BY nombre
+          LIMIT $1 OFFSET $2
+        )
         SELECT p.id, p.nombre, p.codigo,
                pv.id AS variante_id,
                pv.precio,
                img.url_imagen
-        FROM producto p
+        FROM paginated_productos p
         LEFT JOIN producto_variante pv ON pv.producto_id = p.id
         LEFT JOIN imagen img ON img.producto_variante_id = pv.id
         ORDER BY p.nombre
-        LIMIT $1 OFFSET $2
       `;
 
       const result = await db.query(productsQuery, [take, offset]);
