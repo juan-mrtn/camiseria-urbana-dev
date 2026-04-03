@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -118,8 +117,14 @@ export default function Header() {
                       }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     >
+                    <Link 
+                      href="/login" 
+                      onClick={() => setIsMenuOpen(false)}
+                    >
                       Iniciar Sesión
+                    </Link>
                     </button>
+                    
                     <Link 
                       href="/register" 
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
