@@ -30,7 +30,7 @@ export const ProductoRepository = {
         SELECT p.id, p.nombre, p.codigo,
                pv.id AS variante_id,
                pv.precio,
-               img.url_imagen
+               pv.imagen_url AS url_imagen
         FROM paginated_productos p
         LEFT JOIN producto_variante pv ON pv.producto_id = p.id
         LEFT JOIN imagen img ON img.producto_variante_id = pv.id

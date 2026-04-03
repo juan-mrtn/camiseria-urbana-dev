@@ -16,6 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
+          console.log("Usuario intentando loguearse con Google:", user);
           const email = user.email;
           const nombre = user.name;
           const id = crypto.randomUUID();

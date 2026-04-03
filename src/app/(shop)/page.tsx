@@ -29,7 +29,7 @@ export default async function HomePage(props: { searchParams: Promise<{ page?: s
             <div className="flex justify-between items-center mb-8 border-b pb-4">
 
                 <h1 className={`${titleFont.className} text-2xl font-bold uppercase tracking-wider text-right`}>
-                    Todas las Camisas <span className="text-gray-400 font-light">({page})</span>
+                    Todas las Camisas <span className="text-gray-400 font-light">({productos.length})</span>
                 </h1>
                 <div>
                     <select className="border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">

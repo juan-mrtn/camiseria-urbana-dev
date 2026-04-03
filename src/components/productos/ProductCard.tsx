@@ -26,7 +26,7 @@ export default function ProductCard({ producto }: Props) {
       <Link href={`/productos/${producto.id}`}>
         <div className="relative aspect-square w-full overflow-hidden rounded-md bg-gray-100">
           <Image
-            src={producto.imagen}
+            src={`${producto.imagen}`}
             alt={producto.nombre}
             fill
             className="object-cover"
