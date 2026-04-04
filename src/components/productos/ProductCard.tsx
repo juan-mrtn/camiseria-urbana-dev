@@ -9,6 +9,7 @@ interface Producto {
   precio: number;
   imagen: string;
   slug: string;
+  stockDisponible?: number;
 }
 
 interface Props {
@@ -16,60 +17,65 @@ interface Props {
 }
 
 export default function ProductCard({ producto }: Props) {
-  // Valores por defecto (mientras conectamos esto a la DB real más adelante)
-  const enStock = true;
-  const estrellas = 4; // O Math.floor(Math.random() * 5) + 1 para variar
-
+// Lógica de stock basada en los datos de la DB
+  // Si no viene el dato del stock, asumimos true para no bloquear la venta
+  const enStock = producto.stockDisponible !== undefined ? producto.stockDisponible > 0 : true;
+  
+  // Por ahora las estrellas pueden ser fijas o venir de una columna de promedio en la vista
+  const estrellas = 5;
+  console.log("ProductoCard renderizado con producto:", producto.id, producto.slug);
   return (
-    <div className="border p-4 rounded-lg flex flex-col gap-2 shadow-sm hover:shadow-md transition bg-white">
+    <div className="group border p-4 rounded-lg flex flex-col gap-2 shadow-sm hover:shadow-md transition bg-white h-full">
       {/* IMAGEN Y OVERLAY DE STOCK */}
+      {/* Redirigimos al detalle usando el ID que espera tu Page Component */}
       <Link href={`/productos/${producto.id}`}>
         <div className="relative aspect-square w-full overflow-hidden rounded-md bg-gray-100">
           <Image
-            src={`${producto.imagen}`}
+            src={producto.imagen || '/placeholder.jpg'} // Fallback de imagen
             alt={producto.nombre}
             fill
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
+          
           {!enStock && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <span className="bg-white px-3 py-1 text-xs font-bold uppercase">Sin Stock</span>
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
+              <span className="bg-white px-3 py-1 text-xs font-bold uppercase text-black shadow-lg">
+                Sin Stock
+              </span>
             </div>
           )}
         </div>
       </Link>
 
       {/* INFORMACIÓN Y ESTRELLAS */}
-      <div className="mt-2">
+      <div className="mt-2 flex-grow">
         <Link href={`/productos/${producto.id}`}>
-          <h3 className="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">
+          <h3 className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors line-clamp-2">
             {producto.nombre}
           </h3>
         </Link>
 
-        <p className="text-lg font-bold text-gray-900">
-          ${producto.precio.toLocaleString('es-AR')}
+        <p className="text-lg font-bold text-indigo-600 mt-1">
+          ${producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 0 })}
         </p>
 
-        {/* Renderizado de Estrellas (Estilo recuperado) */}
-        <div className="flex text-yellow-400 text-xs mt-1">
+        <div className="flex items-center gap-1 text-yellow-400 text-[10px] mt-1">
           {'★'.repeat(estrellas)}
-          {'☆'.repeat(5 - estrellas)}
-          <span className="text-gray-400 ml-1">({estrellas})</span>
+          <span className="text-gray-400 text-xs ml-1 font-medium">({estrellas}.0)</span>
         </div>
       </div>
 
-      {/* BOTÓN AGREGAR AL CARRITO (Estilo recuperado) */}
+      {/* BOTÓN AGREGAR AL CARRITO */}
       <button
         disabled={!enStock}
-        className={`mt-4 w-full py-2 rounded-md font-semibold text-white transition text-sm uppercase tracking-wide
+        className={`mt-4 w-full py-2.5 rounded-md font-bold text-white transition text-xs uppercase tracking-wider
           ${enStock
-            ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
-            : 'bg-gray-300 cursor-not-allowed'
+            ? 'bg-gray-900 hover:bg-indigo-600 shadow-sm active:scale-95'
+            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
       >
-        {enStock ? 'Agregar al carrito' : 'No disponible'}
+        {enStock ? 'Ver detalle' : 'Agotado'}
       </button>
     </div>
   );

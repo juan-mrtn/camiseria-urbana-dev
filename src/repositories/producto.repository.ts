@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 
 type ProductRow = {
   id: string;
+  produto_id: string;
   nombre: string;
   codigo: string;
   variante_id: string | null;
@@ -85,4 +86,62 @@ export const ProductoRepository = {
       throw new Error("No se pudo cargar los productos");
     }
   },
+  // src/repositories/producto.repository.ts
+
+  async getById(productoId: string) {
+    try {
+      // Ahora buscamos por la columna producto_id (ej: 'P01')
+      const query = `SELECT * FROM v_producto_detalle WHERE producto_id = $1;`;
+      const result = await db.query(query, [productoId]);
+
+      if (result.rows.length === 0) return null;
+
+      const base = result.rows[0];
+
+      const variantes = result.rows.map(row => {
+        // Mapeo seguro del stock que ahora viene de tu v_stock_actual
+        console.log("Valor raw de stock_disponible:", row.stock_disponible);
+        const stockParseado = parseInt(row.stock_disponible as string) || 0;
+        console.log("Valor parseado de stock:", stockParseado);
+        
+        return {
+          id: row.variante_id,
+          talle: row.talle || 'Único', 
+          color: row.color || 'No especificado',
+          material: row.material || 'No especificado',
+          precio: Number(row.precio) || 0,
+          stock: stockParseado,
+          imagen: row.imagen_principal
+        };
+      });
+
+      // ... resto del mapeo igual que antes ...
+      const imagenes = [
+        base.imagen_principal,
+        ...(Array.isArray(base.galeria_imagenes) ? base.galeria_imagenes : [])
+      ].filter(Boolean);
+
+      const stockTotal = variantes.reduce((acc, v) => acc + v.stock, 0);
+
+      return {
+        id: base.producto_id,
+        nombre: base.nombre,
+        descripcion: base.descripcion,
+        codigo: base.codigo,
+        precioBase: Number(base.precio),
+        imagenes: imagenes.length > 0 ? imagenes : ['/placeholder.jpg'],
+        variantes,
+        stockTotal,
+        promocion: base.tipo_promocion ? {
+          tipo: base.tipo_promocion,
+          descuento: Number(base.valor_descuento)
+        } : null
+      };
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error al obtener producto por ID");
+    }
+  }
+
+
 };
