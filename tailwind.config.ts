@@ -29,7 +29,9 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwindcss-animate'), // Para animaciones suaves en modales y transiciones [cite: 1355]
+  ],
 };
 
 export default config;
