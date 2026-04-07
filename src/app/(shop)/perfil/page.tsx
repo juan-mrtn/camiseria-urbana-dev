@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import AddressSection from "@/components/perfil/AddressSection";
 import { UsuarioRepository } from "@/repositories/usuario.repository";
 import { DireccionRepository } from "@/repositories/direccion.repository";
-import NewsletterToggle from "@/components/perfil/NewsletterToggle";
 import  PreferencesSection from "@/components/perfil/PreferencesSection";
 
 

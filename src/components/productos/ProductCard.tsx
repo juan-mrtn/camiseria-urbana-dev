@@ -1,4 +1,5 @@
 // src/components/productos/ProductCard.tsx
+import { LinkIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -20,7 +21,7 @@ export default function ProductCard({ producto }: Props) {
 // Lógica de stock basada en los datos de la DB
   // Si no viene el dato del stock, asumimos true para no bloquear la venta
   const enStock = producto.stockDisponible !== undefined ? producto.stockDisponible > 0 : true;
-  
+  console.log(producto);
   // Por ahora las estrellas pueden ser fijas o venir de una columna de promedio en la vista
   const estrellas = 5;
   console.log("ProductoCard renderizado con producto:", producto.id, producto.slug);
@@ -68,6 +69,7 @@ export default function ProductCard({ producto }: Props) {
 
       {/* BOTÓN AGREGAR AL CARRITO */}
       <button
+        
         disabled={!enStock}
         className={`mt-4 w-full py-2.5 rounded-md font-bold text-white transition text-xs uppercase tracking-wider
           ${enStock
@@ -75,7 +77,9 @@ export default function ProductCard({ producto }: Props) {
             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
       >
+        <Link href={`/productos/${producto.id}`}>
         {enStock ? 'Ver detalle' : 'Agotado'}
+        </Link>
       </button>
     </div>
   );

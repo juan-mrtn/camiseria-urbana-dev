@@ -3,7 +3,8 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { Heart, Truck, Star, AlertCircle } from 'lucide-react';
+import { Heart, Truck, Star, AlertCircle, Minus, Plus } from 'lucide-react';
+import { useCart } from '@/providers/CartProvider'; // O la ruta donde lo hayas guardado
 
 interface ProductDetailProps {
   producto: {
@@ -29,15 +30,36 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ producto }: ProductDetailProps) {
+  // Traemos la función para agregar al carrito desde nuestro Contexto Global
+  const { addToCart } = useCart();
 
-  // Estado para la variante seleccionada (por defecto la primera con stock)
+  // Estado para la variante seleccionada
   const [selectedVariant, setSelectedVariant] = useState(
     producto.variantes.find(v => v.stock > 0) || producto.variantes[0]
   );
 
-  const tallesDisponibles = Array.from(new Set(producto.variantes.map(v => v.talle)));
+  // NUEVO: Estado para controlar la cantidad a comprar
+  const [cantidad, setCantidad] = useState(1);
 
+  const tallesDisponibles = Array.from(new Set(producto.variantes.map(v => v.talle)));
   const precioFinal = producto.promocion ? producto.precioBase * (1 - producto.promocion.descuento / 100) : producto.precioBase;
+
+  // Función que se ejecuta al presionar "Agregar al carrito"
+  const handleAddToCart = () => {
+    if (!selectedVariant || selectedVariant.stock === 0) return;
+
+    addToCart({
+      id: selectedVariant.id, // Usamos el ID único de la variante
+      nombre: producto.nombre,
+      precio: precioFinal, // Usamos el precio con descuento si lo hay
+      talle: selectedVariant.talle,
+      cantidad: cantidad,
+      imagen_url: selectedVariant.imagen || producto.imagenes[0]
+    });
+
+    alert("¡Producto agregado al carrito!");
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <nav className="text-sm text-gray-500 mb-6">
@@ -111,7 +133,10 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
                     onClick={() => {
                       const variant = producto.variantes.find(v => v.talle === talle && v.stock > 0)
                         || producto.variantes.find(v => v.talle === talle);
-                      if (variant) setSelectedVariant(variant);
+                      if (variant) {
+                        setSelectedVariant(variant);
+                        setCantidad(1); // Reseteamos la cantidad a 1 si cambia de talle
+                      }
                     }}
                     className={`w-12 h-12 border-2 flex items-center justify-center font-bold transition ${selectedVariant?.talle === talle ? 'border-black' : 'hover:border-black'}`}
                   >
@@ -122,13 +147,40 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
             </div>
           )}
 
+          {/* NUEVO: Selector de Cantidad (Con límite dinámico según el stock de la variante) */}
+          {selectedVariant && selectedVariant.stock > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3">Cantidad</h3>
+              <div className="flex items-center border-2 border-gray-200 w-fit rounded-lg overflow-hidden">
+                <button 
+                  onClick={() => setCantidad(c => Math.max(1, c - 1))}
+                  className="p-3 hover:bg-gray-100 transition text-gray-700"
+                >
+                  <Minus size={18} />
+                </button>
+                <span className="w-12 text-center font-bold">{cantidad}</span>
+                <button 
+                  onClick={() => setCantidad(c => Math.min(selectedVariant.stock, c + 1))} // No puede superar el stock
+                  className="p-3 hover:bg-gray-100 transition text-gray-700 disabled:opacity-30 disabled:hover:bg-transparent"
+                  disabled={cantidad >= selectedVariant.stock}
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Stock de esta variante: <span className="font-bold">{selectedVariant.stock}</span>
+              </p>
+            </div>
+          )}
+
           {/* Botones de Acción */}
           <div className="flex gap-4">
             <button 
-              disabled={producto.stockTotal === 0}
+              onClick={handleAddToCart}
+              disabled={!selectedVariant || selectedVariant.stock === 0}
               className="flex-1 bg-indigo-600 text-white py-4 font-bold uppercase hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {producto.stockTotal > 0 ? 'Agregar al carrito' : 'Agotado'}
+              {selectedVariant?.stock > 0 ? 'Agregar al carrito' : 'Variante Agotada'}
             </button>
             <button className="p-4 border hover:bg-gray-50" title="Añadir a favoritos">
               <Heart className="w-6 h-6 text-gray-400" />
