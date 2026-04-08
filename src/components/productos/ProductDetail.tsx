@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { Heart, Truck, Star, AlertCircle, Minus, Plus } from 'lucide-react';
+import { Heart, Truck, Star, AlertCircle, Minus, Plus, CheckCircle2, X } from 'lucide-react';
 import { useCart } from '@/providers/CartProvider'; // O la ruta donde lo hayas guardado
 
 interface ProductDetailProps {
@@ -40,6 +40,7 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
 
   // NUEVO: Estado para controlar la cantidad a comprar
   const [cantidad, setCantidad] = useState(1);
+  const [showToast, setShowToast] = useState(false);
 
   const tallesDisponibles = Array.from(new Set(producto.variantes.map(v => v.talle)));
   const precioFinal = producto.promocion ? producto.precioBase * (1 - producto.promocion.descuento / 100) : producto.precioBase;
@@ -57,7 +58,11 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
       imagen_url: selectedVariant.imagen || producto.imagenes[0]
     });
 
-    alert("¡Producto agregado al carrito!");
+    // Notificación de agregado al carrito 
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
   };
 
   return (
@@ -125,24 +130,40 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
           {tallesDisponibles.length > 0 && (
             <div>
               <h3 className="font-semibold mb-3">Talles Disponibles</h3>
-              <div className="flex gap-3">
-                {tallesDisponibles.map(talle => (
-                  <button
-                    key={talle}
-                    type="button"
-                    onClick={() => {
-                      const variant = producto.variantes.find(v => v.talle === talle && v.stock > 0)
-                        || producto.variantes.find(v => v.talle === talle);
-                      if (variant) {
-                        setSelectedVariant(variant);
-                        setCantidad(1); // Reseteamos la cantidad a 1 si cambia de talle
-                      }
-                    }}
-                    className={`w-12 h-12 border-2 flex items-center justify-center font-bold transition ${selectedVariant?.talle === talle ? 'border-black' : 'hover:border-black'}`}
-                  >
-                    {talle}
-                  </button>
-                ))}
+              <div className="flex gap-3 flex-wrap">
+                {tallesDisponibles.map(talle => {
+                  const isSelected = selectedVariant?.talle === talle;
+                  
+                  // Buscamos si hay alguna variante de este talle con stock
+                  const variantConStock = producto.variantes.find(v => v.talle === talle && v.stock > 0);
+                  const tieneStock = !!variantConStock;
+
+                  return (
+                    <button
+                      key={talle}
+                      type="button"
+                      disabled={!tieneStock}
+                      onClick={() => {
+                        const variant = variantConStock || producto.variantes.find(v => v.talle === talle);
+                        if (variant) {
+                          setSelectedVariant(variant);
+                          setCantidad(1); // Reseteamos la cantidad a 1 si cambia de talle
+                        }
+                      }}
+                      className={`
+                        w-12 h-12 rounded-lg font-bold text-sm flex items-center justify-center transition-all duration-200
+                        ${isSelected 
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border-2 border-indigo-600 scale-105' 
+                          : tieneStock 
+                            ? 'bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50' 
+                            : 'bg-gray-100 text-gray-400 border-2 border-gray-100 cursor-not-allowed opacity-60'
+                        }
+                      `}
+                    >
+                      {talle}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -203,7 +224,23 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
             <p className="text-gray-600 text-sm leading-relaxed">{producto.descripcion}</p>
           </div>
         </div>
+        {showToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-gray-900 text-white px-5 py-4 rounded-xl shadow-2xl animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <CheckCircle2 className="w-6 h-6 text-green-400" />
+          <div className="flex flex-col">
+            <span className="font-bold text-sm">¡Agregado al carrito!</span>
+            <span className="text-xs text-gray-400">{producto.nombre} ({selectedVariant.talle})</span>
+          </div>
+          <button 
+            onClick={() => setShowToast(false)} 
+            className="ml-4 text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
       </div>
+      
     </div>
   );
 }
