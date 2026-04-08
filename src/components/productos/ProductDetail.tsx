@@ -58,8 +58,8 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
       imagen_url: selectedVariant.imagen || producto.imagenes[0]
     });
 
+    // Notificación de agregado al carrito 
     setShowToast(true);
-    // Ocultar automáticamente después de 3 segundos
     setTimeout(() => {
       setShowToast(false);
     }, 3000);
@@ -130,24 +130,40 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
           {tallesDisponibles.length > 0 && (
             <div>
               <h3 className="font-semibold mb-3">Talles Disponibles</h3>
-              <div className="flex gap-3">
-                {tallesDisponibles.map(talle => (
-                  <button
-                    key={talle}
-                    type="button"
-                    onClick={() => {
-                      const variant = producto.variantes.find(v => v.talle === talle && v.stock > 0)
-                        || producto.variantes.find(v => v.talle === talle);
-                      if (variant) {
-                        setSelectedVariant(variant);
-                        setCantidad(1); // Reseteamos la cantidad a 1 si cambia de talle
-                      }
-                    }}
-                    className={`w-12 h-12 border-2 flex items-center justify-center font-bold transition ${selectedVariant?.talle === talle ? 'border-black' : 'hover:border-black'}`}
-                  >
-                    {talle}
-                  </button>
-                ))}
+              <div className="flex gap-3 flex-wrap">
+                {tallesDisponibles.map(talle => {
+                  const isSelected = selectedVariant?.talle === talle;
+                  
+                  // Buscamos si hay alguna variante de este talle con stock
+                  const variantConStock = producto.variantes.find(v => v.talle === talle && v.stock > 0);
+                  const tieneStock = !!variantConStock;
+
+                  return (
+                    <button
+                      key={talle}
+                      type="button"
+                      disabled={!tieneStock}
+                      onClick={() => {
+                        const variant = variantConStock || producto.variantes.find(v => v.talle === talle);
+                        if (variant) {
+                          setSelectedVariant(variant);
+                          setCantidad(1); // Reseteamos la cantidad a 1 si cambia de talle
+                        }
+                      }}
+                      className={`
+                        w-12 h-12 rounded-lg font-bold text-sm flex items-center justify-center transition-all duration-200
+                        ${isSelected 
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border-2 border-indigo-600 scale-105' 
+                          : tieneStock 
+                            ? 'bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50' 
+                            : 'bg-gray-100 text-gray-400 border-2 border-gray-100 cursor-not-allowed opacity-60'
+                        }
+                      `}
+                    >
+                      {talle}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
