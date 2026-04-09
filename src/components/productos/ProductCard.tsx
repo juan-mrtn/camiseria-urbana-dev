@@ -68,6 +68,7 @@ export default function ProductCard({ producto }: Props) {
       </div>
 
       {/* BOTÓN AGREGAR AL CARRITO */}
+      <Link href={`/productos/${producto.id}`}>
       <button
         
         disabled={!enStock}
@@ -77,10 +78,9 @@ export default function ProductCard({ producto }: Props) {
             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
       >
-        <Link href={`/productos/${producto.id}`}>
         {enStock ? 'Ver detalle' : 'Agotado'}
-        </Link>
       </button>
+        </Link>
     </div>
   );
 }
