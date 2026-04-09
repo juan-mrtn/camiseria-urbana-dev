@@ -3,21 +3,27 @@ import { ChevronRight, Edit2, Trash2, Home, Building2, Star, RefreshCw, Plus, Sa
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import AddressSection from "@/components/perfil/AddressSection";
+import { UsuarioRepository } from "@/repositories/usuario.repository";
+import { DireccionRepository } from "@/repositories/direccion.repository";
+import  PreferencesSection from "@/components/perfil/PreferencesSection";
+
 
 export default async function ProfilePage() {
-  // const session = await auth();
+  const session = await auth();
 
-  // if (!session || !session.user) {
-  //   redirect("/login");
-  // }
+  // Verificamos sesión e ID inyectado por el callback de auth.ts
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
 
-  // Mocks de datos estructurados para simular la vista
-  const usuario = {
-    nombre:  "Juan M.",
-    email:  "juan@email.com",
-    telefono: "+54 345 123-4567"
-  };
+  // Ejecutamos consultas en paralelo para máxima velocidad
+  const [usuarioDb, direcciones] = await Promise.all([
+    UsuarioRepository.getByEmail(session.user.email!),
+    DireccionRepository.getByUsuarioId(session.user.id)
+  ]);
 
+  if (!usuarioDb) redirect("/login");
+  
   return (
     <div className="max-w-5xl mx-auto flex flex-col pb-20">
       
@@ -47,8 +53,8 @@ export default async function ProfilePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Nombre</label>
               <input 
                 type="text" 
-                defaultValue={usuario.nombre} 
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                defaultValue={usuarioDb.nombre} 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none font-medium"
                 readOnly
               />
             </div>
@@ -56,65 +62,34 @@ export default async function ProfilePage() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <input 
                 type="email" 
-                defaultValue={usuario.email} 
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                defaultValue={usuarioDb.email} 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none font-medium"
                 readOnly
               />
             </div>
-            <div className="md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
-              <input 
-                type="tel" 
-                defaultValue={usuario.telefono} 
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
-                readOnly
-              />
-            </div>
+            
           </div>
           
-          <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
-            <Edit2 className="w-4 h-4" />
-            Editar información
-          </button>
         </section>
 
         {/* SECCIÓN 2: Direcciones de envío */}
-        <AddressSection />
+        <AddressSection direcciones={direcciones} />
 
-        {/* SECCIÓN 3: Seguridad */}
+        {/* SECCIÓN 3: Seguridad
         <section className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Seguridad</h2>
           <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">
             <RefreshCw className="w-4 h-4" />
             Cambiar contraseña
           </button>
-        </section>
+        </section> */}
 
         {/* SECCIÓN 4: Preferencias */}
-        <section className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Preferencias</h2>
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <Mail className="w-5 h-5 text-gray-700" />
-                <span className="font-bold text-gray-900">Suscripción a newsletter</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-2 font-medium">Recibe novedades, promociones y descuentos exclusivos en tu correo.</p>
-            </div>
-            <button className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 text-gray-900 font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow-sm whitespace-nowrap">
-              <Check className="w-4 h-4" />
-              Sí, quiero recibir ofertas
-            </button>
-          </div>
-        </section>
-
-        {/* BOTÓN FINAL */}
-        <div className="flex justify-end mt-2">
-          <button className="flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-md">
-            <Save className="w-5 h-5" />
-            Guardar cambios
-          </button>
-        </div>
+        <section className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm mt-6">
+        
+          {/* Aquí insertas el nuevo componente interactivo */}
+          <PreferencesSection suscrito={usuarioDb.suscrito} />
+      </section>
 
       </div>
     </div>

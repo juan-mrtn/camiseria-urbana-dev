@@ -1,25 +1,22 @@
-// src/app/producto/[id]/page.tsx
+// src/app/(shop)/productos/[id]/page.tsx
+import { notFound } from 'next/navigation';
 import ProductDetail from '@/components/productos/ProductDetail';
+import { ProductoRepository } from '@/repositories/producto.repository';
 
-// Datos de prueba para previsualizar el layout [cite: 1570, 1585]
-const PRODUCTO_MOCK = {
-  nombre: "Camisa Premium Algodón Blanca",
-  precio: 9999,
-  descripcion: "Tejido suave y respirable, corte moderno para uso diario. Calidad premium garantizada para larga durabilidad.",
-  talles: ["S", "M", "L", "XL"],
-  imagenes: [
-    "https://via.placeholder.com/600x800?text=Principal",
-    "https://via.placeholder.com/600x800?text=Vista+2",
-    "https://via.placeholder.com/600x800?text=Vista+3",
-    "https://via.placeholder.com/600x800?text=Detalle"
-  ],
-  opinionesCount: 42
-};
+interface PageProps {
+  params: Promise<{ id: string; }>;
+}
 
-export default function PaginaDetalleProducto() {
+export default async function PaginaDetalleProducto({ params }: PageProps) {
+
+  const productos = await ProductoRepository.getById((await params).id);
+  console.log("Producto encontrado:", productos); // Debug: Ver qué producto se obtuvo
+
+  if (!productos) notFound();
+
   return (
     <div className="bg-white min-h-screen">
-      <ProductDetail producto={PRODUCTO_MOCK} />
+      <ProductDetail producto={productos} />
     </div>
   );
 }

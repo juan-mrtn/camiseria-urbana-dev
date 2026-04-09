@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SessionProvider from '@/providers/SessionProvider';
+import { CartProvider } from '@/providers/CartProvider';
 
 export const metadata: Metadata = {
   title: 'La Camisería Urbana',
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body className="min-h-screen flex flex-col font-sans antialiased">
+        <CartProvider>
         <SessionProvider>
         <Header />
         <main className="flex-1">
@@ -21,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Footer />
         </SessionProvider>
+        </CartProvider>
       </body>
     </html>
   );
