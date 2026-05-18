@@ -81,5 +81,25 @@ export const AdminRepository = {
       ingreso.costo, 
       fechaActual
     ]);
+  },
+
+  // PBI-XX: Listar Productos para el Dashboard
+  async getProductosParaDashboard() {
+    const query = `
+      SELECT 
+        p.id, 
+        p.nombre, 
+        p.codigo,
+        COUNT(v.id) as cantidad_variantes,
+        COALESCE(MIN(v.precio), 0) as precio_base,
+        COALESCE(SUM(s.stock_disponible), 0) as stock_total
+      FROM producto p
+      LEFT JOIN producto_variante v ON p.id = v.producto_id
+      LEFT JOIN v_stock_actual s ON v.id = s.producto_variante_id
+      GROUP BY p.id, p.nombre, p.codigo
+      ORDER BY p.nombre ASC;
+    `;
+    const result = await db.query(query);
+    return result.rows;
   }
 };
