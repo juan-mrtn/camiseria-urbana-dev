@@ -2,6 +2,7 @@
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import StockForm from "@/components/admin/StockForm";
+import SupplierForm from "@/components/admin/SupplierForm";
 import Link from "next/link";
 import { Package, PlusCircle, LayoutDashboard, Truck } from "lucide-react";
 
@@ -68,7 +69,8 @@ export default async function AdminDashboard() {
                 Gestión de Inventario (PBI-24)
               </h2>
             </div>
-            
+            <SupplierForm />
+
             {/* Aquí inyectamos el componente que creamos anteriormente */}
             <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
               <div className="p-6 border-b border-gray-100 bg-gray-50/50">
