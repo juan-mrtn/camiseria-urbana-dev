@@ -28,9 +28,9 @@ export default function BaseProductForm() {
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm mb-8">
       <div className="mb-4">
         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <Tag className="w-5 h-5 text-indigo-600" /> Crear Producto Base
+          <Tag className="w-5 h-5 text-indigo-600" /> Paso 1: Crear Producto Base
         </h2>
-        <p className="text-sm text-gray-500">Registra un nuevo producto (ej: Camisa Taverniti) antes de agregarle talles, colores o stock.</p>
+        <p className="text-sm text-gray-500">Registra el nombre genérico del producto antes de asignarle talles o colores.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

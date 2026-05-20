@@ -115,7 +115,7 @@ export default function ProductForm() {
       {/* SECCIÓN 1: PRODUCTO BASE Y STOCK */}
       <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Package className="w-5 h-5 text-indigo-600" /> 1. Configurar Producto Base
+          <Package className="w-5 h-5 text-indigo-600" /> Paso 2: Vincular Producto Base
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -154,7 +154,7 @@ export default function ProductForm() {
       <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-indigo-600" /> 2. Variantes de Retail
+            <CheckCircle className="w-5 h-5 text-indigo-600" /> Paso 3: Definir Variantes
           </h2>
           <button type="button" onClick={agregarVariante} className="flex items-center gap-2 text-sm bg-indigo-50 text-indigo-700 font-bold px-4 py-2 rounded-lg hover:bg-indigo-100 transition-colors">
             <Plus className="w-4 h-4" /> Agregar Variante

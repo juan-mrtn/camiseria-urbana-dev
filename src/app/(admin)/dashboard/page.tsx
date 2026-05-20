@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import StockForm from "@/components/admin/StockForm";
 import SupplierForm from "@/components/admin/SupplierForm";
 import Link from "next/link";
-import { Package, PlusCircle, LayoutDashboard, Truck } from "lucide-react";
+import { Package, PlusCircle, LayoutDashboard, Truck, BarChart3, ListCollapse } from "lucide-react";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -39,27 +39,38 @@ export default async function AdminDashboard() {
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">
               Accesos Rápidos
             </h2>
-            
-            <Link href="/admin/productos/nuevo" 
+            <Link href="/dashboard/productos" 
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
+              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
+                <ListCollapse className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              </div>
+              <div>
+                <span className="block font-bold text-gray-900">Catálogo de Productos</span>
+                <span className="text-xs text-gray-500">Ver y editar inventario</span>
+              </div>
+            </Link>
+
+            <Link href="/dashboard/productos/nuevo" 
               className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
               <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
                 <PlusCircle className="w-6 h-6 text-indigo-600 group-hover:text-white" />
               </div>
               <div>
-                <span className="block font-bold text-gray-900">Cargar Producto</span>
-                <span className="text-xs text-gray-500">PBI-23: Crear nuevas variantes</span>
+                <span className="block font-bold text-gray-900">Alta de Productos</span>
+                <span className="text-xs text-gray-500">Producto base y variantes</span>
               </div>
             </Link>
 
-            <div className="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-xl opacity-60">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <Truck className="w-6 h-6 text-gray-400" />
+            <Link href="/dashboard/metricas" 
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
+              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
+                <BarChart3 className="w-6 h-6 text-indigo-600 group-hover:text-white" />
               </div>
               <div>
-                <span className="block font-bold text-gray-400">Proveedores</span>
-                <span className="text-xs text-gray-400">Próximamente</span>
+                <span className="block font-bold text-gray-900">Métricas de Ventas</span>
+                <span className="text-xs text-gray-500">Analítica básica de ingresos</span>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Columna Derecha: Gestión de Stock (PBI-24) */}

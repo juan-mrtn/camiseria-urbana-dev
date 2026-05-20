@@ -50,9 +50,9 @@ export default function StockForm() {
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
       <div className="md:col-span-2 mb-2">
         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <PackagePlus className="w-5 h-5" /> 2. Registrar Compra a Proveedor (Stock a Granel)
+          <PackagePlus className="w-5 h-5 text-indigo-600" /> Ingreso de Mercadería (Stock)
         </h2>
-        <p className="text-sm text-gray-500">Selecciona el proveedor y el producto base para registrar una compra mayorista. Este stock quedará disponible para luego asignarse a variantes (talles).</p>
+        <p className="text-sm text-gray-500">Selecciona el proveedor y la variante de producto específica para registrar una compra. Este ingreso sumará al stock disponible inmediatamente.</p>
       </div>
 
       <div className="space-y-2">
