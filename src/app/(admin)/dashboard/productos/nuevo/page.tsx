@@ -2,6 +2,7 @@
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import ProductForm from "@/components/admin/ProductForm";
+import BaseProductForm from "@/components/admin/BaseProductForm";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
@@ -23,7 +24,9 @@ export default async function NuevoProductoPage() {
         <p className="text-gray-500">PBI-23: Define la información base del producto y añade todas sus variantes de talle y color.</p>
       </div>
 
-      <div className="px-4">
+      <div className="px-4 max-w-5xl mx-auto">
+        <BaseProductForm />
+        
         {/* Renderizamos el formulario que maneja todas las tablas a la vez */}
         <ProductForm />
       </div>

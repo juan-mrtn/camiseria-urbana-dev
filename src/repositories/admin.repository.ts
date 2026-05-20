@@ -7,48 +7,115 @@ export interface NuevaVarianteDTO {
   color: string;
   material: string;
   precio: number;
-  imagenUrl: string;
+  imagenUrls: string[];
 }
 
 export interface NuevoProductoDTO {
-  nombre: string;
-  descripcion: string;
-  codigo: string;
+  productoId: string;
   variantes: NuevaVarianteDTO[];
 }
 
 export interface NuevoIngresoStockDTO {
   proveedorId: string;
-  varianteId: string;
+  nombreProducto: string;
+  talle: string;
   cantidad: number;
-  costo: number;
+  costoUnitario: number;
 }
 
 export const AdminRepository = {
-  
+
+  async getExistingProductCodes(): Promise<string[]> {
+    const query = `SELECT DISTINCT codigo FROM producto WHERE codigo IS NOT NULL ORDER BY codigo ASC`;
+    const result = await db.query(query);
+    return result.rows.map((row: any) => row.codigo);
+  },
+
+  async crearProveedor(nombre: string, contacto: string) {
+    const id = `PROV-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    await db.query(`INSERT INTO proveedor (id, nombre, contacto) VALUES ($1, $2, $3)`, [id, nombre, contacto]);
+    return id;
+  },
+
+  async crearProductoBase(nombre: string, descripcion: string, codigo: string) {
+    const id = `P-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    await db.query(
+      `INSERT INTO producto (id, nombre, descripcion, codigo) VALUES ($1, $2, $3, $4)`,
+      [id, nombre, descripcion, codigo]
+    );
+    return id;
+  },
+
+  async getProveedores() {
+    const result = await db.query(`SELECT id, nombre FROM proveedor ORDER BY nombre ASC`);
+    return result.rows.map((row: any) => ({ id: row.id, nombre: row.nombre }));
+  },
+
+  async getProductosBase() {
+    const result = await db.query(`SELECT id, nombre, codigo FROM producto ORDER BY nombre ASC`);
+    return result.rows;
+  },
+
+  async getUnallocatedStock(productoId: string): Promise<number> {
+    try {
+      // Calculamos el total de stock ingresado para todas las variantes de este producto
+      const res = await db.query(
+        `SELECT SUM(cp.cantidad) as total_comprado 
+         FROM compra_proveedor cp
+         JOIN producto_variante pv ON cp.producto_variante_id = pv.id
+         WHERE pv.producto_id = $1`,
+        [productoId]
+      );
+      return parseInt(res.rows[0]?.total_comprado || "0", 10);
+    } catch (e) {
+      console.error("Error getUnallocatedStock:", e);
+      return 0;
+    }
+  },
+
+  async getAllVariantes() {
+    const result = await db.query(`
+      SELECT 
+        p.nombre, 
+        pv.talle, 
+        p.nombre || ' - Talle ' || pv.talle as label
+      FROM producto_variante pv
+      JOIN producto p ON pv.producto_id = p.id
+      ORDER BY p.nombre ASC, pv.talle ASC
+    `);
+    return result.rows.map((row: any) => ({
+      nombre: row.nombre,
+      talle: row.talle,
+      label: row.label
+    }));
+  },
+
   // PBI-23: Cargar Producto (Transaccional)
   async crearProductoConVariantes(producto: NuevoProductoDTO) {
-    // Importante: Si 'db' es un Pool de pg, necesitamos un cliente dedicado para la transacción
     const client = await db.getClient();
-    
     try {
-      await client.query('BEGIN'); // Iniciamos la transacción
+      await client.query('BEGIN');
 
-      // 1. Insertamos el producto base
-      const prodId = `P${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
-      await client.query(
-        `INSERT INTO producto (id, nombre, descripcion, codigo) VALUES ($1, $2, $3, $4)`,
-        [prodId, producto.nombre, producto.descripcion, producto.codigo]
-      );
+      const prodId = producto.productoId;
 
       // 2. Insertamos todas sus variantes
       for (const [index, variante] of producto.variantes.entries()) {
         const varId = `V-${prodId}-${index}`;
         await client.query(
-          `INSERT INTO producto_variante (id, producto_id, talle, color, material, precio, imagen_url) 
-           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [varId, prodId, variante.talle, variante.color, variante.material, variante.precio, variante.imagenUrl]
+          `INSERT INTO producto_variante (id, producto_id, talle, color, material, precio) 
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [varId, prodId, variante.talle, variante.color, variante.material, variante.precio]
         );
+
+        if (variante.imagenUrls && variante.imagenUrls.length > 0) {
+          for (const url of variante.imagenUrls) {
+            const imgId = `IMG-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+            await client.query(
+              `INSERT INTO imagen (id, producto_variante_id, url) VALUES ($1, $2, $3)`,
+              [imgId, varId, url]
+            );
+          }
+        }
       }
 
       await client.query('COMMIT'); // Si todo salió bien, guardamos los cambios
@@ -65,21 +132,14 @@ export const AdminRepository = {
 
   // PBI-24: Gestionar Stock (Exclusivo por Compras a Proveedores)
   async registrarIngresoStock(ingreso: NuevoIngresoStockDTO) {
-    const idCompra = `CP-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
-    const fechaActual = new Date().toISOString();
-
-    const query = `
-      INSERT INTO compra_proveedor (id, proveedor_id, producto_variante_id, cantidad, costo, fecha)
-      VALUES ($1, $2, $3, $4, $5, $6)
-    `;
+    const query = `CALL sp_registrar_ingreso_stock($1, $2, $3, $4, $5)`;
 
     await db.query(query, [
-      idCompra, 
-      ingreso.proveedorId, 
-      ingreso.varianteId, 
-      ingreso.cantidad, 
-      ingreso.costo, 
-      fechaActual
+      ingreso.nombreProducto,
+      ingreso.talle,
+      ingreso.proveedorId,
+      ingreso.cantidad,
+      ingreso.costoUnitario
     ]);
   },
 
