@@ -27,12 +27,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             [email]
           );
 
-          // Si no existe, lo insertamos (Registro automático)
           if (rows.length === 0) {
+            // Generamos una contraseña aleatoria imposible de adivinar para los usuarios de Google
+            const randomPassword = crypto.randomUUID() + crypto.randomUUID();
+
             await db.query(
-              `INSERT INTO usuario (id, nombre, email, rol, suscrito) 
-               VALUES ($1, $2, $3, 'cliente', true)`,
-              [id, nombre, email]
+              `INSERT INTO usuario (id, nombre, email, password, rol, suscrito) 
+               VALUES ($1, $2, $3, $4, 'cliente', true)`,
+              [id, nombre, email, randomPassword]
             );
           }
 
