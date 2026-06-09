@@ -75,7 +75,7 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
         {/* Galería de Imágenes */}
         <div className="space-y-4">
           <div className="relative aspect-[4/5] w-full bg-gray-100 rounded-lg overflow-hidden">
-            <Image src={producto.imagenes[0]} alt={producto.nombre} fill className="object-cover" />
+            <Image src={producto.imagenes[0]} alt={producto.nombre} fill priority className="object-cover" />
             
             {/* Badge de Promoción superpuesto en la imagen */}
             {producto.promocion && (

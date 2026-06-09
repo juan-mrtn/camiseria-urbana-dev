@@ -8,7 +8,7 @@ interface VarianteFormState {
   talle: string;
   color: string;
   material: string;
-  precio: number;
+  precio: number | string;
   imagenFiles: File[];
   imagenPreviews: string[];
 }
@@ -16,13 +16,17 @@ interface VarianteFormState {
 export default function ProductForm() {
   const [isPending, startTransition] = useTransition();
 
-  const [productos, setProductos] = useState<{id: string, nombre: string, codigo: string}[]>([]);
+  const [productos, setProductos] = useState<{ id: string, nombre: string, codigo: string }[]>([]);
   const [selectedProductoId, setSelectedProductoId] = useState("");
   const [unallocatedStock, setUnallocatedStock] = useState<number | null>(null);
 
   const [variantes, setVariantes] = useState<VarianteFormState[]>([
     { talle: "", color: "", material: "", precio: 0, imagenFiles: [], imagenPreviews: [] }
   ]);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
 
   useEffect(() => {
     getProductosBaseAction().then(setProductos).catch(console.error);
@@ -35,6 +39,8 @@ export default function ProductForm() {
       setUnallocatedStock(null);
     }
   }, [selectedProductoId]);
+
+  if (!mounted) return null;
 
   const agregarVariante = () => {
     setVariantes([...variantes, { talle: "", color: "", material: "", precio: 0, imagenFiles: [], imagenPreviews: [] }]);
@@ -57,10 +63,10 @@ export default function ProductForm() {
       const nuevas = [...variantes];
       const prevFiles = nuevas[index].imagenFiles;
       const prevPreviews = nuevas[index].imagenPreviews;
-      
+
       const newFiles = [...prevFiles, ...files];
       const newPreviews = [...prevPreviews, ...files.map(f => URL.createObjectURL(f))];
-      
+
       nuevas[index] = { ...nuevas[index], imagenFiles: newFiles, imagenPreviews: newPreviews };
       setVariantes(nuevas);
     }
@@ -90,7 +96,7 @@ export default function ProductForm() {
       formData.append(`variante_${index}_color`, variante.color);
       formData.append(`variante_${index}_material`, variante.material);
       formData.append(`variante_${index}_precio`, variante.precio.toString());
-      
+
       variante.imagenFiles.forEach(file => {
         formData.append(`variante_${index}_imagen`, file);
       });
@@ -117,14 +123,13 @@ export default function ProductForm() {
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
           <Package className="w-5 h-5 text-indigo-600" /> Paso 2: Vincular Producto Base
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-bold text-gray-700">Producto Base</label>
-            <select 
-              required defaultValue=""
-              value={selectedProductoId} 
-              onChange={e => setSelectedProductoId(e.target.value)} 
+            <select
+              defaultValue={selectedProductoId}
+              onChange={e => setSelectedProductoId(e.target.value)}
               className="border p-3 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
             >
               <option value="" disabled>Seleccione un producto base...</option>
@@ -173,7 +178,7 @@ export default function ProductForm() {
               <h3 className="font-bold text-gray-800 mb-4">Variante #{index + 1}</h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 {/* Detalles de la Variante */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
@@ -190,14 +195,14 @@ export default function ProductForm() {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Precio Retail ($)</label>
-                    <input required type="number" min="0" step="0.01" value={variante.precio} onChange={e => actualizarVariante(index, 'precio', parseFloat(e.target.value))} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
+                    <input required type="number" min="0" step="0.01" value={variante.precio} onChange={e => actualizarVariante(index, 'precio', e.target.value === '' ? '' : parseFloat(e.target.value))} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
                   </div>
                 </div>
 
                 {/* Multi-Imagen Upload */}
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Imágenes (Multi-Upload)</label>
-                  
+
                   <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-white cursor-pointer hover:border-indigo-500 transition-colors group h-full">
                     <input
                       type="file"
@@ -227,8 +232,8 @@ export default function ProductForm() {
                       <div key={i} className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm w-20 h-20">
                         <img src={preview} alt={`preview ${i}`} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => removeImage(index, i)}
                             className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
                           >
@@ -246,7 +251,7 @@ export default function ProductForm() {
         </div>
       </div>
 
-      <button type="submit" disabled={isPending || !selectedProductoId} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-xl shadow-lg transition-all disabled:opacity-50 text-lg mb-10">
+      <button type="submit" disabled={isPending || !selectedProductoId ? true : undefined} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-xl shadow-lg transition-all disabled:opacity-50 text-lg mb-10">
         {isPending ? (
           <><Loader2 className="w-6 h-6 animate-spin" /> Procesando Configuración...</>
         ) : (
