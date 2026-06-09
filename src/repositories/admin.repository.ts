@@ -1,5 +1,6 @@
 // src/repositories/admin.repository.ts
 import { db } from "@/lib/db";
+import crypto from "crypto";
 
 // Definimos las interfaces de los datos entrantes
 export interface NuevaVarianteDTO {
@@ -99,19 +100,21 @@ export const AdminRepository = {
       const prodId = producto.productoId;
 
       // 2. Insertamos todas sus variantes
-      for (const [index, variante] of producto.variantes.entries()) {
-        const varId = `V-${prodId}-${index}`;
+      for (const variante of producto.variantes) {
+        const varId = `V-${prodId}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+        const mainImageUrl = (variante.imagenUrls && variante.imagenUrls.length > 0) ? variante.imagenUrls[0] : null;
         await client.query(
-          `INSERT INTO producto_variante (id, producto_id, talle, color, material, precio) 
-           VALUES ($1, $2, $3, $4, $5, $6)`,
-          [varId, prodId, variante.talle, variante.color, variante.material, variante.precio]
+          `INSERT INTO producto_variante (id, producto_id, talle, color, material, precio, imagen_url) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [varId, prodId, variante.talle, variante.color, variante.material, variante.precio, mainImageUrl]
         );
 
-        if (variante.imagenUrls && variante.imagenUrls.length > 0) {
-          for (const url of variante.imagenUrls) {
+        if (variante.imagenUrls && variante.imagenUrls.length > 1) {
+          const extraImages = variante.imagenUrls.slice(1);
+          for (const url of extraImages) {
             const imgId = `IMG-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
             await client.query(
-              `INSERT INTO imagen (id, producto_variante_id, url) VALUES ($1, $2, $3)`,
+              `INSERT INTO imagen (id, producto_variante_id, url_imagen) VALUES ($1, $2, $3)`,
               [imgId, varId, url]
             );
           }

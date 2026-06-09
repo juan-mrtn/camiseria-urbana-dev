@@ -8,6 +8,8 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
+import sharp from "sharp";
+
 // Acción para el PBI-23
 export async function crearProductoAction(formData: FormData) {
   const session = await auth();
@@ -39,12 +41,15 @@ export async function crearProductoAction(formData: FormData) {
         if (file.size > 0) {
           const bytes = await file.arrayBuffer();
           const buffer = Buffer.from(bytes);
-          
-          const ext = path.extname(file.name) || '.jpg';
-          const filename = `${crypto.randomUUID()}${ext}`;
+
+          const filename = `${crypto.randomUUID()}.webp`;
           const filepath = path.join(uploadDir, filename);
-          
-          await fs.writeFile(filepath, buffer);
+
+          await sharp(buffer)
+            .resize(800, 1000, { fit: 'cover' })
+            .webp({ quality: 80 })
+            .toFile(filepath);
+
           return `/uploads/${filename}`;
         }
         return null;

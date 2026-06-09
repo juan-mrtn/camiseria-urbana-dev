@@ -25,13 +25,13 @@ export const ProductoRepository = {
       const productsQuery = `
         WITH paginados AS (
             -- 1. Traemos los 12 productos ya ordenados por tu vista
-            SELECT producto_id, stock_total, prioridad
+            SELECT producto_id, prioridad
             FROM v_catalogo_publico 
             ORDER BY prioridad ASC, producto ASC 
             LIMIT $1 OFFSET $2
         )
         -- 2. Cruzamos esos 12 con v_producto_detalle para traer las fotos, precios y promos
-        SELECT v.*, p.stock_total, p.prioridad
+        SELECT v.*, p.prioridad
         FROM v_producto_detalle v
         INNER JOIN paginados p ON v.producto_id = p.producto_id
         ORDER BY p.prioridad ASC, v.nombre ASC;
@@ -52,16 +52,20 @@ export const ProductoRepository = {
             id: row.producto_id,
             nombre: row.nombre,
             codigo: row.codigo,
-            // Tomamos el precio de la vista
             precioBase: Number(row.precio) || 0, 
-            // Guardamos la imagen principal para hacer un array luego
-            imagenPrincipal: row.imagen_principal || "/placeholder.jpg",
+            // Filtramos las URLs falsas de example.com generadas por el script de prueba
+            imagenPrincipal: row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : (Array.isArray(row.galeria_imagenes) && row.galeria_imagenes.length > 0 && !row.galeria_imagenes[0].includes('example.com') ? row.galeria_imagenes[0] : null) || "/camisa.png",
             stockTotal: 0,
             promocion: row.tipo_promocion ? {
               tipo: row.tipo_promocion,
               descuento: Number(row.valor_descuento)
             } : null,
           };
+        } else if (grouped[row.producto_id].imagenPrincipal === "/camisa.png") {
+          const fallbackImage = (row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : null) || (Array.isArray(row.galeria_imagenes) && row.galeria_imagenes.length > 0 && !row.galeria_imagenes[0].includes('example.com') ? row.galeria_imagenes[0] : null);
+          if (fallbackImage) {
+            grouped[row.producto_id].imagenPrincipal = fallbackImage;
+          }
         }
 
         // Si tiene variante, parseamos su stock como en getById y lo sumamos
@@ -125,10 +129,12 @@ export const ProductoRepository = {
       });
 
       // ... resto del mapeo igual que antes ...
-      const imagenes = [
-        base.imagen_principal,
-        ...(Array.isArray(base.galeria_imagenes) ? base.galeria_imagenes : [])
-      ].filter(Boolean);
+      const todasLasImagenes = result.rows.flatMap(row => [
+        row.imagen_principal,
+        ...(Array.isArray(row.galeria_imagenes) ? row.galeria_imagenes : [])
+      ]).filter(img => img && !img.includes('example.com'));
+
+      const imagenes = [...new Set(todasLasImagenes)];
 
       const stockTotal = variantes.reduce((acc, v) => acc + v.stock, 0);
       console.log("Valor parseado de 1stock:", stockTotal);
@@ -138,7 +144,7 @@ export const ProductoRepository = {
         descripcion: base.descripcion,
         codigo: base.codigo,
         precioBase: Number(base.precio),
-        imagenes: imagenes.length > 0 ? imagenes : ['/placeholder.jpg'],
+        imagenes: imagenes.length > 0 ? imagenes : ['/camisa.png'],
         variantes,
         stockTotal,
         promocion: base.tipo_promocion ? {
