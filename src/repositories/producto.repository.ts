@@ -10,8 +10,42 @@ type ProductRow = {
   url_imagen: string | null;
 };
 
+export interface CatalogoFilters {
+  color?: string;
+  talle?: string;
+  material?: string;
+  precio_min?: number;
+  precio_max?: number;
+}
+
 export const ProductoRepository = {
-  async getPaginated({ page = 1, take = 12 }: { page?: number; take?: number }) {
+  async getAvailableFilterOptions() {
+    try {
+      const tallesRes = await db.query(`
+        SELECT DISTINCT UPPER(TRIM(talle)) AS talle 
+        FROM producto_variante 
+        WHERE talle IS NOT NULL AND TRIM(talle) != ''
+        ORDER BY talle ASC;
+      `);
+      
+      const materialesRes = await db.query(`
+        SELECT DISTINCT INITCAP(TRIM(material)) AS material 
+        FROM producto_variante 
+        WHERE material IS NOT NULL AND TRIM(material) != ''
+        ORDER BY material ASC;
+      `);
+
+      return {
+        talles: tallesRes.rows.map(r => r.talle as string),
+        materiales: materialesRes.rows.map(r => r.material as string),
+      };
+    } catch (error) {
+      console.error("ProductoRepository.getAvailableFilterOptions error:", error);
+      return { talles: [], materiales: [] };
+    }
+  },
+
+  async getPaginated({ page = 1, take = 12, filters = {} }: { page?: number; take?: number; filters?: CatalogoFilters }) {
     page = Number(page);
     take = Number(take);
 
@@ -21,25 +55,63 @@ export const ProductoRepository = {
     try {
       const offset = (page - 1) * take;
 
-      // 1. Buscamos los 12 productos base y los cruzamos con TU VISTA
+      const buildConditions = (startIdx: number) => {
+        const vals: any[] = [];
+        let conds = "1=1";
+        
+        if (filters.color) {
+          vals.push(`%${filters.color}%`);
+          conds += ` AND color ILIKE $${startIdx + vals.length - 1}`;
+        }
+        if (filters.talle) {
+          vals.push(filters.talle);
+          conds += ` AND talle ILIKE $${startIdx + vals.length - 1}`;
+        }
+        if (filters.material) {
+          vals.push(`%${filters.material}%`);
+          conds += ` AND material ILIKE $${startIdx + vals.length - 1}`;
+        }
+        if (filters.precio_min !== undefined && !Number.isNaN(filters.precio_min)) {
+          vals.push(filters.precio_min);
+          conds += ` AND precio >= $${startIdx + vals.length - 1}`;
+        }
+        if (filters.precio_max !== undefined && !Number.isNaN(filters.precio_max)) {
+          vals.push(filters.precio_max);
+          conds += ` AND precio <= $${startIdx + vals.length - 1}`;
+        }
+        return { vals, conds };
+      };
+
+      const filterLogic = buildConditions(3); // values $1 and $2 are take and offset
+
       const productsQuery = `
-        WITH paginados AS (
-            -- 1. Traemos los 12 productos ya ordenados por tu vista
-            SELECT producto_id, prioridad
-            FROM v_catalogo_publico 
-            ORDER BY prioridad ASC, producto ASC 
+        WITH productos_filtrados AS (
+            SELECT DISTINCT producto_id
+            FROM v_producto_detalle
+            WHERE ${filterLogic.conds}
+        ),
+        paginados AS (
+            SELECT pf.producto_id, v.prioridad
+            FROM productos_filtrados pf
+            JOIN v_catalogo_publico v ON pf.producto_id = v.producto_id
+            ORDER BY v.prioridad ASC, v.producto ASC 
             LIMIT $1 OFFSET $2
         )
-        -- 2. Cruzamos esos 12 con v_producto_detalle para traer las fotos, precios y promos
         SELECT v.*, p.prioridad
         FROM v_producto_detalle v
         INNER JOIN paginados p ON v.producto_id = p.producto_id
         ORDER BY p.prioridad ASC, v.nombre ASC;
       `;
 
-      const result = await db.query(productsQuery, [take, offset]);
+      const result = await db.query(productsQuery, [take, offset, ...filterLogic.vals]);
 
-      const totalCountResult = await db.query("SELECT COUNT(*) AS total FROM producto");
+      const countLogic = buildConditions(1);
+      const countQuery = `
+        SELECT COUNT(DISTINCT producto_id) AS total 
+        FROM v_producto_detalle 
+        WHERE ${countLogic.conds}
+      `;
+      const totalCountResult = await db.query(countQuery, countLogic.vals);
       const totalCount = Number(totalCountResult.rows[0]?.total ?? 0);
       const totalPages = Math.ceil(totalCount / take);
 
