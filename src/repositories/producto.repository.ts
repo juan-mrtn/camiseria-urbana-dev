@@ -16,6 +16,7 @@ export interface CatalogoFilters {
   material?: string;
   precio_min?: number;
   precio_max?: number;
+  search?: string;
 }
 
 export const ProductoRepository = {
@@ -78,6 +79,10 @@ export const ProductoRepository = {
         if (filters.precio_max !== undefined && !Number.isNaN(filters.precio_max)) {
           vals.push(filters.precio_max);
           conds += ` AND precio <= $${startIdx + vals.length - 1}`;
+        }
+        if (filters.search) {
+          vals.push(`%${filters.search}%`);
+          conds += ` AND (nombre ILIKE $${startIdx + vals.length - 1} OR material ILIKE $${startIdx + vals.length - 1})`;
         }
         return { vals, conds };
       };

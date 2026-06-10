@@ -1,9 +1,10 @@
 'use client';
 
 import Link from "next/link";
-import { Search, Heart, ShoppingCart, User, Moon, LogOut, Package, Settings } from 'lucide-react';
+import { Heart, ShoppingCart, User, Moon, LogOut, Package, Settings } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
+import SearchBar from "@/components/shop/SearchBar";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -30,13 +31,8 @@ export default function Header() {
         </Link>
 
         {/* Buscador (PBI-07) */}
-        <div className="flex-1 max-w-md relative hidden sm:block">
-          <input 
-            type="text" 
-            placeholder="Buscar camisas, materiales o colecciones..." 
-            className="w-full border rounded-full py-2 px-4 pl-10 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          />
-          <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+        <div className="flex-1 max-w-md hidden md:block mx-auto">
+          <SearchBar />
         </div>
 
         {/* Acciones de Usuario */}
@@ -51,17 +47,17 @@ export default function Header() {
             <ShoppingCart className="w-5 h-5 text-gray-600" />
             <span className="absolute top-1 right-1 bg-orange-500 text-white text-[10px] font-bold px-1.5 rounded-full">3</span>
           </Link>
-          
+
           {/* MENÚ DE USUARIO DESPLEGABLE */}
           <div className="relative" ref={menuRef}>
-            <button 
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 hover:bg-gray-100 rounded-full focus:outline-none transition-colors"
             >
               {session?.user?.image ? (
-                <img 
-                  src={session.user.image} 
-                  alt="Perfil" 
+                <img
+                  src={session.user.image}
+                  alt="Perfil"
                   className="w-6 h-6 rounded-full"
                   referrerPolicy="no-referrer"
                 />
@@ -80,24 +76,24 @@ export default function Header() {
                       <p className="text-sm font-medium text-gray-900 truncate">{session.user?.name}</p>
                       <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
                     </div>
-                    
-                    <Link 
-                      href="/perfil" 
+
+                    <Link
+                      href="/perfil"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <Settings className="w-4 h-4 mr-2" /> Mi Perfil
                     </Link>
-                    
-                    <Link 
-                      href="/perfil/pedidos" 
+
+                    <Link
+                      href="/perfil/pedidos"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <Package className="w-4 h-4 mr-2" /> Mis Pedidos
                     </Link>
-                    
-                    <button 
+
+                    <button
                       onClick={() => {
                         setIsMenuOpen(false);
                         signOut();
@@ -110,23 +106,23 @@ export default function Header() {
                 ) : (
                   <>
                     {/* Opciones para usuarios invitados */}
-                    <button 
+                    <button
                       onClick={() => {
                         setIsMenuOpen(false);
                         signIn();
                       }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     >
-                    <Link 
-                      href="/login" 
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Iniciar Sesión
-                    </Link>
+                      <Link
+                        href="/login"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Iniciar Sesión
+                      </Link>
                     </button>
-                    
-                    <Link 
-                      href="/register" 
+
+                    <Link
+                      href="/register"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >

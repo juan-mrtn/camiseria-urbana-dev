@@ -5,37 +5,39 @@ import Pagination from "@/components/ui/Pagination";
 import { titleFont } from "@/config/fonts";
 import FilterSidebar from "@/components/shop/FilterSidebar";
 
-export default async function HomePage(props: { 
-  searchParams: Promise<{ 
-    page?: string;
-    color?: string;
-    talle?: string;
-    material?: string;
-    precio_min?: string;
-    precio_max?: string;
-  }> 
+export default async function HomePage(props: {
+    searchParams: Promise<{
+        page?: string;
+        color?: string;
+        talle?: string;
+        material?: string;
+        precio_min?: string;
+        precio_max?: string;
+        q?: string;
+    }>
 }) {
     const searchParams = await props.searchParams;
     // 1. Leemos la página de la URL (si no existe, es la 1)
     const page = searchParams.page ? parseInt(searchParams.page) : 1;
-    
+
     // Filtros dinámicos desde la URL
     const filters = {
-      color: searchParams.color,
-      talle: searchParams.talle,
-      material: searchParams.material,
-      precio_min: searchParams.precio_min ? Number(searchParams.precio_min) : undefined,
-      precio_max: searchParams.precio_max ? Number(searchParams.precio_max) : undefined,
+        color: searchParams.color,
+        talle: searchParams.talle,
+        material: searchParams.material,
+        precio_min: searchParams.precio_min ? Number(searchParams.precio_min) : undefined,
+        precio_max: searchParams.precio_max ? Number(searchParams.precio_max) : undefined,
+        search: searchParams.q,
     };
 
     // 2. Pedimos los datos paginados y las opciones de filtros dinámicos
     const [paginatedData, filterOptions] = await Promise.all([
-      ProductoRepository.getPaginated({ page, filters }),
-      ProductoRepository.getAvailableFilterOptions()
+        ProductoRepository.getPaginated({ page, filters }),
+        ProductoRepository.getAvailableFilterOptions()
     ]);
     const { productos, totalPages } = paginatedData;
     const { talles, materiales } = filterOptions;
-    
+
     // 3. Redirección por seguridad (si ponen pagina 500 y no existe)
     if (productos.length === 0 && page > 1) {
         redirect("/catalogo");
@@ -43,11 +45,11 @@ export default async function HomePage(props: {
 
     return (
         <div className="max-w-7xl mx-auto px-4 pt-4 py-8">
-            <div className="flex justify-between items-center mb-8 border-b pb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b pb-4">
                 <h1 className={`${titleFont.className} text-2xl font-bold uppercase tracking-wider text-right`}>
                     Catálogo <span className="text-gray-400 font-light">({page})</span>
                 </h1>
-                <div>
+                <div className="flex items-center gap-4 w-full sm:w-auto">
                     <select className="border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
                         <option>Ordenar: Relevancia</option>
                         <option>Precio: Menor a Mayor</option>
