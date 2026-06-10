@@ -3,6 +3,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SessionProvider from '@/providers/SessionProvider';
 import { CartProvider } from '@/providers/CartProvider';
+import CartBadgeIcon from '@/components/ui/CartBadgeIcon';
 
 export const metadata: Metadata = {
   title: 'La Camisería Urbana',
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen flex flex-col font-sans antialiased">
         <CartProvider>
         <SessionProvider>
-        <Header />
+        <Header cartBadge={<CartBadgeIcon />} />
         <main className="flex-1">
           {children}: 
         </main>

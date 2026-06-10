@@ -1,12 +1,16 @@
 'use client';
 
 import Link from "next/link";
-import { Heart, ShoppingCart, User, Moon, LogOut, Package, Settings } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { Heart, User, Moon, LogOut, Package, Settings } from 'lucide-react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import SearchBar from "@/components/shop/SearchBar";
 
-export default function Header() {
+interface HeaderProps {
+  cartBadge?: ReactNode;
+}
+
+export default function Header({ cartBadge }: HeaderProps) {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -40,13 +44,12 @@ export default function Header() {
           <button title="Modo Oscuro" className="p-2 hover:bg-gray-100 rounded-full">
             <Moon className="w-5 h-5 text-gray-600" />
           </button>
-          <Link href="/perfil/favoritos" className="p-2 hover:bg-gray-100 rounded-full relative">
+          <Link href="/mi-cuenta/favoritos" className="p-2 hover:bg-gray-100 rounded-full relative">
             <Heart className="w-5 h-5 text-gray-600" />
           </Link>
-          <Link href="/carrito" className="p-2 hover:bg-gray-100 rounded-full relative">
-            <ShoppingCart className="w-5 h-5 text-gray-600" />
-            <span className="absolute top-1 right-1 bg-orange-500 text-white text-[10px] font-bold px-1.5 rounded-full">3</span>
-          </Link>
+          
+          {/* El badge dinámico inyectado desde el servidor */}
+          {cartBadge}
 
           {/* MENÚ DE USUARIO DESPLEGABLE */}
           <div className="relative" ref={menuRef}>

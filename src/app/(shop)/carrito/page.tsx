@@ -57,7 +57,7 @@ export default function CartPage() {
         {/* Resumen del Pedido */}
         <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 h-fit">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Resumen del pedido</h2>
-          
+
           <div className="space-y-4 border-b border-gray-200 pb-6 mb-6">
             <div className="flex justify-between text-gray-600">
               <span>Subtotal</span>
@@ -74,8 +74,8 @@ export default function CartPage() {
             <span className="text-3xl font-black text-indigo-600">${cartTotal.toLocaleString('es-AR')}</span>
           </div>
 
-          <Link 
-            href="/checkout" 
+          <Link
+            href="/checkout"
             className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-4 rounded-lg font-bold uppercase hover:bg-indigo-600 transition"
           >
             Avanzar al pago <ArrowRight size={20} />

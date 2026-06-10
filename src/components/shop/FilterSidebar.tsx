@@ -42,24 +42,40 @@ export default function FilterSidebar({ talles, materiales }: Props) {
   // Debounce para los precios
   useEffect(() => {
     const handler = setTimeout(() => {
-      const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
-      if (minPrice) params.set("precio_min", minPrice);
-      else params.delete("precio_min");
+      // 1. Usamos window.location para obtener el estado real sin depender de React y evitar el loop
+      const params = new URLSearchParams(window.location.search);
+      const currentPath = window.location.pathname;
       
-      if (maxPrice) params.set("precio_max", maxPrice);
-      else params.delete("precio_max");
+      let hasChanges = false;
 
-      if (
-        params.get("precio_min") !== searchParams?.get("precio_min") || 
-        params.get("precio_max") !== searchParams?.get("precio_max")
-      ) {
+      // 2. Evaluamos si minPrice cambió respecto a la URL
+      if (minPrice && params.get("precio_min") !== minPrice) {
+        params.set("precio_min", minPrice);
+        hasChanges = true;
+      } else if (!minPrice && params.has("precio_min")) {
+        params.delete("precio_min");
+        hasChanges = true;
+      }
+      
+      // 3. Evaluamos si maxPrice cambió respecto a la URL
+      if (maxPrice && params.get("precio_max") !== maxPrice) {
+        params.set("precio_max", maxPrice);
+        hasChanges = true;
+      } else if (!maxPrice && params.has("precio_max")) {
+        params.delete("precio_max");
+        hasChanges = true;
+      }
+
+      // 4. Si hay cambios, empujamos la nueva URL de manera segura
+      if (hasChanges) {
         params.set("page", "1");
-        router.push(`${safePathname}?${params.toString()}`, { scroll: false });
+        router.push(`${currentPath}?${params.toString()}`, { scroll: false });
       }
     }, 500);
 
     return () => clearTimeout(handler);
-  }, [minPrice, maxPrice, router, safePathname, searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minPrice, maxPrice]); // Solo dependemos del estado local para romper el loop
 
 
 

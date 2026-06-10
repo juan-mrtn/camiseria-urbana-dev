@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { ProductoRepository } from "@/repositories/producto.repository";
 import ProductCard from "@/components/productos/ProductCard";
 import Pagination from "@/components/ui/Pagination";
@@ -60,7 +61,16 @@ export default async function HomePage(props: {
 
             <div className="flex flex-col md:flex-row gap-10">
                 {/* SIDEBAR DE FILTROS */}
-                <FilterSidebar talles={talles} materiales={materiales} />
+                <Suspense fallback={
+                    <div className="w-full md:w-64 shrink-0 space-y-8 animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                        <div className="h-32 bg-gray-100 rounded mb-8"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                        <div className="h-24 bg-gray-100 rounded mb-8"></div>
+                    </div>
+                }>
+                    <FilterSidebar talles={talles} materiales={materiales} />
+                </Suspense>
 
                 {/* GRILLA + PAGINACIÓN */}
                 <main className="flex-1">
