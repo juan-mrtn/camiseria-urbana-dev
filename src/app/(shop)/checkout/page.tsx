@@ -2,6 +2,7 @@
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { DireccionRepository } from "@/repositories/direccion.repository";
+import { CarritoRepository } from "@/repositories/carrito.repository";
 import CheckoutClient from "@/components/checkout/CheckoutClient";
 import { ShieldCheck } from "lucide-react";
 
@@ -15,6 +16,9 @@ export default async function CheckoutPage() {
 
   // Traemos las direcciones del usuario desde PostgreSQL
   const direcciones = await DireccionRepository.getByUsuarioId(session.user.id);
+
+  // Traemos los items del carrito desde PostgreSQL
+  const dbCartItems = await CarritoRepository.getCartWithItems(session.user.id);
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -37,7 +41,7 @@ export default async function CheckoutPage() {
         </h2>
         
         {/* Renderizamos el cliente interactivo pasándole los datos seguros */}
-        <CheckoutClient session={session} direcciones={direcciones} />
+        <CheckoutClient session={session} direcciones={direcciones} dbCartItems={dbCartItems} />
       </main>
     </div>
   );

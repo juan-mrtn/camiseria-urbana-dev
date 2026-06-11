@@ -23,7 +23,7 @@ export default async function OpinionesPage() {
                 <ChevronRight className="w-4 h-4 mx-2" />
                 <Link href="/mi-cuenta" className="hover:text-black transition-colors">Mi Cuenta</Link>
                 <ChevronRight className="w-4 h-4 mx-2" />
-                <span className="text-gray-900 font-medium">Mis Opiniones</span>
+                <span className="text-gray-900 font-medium">Mis Compras</span>
             </nav>
 
             <div className="border border-gray-200 rounded-xl p-6 mb-8 bg-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -62,7 +62,7 @@ export default async function OpinionesPage() {
                                         </p>
                                     </div>
                                 </div>
-                                
+
                                 {/* Formulario Cliente */}
                                 <ReviewForm productoVarianteId={item.producto_variante_id} />
                             </div>
@@ -116,7 +116,7 @@ export default async function OpinionesPage() {
                     </div>
                 )}
             </div>
-            
+
             <div className="mt-10 flex justify-center">
                 <Link
                     href="/catalogo"

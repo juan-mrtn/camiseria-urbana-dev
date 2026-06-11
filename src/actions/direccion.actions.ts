@@ -27,14 +27,14 @@ export async function saveDireccionAction(formData: FormData, direccionId?: stri
   }
 
   // Refresca la página automáticamente
-  revalidatePath("/perfil"); 
+  revalidatePath("/", "layout"); 
 }
 
 export async function deleteDireccionAction(id: string) {
   const session = await auth();
   if (session?.user?.id) {
     await DireccionRepository.delete(id, session.user.id);
-    revalidatePath("/perfil");
+    revalidatePath("/", "layout");
   }
 }
 
@@ -42,6 +42,6 @@ export async function setPrincipalAction(id: string) {
   const session = await auth();
   if (session?.user?.id) {
     await DireccionRepository.setPrincipal(id, session.user.id);
-    revalidatePath("/perfil");
+    revalidatePath("/", "layout");
   }
 }

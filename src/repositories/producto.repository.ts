@@ -233,7 +233,53 @@ export const ProductoRepository = {
       console.error(error);
       throw new Error("Error al obtener producto por ID");
     }
+  },
+
+  async getProductosEnPromocion() {
+    try {
+      const query = `
+        SELECT *
+        FROM v_producto_detalle
+        WHERE tipo_promocion IS NOT NULL;
+      `;
+      const result = await db.query(query);
+
+      const grouped: Record<string, any> = {};
+
+      for (const row of result.rows) {
+        if (!grouped[row.producto_id]) {
+          let precioBase = Number(row.precio) || 0;
+          let precioCalculado = precioBase;
+          
+          if (row.tipo_promocion?.toLowerCase() === 'descuento' && row.valor_descuento) {
+              precioCalculado = precioBase * (1 - Number(row.valor_descuento) / 100);
+          }
+          
+          grouped[row.producto_id] = {
+            id: row.producto_id,
+            nombre: row.nombre,
+            codigo: row.codigo,
+            precioBase,
+            precioCalculado,
+            imagen: row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : "/camisa.png",
+            slug: row.codigo,
+            promocion: {
+              tipo: row.tipo_promocion,
+              descuento: Number(row.valor_descuento)
+            }
+          };
+        } else if (grouped[row.producto_id].imagen === "/camisa.png") {
+          const fallbackImage = row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : null;
+          if (fallbackImage) {
+            grouped[row.producto_id].imagen = fallbackImage;
+          }
+        }
+      }
+
+      return Object.values(grouped);
+    } catch (error) {
+      console.error("Error al obtener productos en promoción:", error);
+      throw new Error("No se pudo cargar las promociones");
+    }
   }
-
-
 };

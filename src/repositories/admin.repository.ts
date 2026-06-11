@@ -77,6 +77,7 @@ export const AdminRepository = {
   async getAllVariantes() {
     const result = await db.query(`
       SELECT 
+        pv.id,
         p.nombre, 
         pv.talle, 
         p.nombre || ' - Talle ' || pv.talle as label
@@ -85,6 +86,7 @@ export const AdminRepository = {
       ORDER BY p.nombre ASC, pv.talle ASC
     `);
     return result.rows.map((row: any) => ({
+      id: row.id,
       nombre: row.nombre,
       talle: row.talle,
       label: row.label

@@ -94,7 +94,7 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
             {/* Badge de Promoción superpuesto en la imagen */}
             {producto.promocion && (
               <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-sm font-bold rounded-full">
-                {producto.promocion.tipo === 'Descuento' ? `-${producto.promocion.descuento}% OFF` : producto.promocion.tipo}
+                {producto.promocion.tipo?.toLowerCase() === 'descuento' ? `-${producto.promocion.descuento}% OFF` : producto.promocion.tipo}
               </div>
             )}
           </div>
@@ -116,10 +116,10 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
             <h1 className="text-3xl font-bold text-gray-900">{producto.nombre}</h1>
 
             <div className="flex items-baseline gap-3 mt-2">
-              <span className="text-2xl font-bold text-indigo-600">
+              <span className={`text-2xl font-bold ${producto.precioBase > precioFinal ? 'text-green-600' : 'text-indigo-600'}`}>
                 ${precioFinal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
-              {producto.promocion?.tipo === 'Descuento' && (
+              {producto.promocion?.tipo?.toLowerCase() === 'descuento' && (
                 <span className="text-lg text-gray-400 line-through">
                   ${producto.precioBase.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>

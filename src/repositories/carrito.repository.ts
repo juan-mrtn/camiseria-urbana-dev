@@ -69,5 +69,72 @@ export const CarritoRepository = {
         } finally {
             client.release();
         }
+    },
+
+    async eliminarItemDelCarrito(usuarioId: string, varianteId: string): Promise<void> {
+        const client = await db.getClient();
+        try {
+            await client.query('BEGIN');
+
+            const carritoResult = await client.query(`
+                SELECT id FROM carrito WHERE usuario_id = $1 AND estado = 'abierto' LIMIT 1;
+            `, [usuarioId]);
+
+            if (carritoResult.rowCount && carritoResult.rowCount > 0) {
+                const carritoId = carritoResult.rows[0].id;
+                await client.query(`
+                    DELETE FROM carrito_item 
+                    WHERE carrito_id = $1 AND producto_variante_id = $2;
+                `, [carritoId, varianteId]);
+            }
+
+            await client.query('COMMIT');
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
+    },
+
+    async getCartWithItems(usuarioId: string) {
+        const client = await db.getClient();
+        try {
+            const query = `
+                SELECT 
+                    ci.producto_variante_id as id,
+                    v.nombre,
+                    v.precio,
+                    v.talle,
+                    ci.cantidad,
+                    v.imagen_principal as imagen_url,
+                    v.tipo_promocion,
+                    v.valor_descuento
+                FROM carrito c
+                JOIN carrito_item ci ON c.id = ci.carrito_id
+                JOIN v_producto_detalle v ON v.variante_id = ci.producto_variante_id
+                WHERE c.usuario_id = $1 AND c.estado = 'abierto'
+                ORDER BY ci.id ASC;
+            `;
+            const result = await client.query(query, [usuarioId]);
+
+            return result.rows.map(row => {
+                let precioFinal = Number(row.precio) || 0;
+                if (row.tipo_promocion === 'Descuento' && row.valor_descuento) {
+                    precioFinal = precioFinal * (1 - Number(row.valor_descuento) / 100);
+                }
+
+                return {
+                    id: row.id,
+                    nombre: row.nombre,
+                    precio: precioFinal,
+                    talle: row.talle || 'Único',
+                    cantidad: Number(row.cantidad) || 1,
+                    imagen_url: row.imagen_url && !row.imagen_url.includes('example.com') ? row.imagen_url : "/camisa.png"
+                };
+            });
+        } finally {
+            client.release();
+        }
     }
 };

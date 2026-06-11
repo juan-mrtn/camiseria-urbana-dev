@@ -47,7 +47,7 @@ export default function Header({ cartBadge }: HeaderProps) {
           <Link href="/mi-cuenta/favoritos" className="p-2 hover:bg-gray-100 rounded-full relative">
             <Heart className="w-5 h-5 text-gray-600" />
           </Link>
-          
+
           {/* El badge dinámico inyectado desde el servidor */}
           {cartBadge}
 
@@ -89,11 +89,11 @@ export default function Header({ cartBadge }: HeaderProps) {
                     </Link>
 
                     <Link
-                      href="/perfil/pedidos"
+                      href="/mi-cuenta/opiniones"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <Package className="w-4 h-4 mr-2" /> Mis Pedidos
+                      <Package className="w-4 h-4 mr-2" /> Mis Compras
                     </Link>
 
                     <button

@@ -3,6 +3,7 @@ import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import StockForm from "@/components/admin/StockForm";
 import SupplierForm from "@/components/admin/SupplierForm";
+import PromoForm from "@/components/admin/PromoForm";
 import Link from "next/link";
 import { Package, PlusCircle, LayoutDashboard, Truck, BarChart3, ListCollapse } from "lucide-react";
 
@@ -97,6 +98,13 @@ export default async function AdminDashboard() {
                 <StockForm />
               </div>
             </div>
+
+            <div className="mb-4">
+              <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-8">
+                Gestión de Promociones (PBI-28)
+              </h2>
+            </div>
+            <PromoForm />
           </div>
 
         </div>
