@@ -101,10 +101,18 @@ export const ProductoRepository = {
             JOIN v_catalogo_publico v ON pf.producto_id = v.producto_id
             ORDER BY v.prioridad ASC, v.producto ASC 
             LIMIT $1 OFFSET $2
+        ),
+        opiniones_avg AS (
+            SELECT pv.producto_id, COALESCE(AVG(o.estrellas), NULL)::numeric(2,1) AS promedio_estrellas
+            FROM producto_variante pv
+            LEFT JOIN opinion o ON pv.id = o.producto_variante_id
+            WHERE pv.producto_id IN (SELECT producto_id FROM paginados)
+            GROUP BY pv.producto_id
         )
-        SELECT v.*, p.prioridad
+        SELECT v.*, p.prioridad, oa.promedio_estrellas
         FROM v_producto_detalle v
         INNER JOIN paginados p ON v.producto_id = p.producto_id
+        LEFT JOIN opiniones_avg oa ON v.producto_id = oa.producto_id
         ORDER BY p.prioridad ASC, v.nombre ASC;
       `;
 
@@ -133,6 +141,7 @@ export const ProductoRepository = {
             // Filtramos las URLs falsas de example.com generadas por el script de prueba
             imagenPrincipal: row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : (Array.isArray(row.galeria_imagenes) && row.galeria_imagenes.length > 0 && !row.galeria_imagenes[0].includes('example.com') ? row.galeria_imagenes[0] : null) || "/camisa.png",
             stockTotal: 0,
+            promedio_estrellas: row.promedio_estrellas !== null ? Number(row.promedio_estrellas) : null,
             promocion: row.tipo_promocion ? {
               tipo: row.tipo_promocion,
               descuento: Number(row.valor_descuento)
@@ -163,6 +172,7 @@ export const ProductoRepository = {
           slug: p.codigo,
           stockDisponible: p.stockTotal,
           precioBase: p.precioBase,
+          promedio_estrellas: p.promedio_estrellas,
           promocion: p.promocion
         };
       });
@@ -181,18 +191,33 @@ export const ProductoRepository = {
 
   async getById(productoId: string) {
     try {
-      // Ahora buscamos por la columna producto_id (ej: 'P01')
+      // Buscamos por la columna producto_id (ej: 'P01')
       const query = `SELECT * FROM v_producto_detalle WHERE producto_id = $1;`;
       const result = await db.query(query, [productoId]);
 
       if (result.rows.length === 0) return null;
+
+      // Obtener opiniones para las variantes de este producto
+      const opinionesQuery = `
+        SELECT o.id, o.estrellas, o.comentario, o.fecha, u.nombre as usuario_nombre
+        FROM opinion o
+        JOIN producto_variante pv ON o.producto_variante_id = pv.id
+        LEFT JOIN usuario u ON o.usuario_id = u.id
+        WHERE pv.producto_id = $1
+        ORDER BY o.fecha DESC;
+      `;
+      const opinionesResult = await db.query(opinionesQuery, [productoId]);
+      const opiniones = opinionesResult.rows;
+
+      const promedio_estrellas = opiniones.length > 0 
+        ? opiniones.reduce((acc, curr) => acc + Number(curr.estrellas), 0) / opiniones.length 
+        : null;
 
       const base = result.rows[0];
 
       const variantes = result.rows.map(row => {
         // Mapeo del stock v_stock_actual
         const stockParseado = parseInt(row.stock_disponible as string) || 0;
-        
         
         return {
           id: row.variante_id,
@@ -205,7 +230,6 @@ export const ProductoRepository = {
         };
       });
 
-      // ... resto del mapeo igual que antes ...
       const todasLasImagenes = result.rows.flatMap(row => [
         row.imagen_principal,
         ...(Array.isArray(row.galeria_imagenes) ? row.galeria_imagenes : [])
@@ -214,7 +238,7 @@ export const ProductoRepository = {
       const imagenes = [...new Set(todasLasImagenes)];
 
       const stockTotal = variantes.reduce((acc, v) => acc + v.stock, 0);
-      console.log("Valor parseado de 1stock:", stockTotal);
+      
       return {
         id: base.producto_id,
         nombre: base.nombre,
@@ -224,6 +248,9 @@ export const ProductoRepository = {
         imagenes: imagenes.length > 0 ? imagenes : ['/camisa.png'],
         variantes,
         stockTotal,
+        promedio_estrellas,
+        opiniones,
+        opinionesCount: opiniones.length,
         promocion: base.tipo_promocion ? {
           tipo: base.tipo_promocion,
           descuento: Number(base.valor_descuento)
@@ -238,9 +265,22 @@ export const ProductoRepository = {
   async getProductosEnPromocion() {
     try {
       const query = `
-        SELECT *
-        FROM v_producto_detalle
-        WHERE tipo_promocion IS NOT NULL;
+        WITH en_promocion AS (
+            SELECT DISTINCT producto_id
+            FROM v_producto_detalle
+            WHERE tipo_promocion IS NOT NULL
+        ),
+        opiniones_avg AS (
+            SELECT pv.producto_id, COALESCE(AVG(o.estrellas), NULL)::numeric(2,1) AS promedio_estrellas
+            FROM producto_variante pv
+            LEFT JOIN opinion o ON pv.id = o.producto_variante_id
+            WHERE pv.producto_id IN (SELECT producto_id FROM en_promocion)
+            GROUP BY pv.producto_id
+        )
+        SELECT v.*, oa.promedio_estrellas
+        FROM v_producto_detalle v
+        LEFT JOIN opiniones_avg oa ON v.producto_id = oa.producto_id
+        WHERE v.tipo_promocion IS NOT NULL;
       `;
       const result = await db.query(query);
 
@@ -261,6 +301,7 @@ export const ProductoRepository = {
             codigo: row.codigo,
             precioBase,
             precioCalculado,
+            promedio_estrellas: row.promedio_estrellas !== null ? Number(row.promedio_estrellas) : null,
             imagen: row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : "/camisa.png",
             slug: row.codigo,
             promocion: {

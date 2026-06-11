@@ -4,9 +4,11 @@
 import Image from 'next/image';
 import { useState, useTransition } from 'react';
 import { Truck, Star, AlertCircle, Minus, Plus, CheckCircle2, X } from 'lucide-react';
+import Link from 'next/link';
 import { useCart } from '@/providers/CartProvider'; // O la ruta donde lo hayas guardado
 import BotonFavorito from '@/components/shop/BotonFavorito';
 import { addToCartAction } from '@/actions/carrito.actions';
+import ProductImageGallery from '@/components/shop/ProductImageGallery';
 
 interface ProductDetailProps {
   favoritosIniciales?: string[];
@@ -29,6 +31,14 @@ interface ProductDetailProps {
     }[];
     promocion: { tipo: string; descuento: number } | null;
     opinionesCount?: number;
+    promedio_estrellas?: number | null;
+    opiniones?: {
+      id: string;
+      estrellas: number;
+      comentario: string;
+      fecha: Date;
+      usuario_nombre: string | null;
+    }[];
   }
 }
 
@@ -81,31 +91,21 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <nav className="text-sm text-gray-500 mb-6">
-        Inicio &gt; Catálogo &gt; <span className="text-gray-900 font-medium">{producto.nombre}</span>
+      <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2">
+        <Link href="/" className="hover:text-indigo-600 transition-colors">Inicio</Link> &gt; 
+        <Link href="/catalogo" className="hover:text-indigo-600 transition-colors">Catálogo</Link> &gt; 
+        <span className="text-gray-900 font-medium line-clamp-1">{producto.nombre}</span>
       </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Galería de Imágenes */}
-        <div className="space-y-4">
-          <div className="relative aspect-[4/5] w-full bg-gray-100 rounded-lg overflow-hidden">
-            <Image src={producto.imagenes[0]} alt={producto.nombre} fill priority className="object-cover" />
+        <div className="relative w-full rounded-lg overflow-hidden border border-gray-100">
+          <ProductImageGallery images={producto.imagenes} altText={producto.nombre} />
 
-            {/* Badge de Promoción superpuesto en la imagen */}
-            {producto.promocion && (
-              <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-sm font-bold rounded-full">
-                {producto.promocion.tipo?.toLowerCase() === 'descuento' ? `-${producto.promocion.descuento}% OFF` : producto.promocion.tipo}
-              </div>
-            )}
-          </div>
-
-          {producto.imagenes.length > 1 && (
-            <div className="grid grid-cols-4 gap-4">
-              {producto.imagenes.map((img, i) => (
-                <div key={i} className="relative aspect-square bg-gray-100 rounded-md overflow-hidden border hover:border-indigo-600 cursor-pointer">
-                  <Image src={img} alt={`${producto.nombre} vista ${i}`} fill className="object-cover" />
-                </div>
-              ))}
+          {/* Badge de Promoción superpuesto en la imagen */}
+          {producto.promocion && (
+            <div className="absolute top-4 left-4 z-20 bg-red-600 text-white px-3 py-1 text-sm font-bold rounded-full pointer-events-none shadow-md">
+              {producto.promocion.tipo?.toLowerCase() === 'descuento' ? `-${producto.promocion.descuento}% OFF` : producto.promocion.tipo}
             </div>
           )}
         </div>
@@ -127,9 +127,16 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-yellow-400">
-            {[...Array(5)].map((_, i) => <Star key={i} size={16} fill={i < 4 ? "currentColor" : "none"} />)}
-            <span className="text-gray-500 text-sm">({producto.opinionesCount} opiniones)</span>
+          <div className="flex items-center gap-1 mt-1">
+            {[...Array(5)].map((_, i) => {
+              const activeStars = producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined ? Math.round(producto.promedio_estrellas) : 5;
+              return (
+                <Star key={i} size={16} className={i < activeStars ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
+              );
+            })}
+            <span className="text-gray-500 text-sm ml-2 font-medium">
+              {producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined ? producto.promedio_estrellas.toFixed(1) : "5.0"} ({producto.opinionesCount || 0} opiniones)
+            </span>
           </div>
 
           {/* Indicador de Stock */}
@@ -210,7 +217,7 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
 
           {/* Botones de Acción */}
           <div className="flex gap-4">
-            <button 
+            <button
               onClick={handleAddToCart}
               disabled={!selectedVariant || selectedVariant.stock === 0}
               className="flex-1 bg-indigo-600 text-white py-4 font-bold uppercase hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg"
@@ -218,10 +225,10 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
               {selectedVariant?.stock > 0 ? 'Agregar al carrito' : 'Variante Agotada'}
             </button>
             {selectedVariant && (
-              <BotonFavorito 
-                key={selectedVariant.id} 
-                productoVarianteId={selectedVariant.id} 
-                isFavoritoInicial={favoritosIniciales.includes(selectedVariant.id)} 
+              <BotonFavorito
+                key={selectedVariant.id}
+                productoVarianteId={selectedVariant.id}
+                isFavoritoInicial={favoritosIniciales.includes(selectedVariant.id)}
               />
             )}
           </div>
@@ -238,8 +245,35 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
           </div>
 
           <div>
-            <h3 className="font-bold border-b pb-2 mb-3">Descripción</h3>
+            <h3 className="font-bold border-b pb-2 mb-3 text-lg">Descripción</h3>
             <p className="text-gray-600 text-sm leading-relaxed">{producto.descripcion}</p>
+          </div>
+
+          <div className="mt-8">
+            <h3 className="font-bold border-b pb-2 mb-4 text-lg">Opiniones de Clientes</h3>
+            {producto.opiniones && producto.opiniones.length > 0 ? (
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                {producto.opiniones.map((opinion) => (
+                  <div key={opinion.id} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="font-bold text-gray-800 text-sm">{opinion.usuario_nombre || "Usuario Anónimo"}</div>
+                      <div className="text-xs text-gray-400">{new Date(opinion.fecha).toLocaleDateString()}</div>
+                    </div>
+                    <div className="flex mb-2 gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} className={i < Number(opinion.estrellas) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
+                      ))}
+                    </div>
+                    <p className="text-sm text-gray-600 italic">"{opinion.comentario}"</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 text-center">
+                <p className="text-sm text-gray-500">Aún no hay opiniones para este producto.</p>
+                <p className="text-xs text-gray-400 mt-1">¡Sé el primero en comprar y compartir tu experiencia!</p>
+              </div>
+            )}
           </div>
         </div>
         {showToast && (

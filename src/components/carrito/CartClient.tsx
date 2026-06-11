@@ -56,7 +56,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
               <div className="relative w-24 h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                <Image src={item.imagen_url} alt={item.nombre} fill className="object-cover" />
+                <Image src={item.imagen_url} alt={item.nombre} fill sizes="100px" className="object-cover" />
               </div>
               <div className="flex-1 flex flex-col justify-between">
                 <div>

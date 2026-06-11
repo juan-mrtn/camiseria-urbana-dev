@@ -62,6 +62,17 @@ export default async function AdminDashboard() {
               </div>
             </Link>
 
+            <Link href="/dashboard/banners" 
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
+              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
+                <LayoutDashboard className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              </div>
+              <div>
+                <span className="block font-bold text-gray-900">Banners Principales</span>
+                <span className="text-xs text-gray-500">Promociones y lanzamientos</span>
+              </div>
+            </Link>
+
             <Link href="/dashboard/metricas" 
               className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
               <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">

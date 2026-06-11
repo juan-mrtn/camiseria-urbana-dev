@@ -7,15 +7,24 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CheckCircle2, Circle, Plus, Lock, ArrowLeft, Truck, X } from "lucide-react";
 import { saveDireccionAction } from "@/actions/direccion.actions";
+import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
+import { processCheckoutAction } from "@/actions/checkout.actions";
 
+// Inicializamos Mercado Pago fuera del componente para evitar re-renderizados innecesarios
+if (process.env.NEXT_PUBLIC_MP_PUBLIC_KEY) {
+  initMercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, { locale: 'es-AR' });
+}
 interface CheckoutClientProps {
   session: any;
   direcciones: any[];
   dbCartItems: CartItem[] | null;
+  carritoId: string;
 }
 
-export default function CheckoutClient({ session, direcciones, dbCartItems }: CheckoutClientProps) {
+export default function CheckoutClient({ session, direcciones, dbCartItems, carritoId }: CheckoutClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const [isLoadingPayment, setIsLoadingPayment] = useState(false);
 
   const handleSubmitDireccion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,13 +55,21 @@ export default function CheckoutClient({ session, direcciones, dbCartItems }: Ch
   const costoEnvio = 3990;
   const totalAPagar = cartTotal + costoEnvio;
 
-  const handlePagar = () => {
+  const handlePagar = async () => {
     if (!direccionSeleccionada) {
       alert("Por favor, selecciona o agrega una dirección de envío.");
       return;
     }
-    // Aquí iría la lógica para llamar a tu Server Action que crea la preferencia en MercadoPago
-    alert("¡Redirigiendo a Mercado Pago para procesar el pago de $" + totalAPagar.toLocaleString('es-AR') + "!");
+    
+    setIsLoadingPayment(true);
+    const res = await processCheckoutAction(session.user.id, carritoId, items, costoEnvio);
+    
+    if (res.success && res.preferenceId) {
+      setPreferenceId(res.preferenceId);
+    } else {
+      alert(res.error || "Hubo un error al iniciar el pago.");
+    }
+    setIsLoadingPayment(false);
   };
 
   if (items.length === 0) return null; // Evita destellos mientras redirige
@@ -143,7 +160,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems }: Ch
             {items.map((item) => (
               <div key={item.id} className="flex gap-4 items-center">
                 <div className="relative w-16 h-16 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                  <Image src={item.imagen_url} alt={item.nombre} fill className="object-cover" />
+                  <Image src={item.imagen_url} alt={item.nombre} fill sizes="100px" className="object-cover" />
                 </div>
                 <div className="flex-1">
                   <h4 className="font-bold text-gray-900 text-sm">{item.nombre}</h4>
@@ -176,13 +193,24 @@ export default function CheckoutClient({ session, direcciones, dbCartItems }: Ch
             <span className="text-2xl font-black text-gray-900">${totalAPagar.toLocaleString('es-AR')}</span>
           </div>
 
-          <div className="mt-6 flex items-center justify-between p-4 border border-gray-200 rounded-xl">
-            <div className="w-12 h-8 bg-blue-50 border border-blue-100 rounded flex items-center justify-center font-black text-[#009EE3] text-xs italic">
+          <div className="mt-6 flex flex-col items-center justify-between p-4 border border-gray-200 rounded-xl gap-4">
+            <div className="w-12 h-8 bg-blue-50 border border-blue-100 rounded flex items-center justify-center font-black text-[#009EE3] text-xs italic self-start">
               <Image src={"/mp.png"} alt="Mercado Pago" width={48} height={32} className="object-contain" />
             </div>
-            <button onClick={handlePagar} className="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 transition-colors">
-              Pagar con Mercado Pago <Lock className="w-4 h-4" />
-            </button>
+            
+            {preferenceId ? (
+              <div className="w-full">
+                <Wallet initialization={{ preferenceId }} />
+              </div>
+            ) : (
+              <button 
+                onClick={handlePagar} 
+                disabled={isLoadingPayment}
+                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              >
+                {isLoadingPayment ? "Procesando..." : "Pagar con Mercado Pago"} <Lock className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -213,9 +241,15 @@ export default function CheckoutClient({ session, direcciones, dbCartItems }: Ch
             <button onClick={() => router.push('/carrito')} className="flex-1 flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold py-4 rounded-xl transition-colors">
               <ArrowLeft className="w-5 h-5" /> Volver al carrito
             </button>
-            <button onClick={handlePagar} className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-xl transition-colors">
-              Pagar con Mercado Pago <Lock className="w-5 h-5" />
-            </button>
+            {!preferenceId && (
+              <button 
+                onClick={handlePagar} 
+                disabled={isLoadingPayment}
+                className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-colors"
+              >
+                {isLoadingPayment ? "Procesando..." : "Pagar con Mercado Pago"} <Lock className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           <p className="text-xs text-gray-500 font-medium">

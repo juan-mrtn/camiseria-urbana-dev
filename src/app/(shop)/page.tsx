@@ -4,52 +4,21 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight, Shirt, Layers, Wind, Percent } from "lucide-react";
 import { ProductoRepository } from "@/repositories/producto.repository";
 import PromoCarousel from "@/components/shop/PromoCarousel";
+import HeroCarouselClient from "@/components/shop/HeroCarouselClient";
+import { BannerRepository } from "@/repositories/banner.repository";
 
 export default async function HomePage() {
   // Obtenemos los 3 productos destacados reales desde la Base de Datos
   const { productos: destacados } = await ProductoRepository.getPaginated({ take: 3 });
+  
+  // Obtenemos los Banners Activos
+  const banners = await BannerRepository.getActiveBanners();
 
   return (
     <div className="flex flex-col gap-12 pb-16">
       
       {/* 1. HERO SECTION (Banner principal) */}
-      <section className="relative w-full border rounded-2xl bg-white overflow-hidden shadow-sm flex flex-col md:flex-row items-center mt-6">
-        {/* Contenido Izquierda */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center space-y-4 p-8 md:p-12 z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight">
-            Promo 2x1 en la nueva colección
-          </h1>
-          <p className="text-lg text-gray-700">
-            Aprovechá por tiempo limitado. Camisas premium en algodón, jean y lino.
-          </p>
-          <Link 
-            href="/productos" 
-            className="mt-4 bg-[#6A0DAD] hover:bg-[#580b91] text-white px-6 py-3 rounded-lg font-medium w-max flex items-center transition-colors"
-          >
-            <ArrowRight className="w-5 h-5 mr-2" />
-            Ver Colección
-          </Link>
-        </div>
-        
-        {/* Imagen Derecha */}
-        <div className="w-full md:w-1/2 relative h-64 md:h-[400px] bg-[#e6eee8]">
-          <Image 
-            src="/images/Gemini_Generated_Image_verde.png" 
-            fill 
-            className="object-cover" 
-            alt="Nueva Colección"
-            priority
-          />
-        </div>
-
-        {/* Flechas de Navegación (Decorativas) */}
-        <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-black text-white p-1.5 rounded-full hover:bg-gray-800 transition">
-          <ChevronLeft className="w-5 h-5"/>
-        </button>
-        <button className="absolute right-4 top-1/2 -translate-y-1/2 bg-black text-white p-1.5 rounded-full hover:bg-gray-800 transition">
-          <ChevronRight className="w-5 h-5"/>
-        </button>
-      </section>
+      <HeroCarouselClient banners={banners} />
 
       {/* 2. CATEGORÍAS (Filtros rápidos interactivos) */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -78,7 +47,7 @@ export default async function HomePage() {
           {destacados.map((prod) => (
             <div key={prod.id} className="border p-4 rounded-xl flex flex-col gap-3 shadow-sm bg-white hover:shadow-md transition">
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
-                <Image src={prod.imagen || "/camisa.png"} alt={prod.nombre} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image src={prod.imagen || "/camisa.png"} alt={prod.nombre} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="flex justify-between items-start mt-2">
                 <h3 className="font-semibold text-gray-800 text-base">{prod.nombre}</h3>

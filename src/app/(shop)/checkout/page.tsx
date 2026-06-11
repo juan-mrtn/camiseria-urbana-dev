@@ -1,10 +1,10 @@
-// src/app/(shop)/checkout/page.tsx
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { DireccionRepository } from "@/repositories/direccion.repository";
 import { CarritoRepository } from "@/repositories/carrito.repository";
 import CheckoutClient from "@/components/checkout/CheckoutClient";
 import { ShieldCheck } from "lucide-react";
+import { db } from "@/lib/db";
 
 export default async function CheckoutPage() {
   const session = await auth();
@@ -14,11 +14,33 @@ export default async function CheckoutPage() {
     redirect("/login?callbackUrl=/checkout");
   }
 
+  const usuarioId = session.user.id;
+
   // Traemos las direcciones del usuario desde PostgreSQL
-  const direcciones = await DireccionRepository.getByUsuarioId(session.user.id);
+  const direcciones = await DireccionRepository.getByUsuarioId(usuarioId);
 
   // Traemos los items del carrito desde PostgreSQL
-  const dbCartItems = await CarritoRepository.getCartWithItems(session.user.id);
+  const dbCartItems = await CarritoRepository.getCartWithItems(usuarioId);
+
+  // Traemos el carritoId activo para procesar el pago
+  const client = await db.getClient();
+  let carritoId = null;
+  try {
+    const carritoResult = await client.query(
+      `SELECT id FROM carrito WHERE usuario_id = $1 AND estado = 'abierto' LIMIT 1;`,
+      [usuarioId]
+    );
+    if (carritoResult.rowCount && carritoResult.rowCount > 0) {
+      carritoId = carritoResult.rows[0].id;
+    }
+  } finally {
+    client.release();
+  }
+
+  // Si no hay carrito abierto, redirigir al catálogo
+  if (!carritoId) {
+    redirect("/catalogo");
+  }
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -41,7 +63,12 @@ export default async function CheckoutPage() {
         </h2>
         
         {/* Renderizamos el cliente interactivo pasándole los datos seguros */}
-        <CheckoutClient session={session} direcciones={direcciones} dbCartItems={dbCartItems} />
+        <CheckoutClient 
+          session={session} 
+          direcciones={direcciones} 
+          dbCartItems={dbCartItems} 
+          carritoId={carritoId}
+        />
       </main>
     </div>
   );

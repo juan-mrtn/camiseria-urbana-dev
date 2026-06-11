@@ -11,6 +11,7 @@ interface Producto {
   imagen: string;
   slug: string;
   stockDisponible?: number;
+  promedio_estrellas?: number | null;
 }
 
 interface Props {
@@ -21,10 +22,12 @@ export default function ProductCard({ producto }: Props) {
 // Lógica de stock basada en los datos de la DB
   // Si no viene el dato del stock, asumimos true para no bloquear la venta
   const enStock = producto.stockDisponible !== undefined ? producto.stockDisponible > 0 : true;
-  console.log(producto);
-  // Por ahora las estrellas pueden ser fijas o venir de una columna de promedio en la vista
-  const estrellas = 5;
-  console.log("ProductoCard renderizado con producto:", producto.id, producto.slug);
+
+  // Calcula las estrellas activas usando el promedio real de la DB, con fallback a 5
+  const activeStars = producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined 
+    ? Math.round(producto.promedio_estrellas) 
+    : 5;
+    
   return (
     <div className="group border p-4 rounded-lg flex flex-col gap-2 shadow-sm hover:shadow-md transition bg-white h-full">
       {/* IMAGEN Y OVERLAY DE STOCK */}
@@ -61,9 +64,15 @@ export default function ProductCard({ producto }: Props) {
           ${producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 0 })}
         </p>
 
-        <div className="flex items-center gap-1 text-yellow-400 text-[10px] mt-1">
-          {'★'.repeat(estrellas)}
-          <span className="text-gray-400 text-xs ml-1 font-medium">({estrellas}.0)</span>
+        <div className="flex items-center gap-1 text-[10px] mt-1">
+          {[...Array(5)].map((_, i) => (
+            <span key={i} className={`text-base ${i < activeStars ? "text-yellow-400" : "text-gray-300"}`}>
+              ★
+            </span>
+          ))}
+          <span className="text-gray-400 text-xs ml-1 font-medium">
+            ({producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined ? producto.promedio_estrellas.toFixed(1) : "5.0"})
+          </span>
         </div>
       </div>
 
