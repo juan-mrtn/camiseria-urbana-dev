@@ -9,11 +9,12 @@ import FilterSidebar from "@/components/shop/FilterSidebar";
 import ProductCard from "@/components/productos/ProductCard";
 import { titleFont } from "@/config/fonts";
 
-export default async function ColeccionPage({ params }: { params: { banner_id: string } }) {
+export default async function ColeccionPage(props: { params: Promise<{ banner_id: string }> }) {
+  const params = await props.params;
   const bannerId = params.banner_id;
   
   // Validamos si es el UUID válido o redireccionamos
-  const banner = await BannerRepository.getBannerById(bannerId).catch(() => null);
+  const banner = await BannerRepository.getBannerById(bannerId).catch((err) => { console.error(err); return null; });
   
   if (!banner) {
     notFound();
