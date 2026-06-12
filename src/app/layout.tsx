@@ -17,13 +17,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body className="min-h-screen flex flex-col font-sans antialiased">
         <CartProvider>
-        <SessionProvider>
-        <Header cartBadge={<CartBadgeIcon />} />
-        <main className="flex-1">
-          {children}: 
-        </main>
-        <Footer />
-        </SessionProvider>
+          <SessionProvider>
+            <Header cartBadge={<CartBadgeIcon />} />
+            <main className="flex-1">
+              {children}:
+            </main>
+            <Footer />
+          </SessionProvider>
         </CartProvider>
       </body>
     </html>

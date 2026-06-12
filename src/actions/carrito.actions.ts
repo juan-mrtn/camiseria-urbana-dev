@@ -50,3 +50,34 @@ export async function removeFromCartAction(productoVarianteId: string) {
         return { success: false, error: "db_error" };
     }
 }
+
+export async function aplicarCuponAction(codigoCupon: string) {
+    const session = await auth();
+    if (!session || !session.user?.id) {
+        return { success: false, error: "Debes iniciar sesión para aplicar cupones." };
+    }
+
+    const codigo = codigoCupon.toUpperCase().trim();
+
+    try {
+        const carritoId = await CarritoRepository.getCarritoAbiertoId(session.user.id);
+        if (!carritoId) {
+            return { success: false, error: "No tienes un carrito activo." };
+        }
+
+        const promoValida = await CarritoRepository.validarPromocion(codigo);
+        if (!promoValida) {
+            return { success: false, error: "Cupón vencido o inexistente" };
+        }
+
+        await CarritoRepository.aplicarPromocionACarrito(carritoId, codigo);
+
+        revalidatePath("/(shop)/carrito", "page");
+        revalidatePath("/", "layout");
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Error al aplicar cupón:", error);
+        return { success: false, error: "Error al aplicar el cupón. Intenta nuevamente." };
+    }
+}

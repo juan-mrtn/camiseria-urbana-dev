@@ -3,7 +3,7 @@ import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AdminRepository } from "@/repositories/admin.repository";
-import { Plus, Edit, Trash2, PackageSearch } from "lucide-react";
+import { Plus, Edit, Trash2, PackageSearch, ChevronLeft } from "lucide-react";
 
 export default async function GestionProductosPage() {
   const session = await auth();
@@ -19,6 +19,9 @@ export default async function GestionProductosPage() {
     <div className="min-h-screen bg-gray-50/50 p-8">
       
       {/* HEADER DE LA SECCIÓN */}
+      <Link href="/dashboard" className="flex items-center gap-2 text-indigo-600 font-bold hover:underline w-fit mb-6">
+        <ChevronLeft className="w-4 h-4" /> Volver al Dashboard
+      </Link>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Gestión de Productos</h1>

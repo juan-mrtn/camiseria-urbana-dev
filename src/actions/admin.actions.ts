@@ -149,3 +149,40 @@ export async function getAllVariantesAction() {
   if (!session || session.user?.rol !== 'admin') throw new Error("Acceso denegado.");
   return await AdminRepository.getAllVariantes();
 }
+
+export async function crearCuponAction(formData: FormData) {
+  const session = await auth();
+  if (!session || session.user?.rol !== 'admin') throw new Error("Acceso denegado.");
+
+  const id = formData.get("id") as string;
+  const tipo = formData.get("tipo") as 'descuento' | '2x1';
+  const descripcion = formData.get("descripcion") as string;
+  const fecha_inicio = formData.get("fecha_inicio") as string;
+  const fecha_fin = formData.get("fecha_fin") as string;
+  
+  let descuento: number | null = null;
+  if (tipo === 'descuento') {
+    const descRaw = formData.get("descuento") as string;
+    descuento = descRaw ? parseFloat(descRaw) / 100 : null;
+  }
+
+  try {
+    await AdminRepository.crearPromocion({
+      id: id.toUpperCase().trim(),
+      tipo,
+      descripcion,
+      fecha_inicio,
+      fecha_fin,
+      descuento
+    });
+    
+    revalidatePath("/(admin)/dashboard/promociones", "page");
+    return { success: true };
+  } catch (error: any) {
+    if (error.code === '23505') { // Postgres unique violation
+      return { success: false, error: "El código de cupón ya existe." };
+    }
+    console.error("Error al crear el cupón:", error);
+    return { success: false, error: "Ocurrió un error al crear el cupón." };
+  }
+}

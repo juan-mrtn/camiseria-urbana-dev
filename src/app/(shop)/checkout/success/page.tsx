@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { CheckCircle2, ShoppingBag, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
+import { enviarFacturaEmail } from "@/lib/email";
 
 export default async function CheckoutSuccessPage({
   searchParams,
@@ -23,6 +24,13 @@ export default async function CheckoutSuccessPage({
   if (isApproved) {
     try {
       await db.query("CALL sp_confirmar_pago($1)", [usuarioId]);
+      
+      try {
+        await enviarFacturaEmail(usuarioId);
+      } catch (emailError) {
+        console.error("Error al enviar el email de factura, pero el pago fue procesado:", emailError);
+      }
+
     } catch (error) {
       console.error("Error al confirmar el pago:", error);
       // Podríamos mostrar un mensaje de error o registrar para revisión manual

@@ -24,6 +24,15 @@ export interface NuevoIngresoStockDTO {
   costoUnitario: number;
 }
 
+export interface NuevaPromocionDTO {
+  id: string;
+  tipo: 'descuento' | '2x1';
+  descripcion: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  descuento: number | null;
+}
+
 export const AdminRepository = {
 
   async getExistingProductCodes(): Promise<string[]> {
@@ -166,5 +175,21 @@ export const AdminRepository = {
     `;
     const result = await db.query(query);
     return result.rows;
+  },
+
+  // PBI-27: Crear Promocion / Cupon
+  async crearPromocion(data: NuevaPromocionDTO) {
+    const query = `
+      INSERT INTO promocion (id, tipo, descripcion, fecha_inicio, fecha_fin, descuento) 
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `;
+    await db.query(query, [
+      data.id,
+      data.tipo,
+      data.descripcion,
+      data.fecha_inicio,
+      data.fecha_fin,
+      data.descuento
+    ]);
   }
 };

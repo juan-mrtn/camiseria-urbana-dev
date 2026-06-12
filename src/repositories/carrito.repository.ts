@@ -136,5 +136,29 @@ export const CarritoRepository = {
         } finally {
             client.release();
         }
+    },
+
+    async getCarritoAbiertoId(usuarioId: string): Promise<string | null> {
+        const result = await db.query(`SELECT id FROM carrito WHERE usuario_id = $1 AND estado = 'abierto' LIMIT 1`, [usuarioId]);
+        return result.rowCount ? result.rows[0].id : null;
+    },
+
+    async validarPromocion(codigo: string): Promise<boolean> {
+        const result = await db.query(`SELECT id FROM promocion WHERE id = $1 AND CURRENT_DATE BETWEEN fecha_inicio AND fecha_fin`, [codigo]);
+        return (result.rowCount ?? 0) > 0;
+    },
+
+    async aplicarPromocionACarrito(carritoId: string, promocionId: string): Promise<void> {
+        const query = `
+            UPDATE carrito_item ci
+            SET promocion_id = $2,
+                precio_unitario = f.precio_final,
+                descuento_unitario = f.descuento_unitario
+            FROM producto_variante pv, 
+                 fn_aplicar_promocion(pv.precio, $2, ci.cantidad) f
+            WHERE ci.carrito_id = $1
+            AND ci.producto_variante_id = pv.id;
+        `;
+        await db.query(query, [carritoId, promocionId]);
     }
 };

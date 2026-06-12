@@ -5,7 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Trash2, ArrowRight, ShoppingBag } from "lucide-react";
 import { useTransition } from "react";
-import { removeFromCartAction } from "@/actions/carrito.actions";
+import { removeFromCartAction, aplicarCuponAction } from "@/actions/carrito.actions";
+import { useState } from "react";
 
 interface CartClientProps {
   dbItems: CartItem[] | null;
@@ -14,6 +15,9 @@ interface CartClientProps {
 export default function CartClient({ dbItems }: CartClientProps) {
   const { items: localItems, removeFromCart } = useCart();
   const [isPending, startTransition] = useTransition();
+  const [isApplyingCupon, startCuponTransition] = useTransition();
+  const [cupon, setCupon] = useState("");
+  const [cuponMsg, setCuponMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   // Si dbItems existe (usuario logueado), usamos los datos de la DB como fuente de verdad
   const items = dbItems !== null ? dbItems : localItems;
@@ -29,6 +33,24 @@ export default function CartClient({ dbItems }: CartClientProps) {
         await removeFromCartAction(id);
       } catch (error) {
         console.error("Error eliminando del carrito en DB:", error);
+      }
+    });
+  };
+
+  const handleAplicarCupon = () => {
+    if (!cupon.trim()) return;
+    setCuponMsg(null);
+    startCuponTransition(async () => {
+      try {
+        const res = await aplicarCuponAction(cupon);
+        if (res.success) {
+          setCuponMsg({ type: 'success', text: "Cupón aplicado correctamente" });
+          setCupon("");
+        } else {
+          setCuponMsg({ type: 'error', text: res.error || "Error al aplicar cupón" });
+        }
+      } catch (error) {
+        setCuponMsg({ type: 'error', text: "Ocurrió un error inesperado" });
       }
     });
   };
@@ -95,6 +117,31 @@ export default function CartClient({ dbItems }: CartClientProps) {
           <div className="flex justify-between items-end mb-8">
             <span className="font-bold text-gray-900">Total</span>
             <span className="text-3xl font-black text-indigo-600">${cartTotal.toLocaleString('es-AR')}</span>
+          </div>
+
+          <div className="mb-8 border-t border-gray-200 pt-6">
+            <label className="text-sm font-bold text-gray-700 block mb-2">¿Tienes un cupón?</label>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                placeholder="Ingresa tu cupón" 
+                value={cupon}
+                onChange={(e) => setCupon(e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
+              />
+              <button 
+                onClick={handleAplicarCupon}
+                disabled={isApplyingCupon || !cupon.trim()}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+              >
+                {isApplyingCupon ? "..." : "Aplicar"}
+              </button>
+            </div>
+            {cuponMsg && (
+              <p className={`mt-2 text-sm font-bold ${cuponMsg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                {cuponMsg.text}
+              </p>
+            )}
           </div>
 
           <Link

@@ -3,9 +3,8 @@ import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import StockForm from "@/components/admin/StockForm";
 import SupplierForm from "@/components/admin/SupplierForm";
-import PromoForm from "@/components/admin/PromoForm";
 import Link from "next/link";
-import { Package, PlusCircle, LayoutDashboard, Truck, BarChart3, ListCollapse } from "lucide-react";
+import { Package, PlusCircle, LayoutDashboard, Truck, BarChart3, ListCollapse, Tag, Ticket, ChevronLeft } from "lucide-react";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -20,6 +19,9 @@ export default async function AdminDashboard() {
       {/* Header del Dashboard */}
       <div className="bg-white border-b border-gray-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 py-8">
+          <Link href="/" className="flex items-center gap-2 text-indigo-600 font-bold hover:underline w-fit mb-6">
+            <ChevronLeft className="w-4 h-4" /> Volver a la Tienda
+          </Link>
           <div className="flex items-center gap-3 mb-2">
             <LayoutDashboard className="w-6 h-6 text-indigo-600" />
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">
@@ -83,6 +85,28 @@ export default async function AdminDashboard() {
                 <span className="text-xs text-gray-500">Analítica básica de ingresos</span>
               </div>
             </Link>
+
+            <Link href="/dashboard/promociones" 
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
+              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
+                <Tag className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              </div>
+              <div>
+                <span className="block font-bold text-gray-900">Gestión de Promos</span>
+                <span className="text-xs text-gray-500">Descuentos por variante</span>
+              </div>
+            </Link>
+
+            <Link href="/dashboard/cupones" 
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
+              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
+                <Ticket className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              </div>
+              <div>
+                <span className="block font-bold text-gray-900">Crear Cupón</span>
+                <span className="text-xs text-gray-500">Descuentos y 2x1 globales</span>
+              </div>
+            </Link>
           </div>
 
           {/* Columna Derecha: Gestión de Stock (PBI-24) */}
@@ -109,13 +133,6 @@ export default async function AdminDashboard() {
                 <StockForm />
               </div>
             </div>
-
-            <div className="mb-4">
-              <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-8">
-                Gestión de Promociones (PBI-28)
-              </h2>
-            </div>
-            <PromoForm />
           </div>
 
         </div>
