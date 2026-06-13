@@ -186,3 +186,15 @@ export async function crearCuponAction(formData: FormData) {
     return { success: false, error: "Ocurrió un error al crear el cupón." };
   }
 }
+
+export async function getPromocionesAction() {
+  const session = await auth();
+  if (!session || session.user?.rol !== 'admin') throw new Error("Acceso denegado.");
+  return await AdminRepository.getPromociones();
+}
+
+export async function getAdminMetricsAction() {
+  const session = await auth();
+  if (!session || session.user?.rol !== 'admin') throw new Error("Acceso denegado.");
+  return await AdminRepository.obtenerMetricasVentas();
+}

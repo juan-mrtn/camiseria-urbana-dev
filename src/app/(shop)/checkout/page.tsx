@@ -37,10 +37,8 @@ export default async function CheckoutPage() {
     client.release();
   }
 
-  // Si no hay carrito abierto, redirigir al catálogo
-  if (!carritoId) {
-    redirect("/catalogo");
-  }
+  // Si no hay carrito abierto, la validación se pasará al cliente para permitir sincronizar carritos anónimos
+  // o redirigir al catálogo si realmente está vacío en ambos lados.
 
   return (
     <div className="min-h-screen bg-white pb-20">

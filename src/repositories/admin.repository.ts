@@ -191,5 +191,103 @@ export const AdminRepository = {
       data.fecha_fin,
       data.descuento
     ]);
+  },
+
+  async getPromociones() {
+    const query = `
+      SELECT 
+        id, 
+        tipo, 
+        descripcion, 
+        fecha_inicio, 
+        fecha_fin, 
+        descuento,
+        CASE 
+          WHEN CURRENT_DATE BETWEEN fecha_inicio AND fecha_fin THEN 'Activo'
+          WHEN CURRENT_DATE < fecha_inicio THEN 'Programado'
+          ELSE 'Vencido'
+        END as estado
+      FROM promocion
+      ORDER BY fecha_fin DESC, fecha_inicio DESC
+    `;
+    const result = await db.query(query);
+    return result.rows;
+  },
+
+  async obtenerMetricasVentas() {
+    const queryMetricas = `
+      SELECT 
+        COALESCE(SUM(total), 0) as total_ingresos,
+        COUNT(id) as total_pedidos,
+        COALESCE(AVG(total), 0) as ticket_promedio
+      FROM compra 
+      WHERE estado_pago = 'confirmado'
+    `;
+
+    const queryTop = `
+      SELECT 
+        COALESCE(p.nombre, c.nombre) as producto,
+        SUM(lc.cantidad) as unidades
+      FROM linea_de_compra lc
+      JOIN compra cmp ON lc.compra_id = cmp.id
+      LEFT JOIN producto_variante pv ON lc.producto_variante_id = pv.id
+      LEFT JOIN producto p ON pv.producto_id = p.id
+      LEFT JOIN combo c ON lc.combo_id = c.id
+      WHERE cmp.estado_pago = 'confirmado'
+      GROUP BY COALESCE(p.nombre, c.nombre)
+      ORDER BY unidades DESC
+      LIMIT 3
+    `;
+
+    const queryMensual = `
+      SELECT 
+        TO_CHAR(fecha, 'YYYY-MM') as mes,
+        SUM(total) as ingresos
+      FROM compra
+      WHERE estado_pago = 'confirmado'
+      GROUP BY TO_CHAR(fecha, 'YYYY-MM')
+      ORDER BY mes ASC
+    `;
+
+    const queryTopBuyers = `
+      SELECT 
+        u.nombre,
+        u.email,
+        COUNT(c.id) as cantidad_compras,
+        SUM(c.total) as total_gastado
+      FROM compra c
+      JOIN usuario u ON c.usuario_id = u.id
+      WHERE c.estado_pago = 'confirmado'
+      GROUP BY u.id, u.nombre, u.email
+      ORDER BY total_gastado DESC
+      LIMIT 5
+    `;
+
+    const [metricasRes, topRes, mensualRes, buyersRes] = await Promise.all([
+      db.query(queryMetricas),
+      db.query(queryTop),
+      db.query(queryMensual),
+      db.query(queryTopBuyers)
+    ]);
+
+    return {
+      total_ingresos: Number(metricasRes.rows[0]?.total_ingresos || 0),
+      total_pedidos: Number(metricasRes.rows[0]?.total_pedidos || 0),
+      ticket_promedio: Number(metricasRes.rows[0]?.ticket_promedio || 0),
+      top_productos: topRes.rows.map(row => ({
+        producto: row.producto,
+        unidades: Number(row.unidades)
+      })),
+      ingresosMensuales: mensualRes.rows.map(row => ({
+        mes: row.mes,
+        ingresos: Number(row.ingresos)
+      })),
+      clientesTop: buyersRes.rows.map(row => ({
+        nombre: row.nombre,
+        email: row.email,
+        cantidad_compras: Number(row.cantidad_compras),
+        total_gastado: Number(row.total_gastado)
+      }))
+    };
   }
 };

@@ -31,7 +31,7 @@ export async function enviarFacturaEmail(usuarioId: string, costoEnvio: number =
 
     // 2. Obtener la compra confirmada más reciente
     const compraResult = await client.query(
-      `SELECT id, numero, fecha, total 
+      `SELECT id, numero, fecha, total, descuento_total 
        FROM compra 
        WHERE usuario_id = $1 AND estado_pago = 'confirmado' 
        ORDER BY fecha DESC LIMIT 1`,
@@ -49,11 +49,13 @@ export async function enviarFacturaEmail(usuarioId: string, costoEnvio: number =
       `SELECT 
          lc.cantidad, 
          lc.precio_unitario, 
-         p.nombre as producto_nombre, 
+         lc.descuento_unitario,
+         COALESCE(p.nombre, c.nombre) as producto_nombre, 
          pv.talle 
        FROM linea_de_compra lc
-       JOIN producto_variante pv ON lc.producto_variante_id = pv.id
-       JOIN producto p ON pv.producto_id = p.id
+       LEFT JOIN producto_variante pv ON lc.producto_variante_id = pv.id
+       LEFT JOIN producto p ON pv.producto_id = p.id
+       LEFT JOIN combo c ON lc.combo_id = c.id
        WHERE lc.compra_id = $1`,
       [compra.id]
     );
@@ -61,20 +63,33 @@ export async function enviarFacturaEmail(usuarioId: string, costoEnvio: number =
     const lineas = lineasResult.rows;
 
     // 4. Generar el HTML del Ticket / Factura
-    let lineasHtml = lineas.map(linea => `
+    let lineasHtml = lineas.map(linea => {
+      const precioUnitario = Number(linea.precio_unitario);
+      const descuentoUnitario = Number(linea.descuento_unitario) || 0;
+      const precioOriginal = precioUnitario + descuentoUnitario;
+      const tieneDescuento = descuentoUnitario > 0;
+      
+      const precioHtml = tieneDescuento 
+        ? `<span style="text-decoration: line-through; color: #9ca3af; font-size: 12px; display: block;">$${precioOriginal.toLocaleString('es-AR')}</span>
+           <span>$${precioUnitario.toLocaleString('es-AR')}</span>`
+        : `<span>$${precioUnitario.toLocaleString('es-AR')}</span>`;
+
+      return `
       <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${linea.producto_nombre} (Talle: ${linea.talle})</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">
+          ${linea.producto_nombre} ${linea.talle ? `(Talle: ${linea.talle})` : ''}
+        </td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${linea.cantidad}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">$${Number(linea.precio_unitario).toLocaleString('es-AR')}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">$${(Number(linea.precio_unitario) * Number(linea.cantidad)).toLocaleString('es-AR')}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${precioHtml}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">$${(precioUnitario * Number(linea.cantidad)).toLocaleString('es-AR')}</td>
       </tr>
-    `).join('');
+    `}).join('');
 
     // Agregar fila de envío si existe
     if (costoEnvio > 0) {
       lineasHtml += `
       <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; color: #4f46e5; font-weight: bold;">Costo de Envío</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; color: #4f46e5; font-weight: bold;">Envío Estándar</td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">1</td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">$${costoEnvio.toLocaleString('es-AR')}</td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; color: #4f46e5; font-weight: bold;">$${costoEnvio.toLocaleString('es-AR')}</td>
@@ -82,6 +97,8 @@ export async function enviarFacturaEmail(usuarioId: string, costoEnvio: number =
       `;
     }
 
+    const totalDescuento = Number(compra.descuento_total) || 0;
+    const subtotalOriginal = Number(compra.total) + totalDescuento;
     const totalFinal = Number(compra.total) + costoEnvio;
 
     const htmlContent = `
@@ -110,12 +127,33 @@ export async function enviarFacturaEmail(usuarioId: string, costoEnvio: number =
               ${lineasHtml}
             </tbody>
             <tfoot>
+              ${totalDescuento > 0 ? `
+              <tr>
+                <td colspan="3" style="padding: 10px; text-align: right; color: #6b7280; border-top: 2px solid #ddd;">Subtotal Original:</td>
+                <td style="padding: 10px; text-align: right; color: #9ca3af; text-decoration: line-through; border-top: 2px solid #ddd;">
+                  $${subtotalOriginal.toLocaleString('es-AR')}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="padding: 10px; text-align: right; color: #16a34a; font-weight: bold;">Descuento Aplicado:</td>
+                <td style="padding: 10px; text-align: right; color: #16a34a; font-weight: bold;">
+                  -$${totalDescuento.toLocaleString('es-AR')}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="padding: 15px 10px; text-align: right; font-weight: bold; border-top: 1px solid #ddd;">Total Final:</td>
+                <td style="padding: 15px 10px; text-align: right; font-weight: bold; border-top: 1px solid #ddd; font-size: 18px; color: #4f46e5;">
+                  $${totalFinal.toLocaleString('es-AR')}
+                </td>
+              </tr>
+              ` : `
               <tr>
                 <td colspan="3" style="padding: 15px 10px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;">Total:</td>
                 <td style="padding: 15px 10px; text-align: right; font-weight: bold; border-top: 2px solid #ddd; font-size: 18px; color: #4f46e5;">
                   $${totalFinal.toLocaleString('es-AR')}
                 </td>
               </tr>
+              `}
             </tfoot>
           </table>
           

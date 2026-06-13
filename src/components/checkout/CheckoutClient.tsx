@@ -8,17 +8,20 @@ import Image from "next/image";
 import { CheckCircle2, Circle, Plus, Lock, ArrowLeft, Truck, X } from "lucide-react";
 import { saveDireccionAction } from "@/actions/direccion.actions";
 import { processCheckoutAction } from "@/actions/checkout.actions";
+import { syncCartAction } from "@/actions/carrito.actions";
 import { calculateShippingCost } from "@/components/shop/ShippingCalculator";
+
 interface CheckoutClientProps {
   session: any;
   direcciones: any[];
   dbCartItems: CartItem[] | null;
-  carritoId: string;
+  carritoId: string | null;
 }
 
 export default function CheckoutClient({ session, direcciones, dbCartItems, carritoId }: CheckoutClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(dbCartItems === null && typeof window !== "undefined" && localStorage.getItem("cart_items") !== "[]");
 
   const handleSubmitDireccion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,19 +30,38 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
     setIsModalOpen(false);
   };
 
-  const { items: localItems, cartTotal: localCartTotal } = useCart();
+  const { items: localItems, cartTotal: localCartTotal, clearCart } = useCart();
+  const router = useRouter();
+
+  // Sincronizar carrito anónimo a la base de datos si el usuario recién inicia sesión
+  useEffect(() => {
+    if (dbCartItems === null && localItems.length > 0) {
+      setIsSyncing(true);
+      syncCartAction(localItems).then((res) => {
+        if (res.success) {
+          clearCart();
+          router.refresh();
+        } else {
+          setIsSyncing(false);
+        }
+      });
+    } else {
+      setIsSyncing(false);
+    }
+  }, [dbCartItems, localItems, clearCart, router]);
 
   // Usamos los items de la base de datos si existen (ya que el usuario está logueado en checkout)
   const items = dbCartItems !== null ? dbCartItems : localItems;
+  const cartTotalOriginal = items.reduce((total, item) => total + (item.precioOriginal || item.precio) * item.cantidad, 0);
   const cartTotal = items.reduce((total, item) => total + item.precio * item.cantidad, 0);
-  const router = useRouter();
+  const totalDescuento = cartTotalOriginal - cartTotal;
 
-  // Redirigir al catálogo si el carrito está vacío
+  // Redirigir al catálogo si el carrito está verdaderamente vacío
   useEffect(() => {
-    if (items.length === 0) {
+    if (!isSyncing && items.length === 0) {
       router.push("/catalogo");
     }
-  }, [items, router]);
+  }, [items, isSyncing, router]);
 
   // Estado para la dirección elegida. Por defecto usamos la principal o la primera.
   const [direccionSeleccionada, setDireccionSeleccionada] = useState<string | null>(
@@ -55,6 +77,11 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
   const handlePagarConMercadoPago = async () => {
     if (!direccionSeleccionada) {
       alert("Por favor, selecciona o agrega una dirección de envío.");
+      return;
+    }
+
+    if (!carritoId) {
+      alert("Sincronizando carrito anónimo... Aguarda unos instantes.");
       return;
     }
     
@@ -165,8 +192,15 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
                   <h4 className="font-bold text-gray-900 text-sm">{item.nombre}</h4>
                   <p className="text-xs text-gray-500 mt-0.5">Talla {item.talle} · Cant. {item.cantidad}</p>
                 </div>
-                <div className="font-bold text-gray-900">
-                  ${(item.precio * item.cantidad).toLocaleString('es-AR')}
+                <div className="flex flex-col items-end">
+                  {item.precioOriginal && item.precioOriginal > item.precio && (
+                    <span className="text-xs text-gray-400 line-through">
+                      ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
+                    </span>
+                  )}
+                  <span className="font-bold text-gray-900">
+                    ${(item.precio * item.cantidad).toLocaleString('es-AR')}
+                  </span>
                 </div>
               </div>
             ))}
@@ -175,8 +209,16 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
           <div className="space-y-3 pt-6 border-t border-gray-100 text-sm">
             <div className="flex justify-between text-gray-600 font-medium">
               <span>Subtotal</span>
-              <span>${cartTotal.toLocaleString('es-AR')}</span>
+              <span className={totalDescuento > 0 ? "line-through text-gray-400" : ""}>
+                ${cartTotalOriginal.toLocaleString('es-AR')}
+              </span>
             </div>
+            {totalDescuento > 0 && (
+              <div className="flex justify-between text-green-600 font-bold">
+                <span>Descuento aplicado</span>
+                <span>-${totalDescuento.toLocaleString('es-AR')}</span>
+              </div>
+            )}
             <div className="flex justify-between text-gray-600 font-medium">
               <span>Envío (estándar)</span>
               <span>{costoEnvio === 0 ? "¡Gratis!" : `$${costoEnvio.toLocaleString('es-AR')}`}</span>

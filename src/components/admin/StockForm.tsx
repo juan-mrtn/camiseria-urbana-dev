@@ -7,8 +7,8 @@ import { Save, Loader2, PackagePlus } from "lucide-react";
 export default function StockForm() {
   const [isPending, startTransition] = useTransition();
 
-  const [proveedores, setProveedores] = useState<{id: string, nombre: string}[]>([]);
-  const [variantes, setVariantes] = useState<{nombre: string, talle: string, label: string}[]>([]);
+  const [proveedores, setProveedores] = useState<{ id: string, nombre: string }[]>([]);
+  const [variantes, setVariantes] = useState<{ nombre: string, talle: string, label: string }[]>([]);
   const [selectedVariante, setSelectedVariante] = useState("");
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function StockForm() {
         console.error("Error al cargar proveedores:", err);
         alert("Error al cargar proveedores: " + err.message);
       });
-      
+
     getAllVariantesAction()
       .then(setVariantes)
       .catch(console.error);
@@ -27,13 +27,13 @@ export default function StockForm() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
+
     if (selectedVariante) {
       const v = JSON.parse(selectedVariante);
       formData.set("nombreProducto", v.nombre);
       formData.set("talle", v.talle);
     }
-    
+
     startTransition(async () => {
       try {
         await registrarStockAction(formData);
@@ -57,7 +57,7 @@ export default function StockForm() {
 
       <div className="space-y-2">
         <label className="text-sm font-bold text-gray-700">Proveedor</label>
-        <select 
+        <select
           name="proveedorId" required defaultValue=""
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-white"
         >
@@ -70,8 +70,8 @@ export default function StockForm() {
 
       <div className="space-y-2 md:col-span-2">
         <label className="text-sm font-bold text-gray-700">Variante del Producto</label>
-        <select 
-          required 
+        <select
+          required
           value={selectedVariante}
           onChange={(e) => setSelectedVariante(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-white"
@@ -88,18 +88,18 @@ export default function StockForm() {
       <div className="grid grid-cols-2 gap-4 md:col-span-2">
         <div className="space-y-2">
           <label className="text-sm font-bold text-gray-700">Cantidad (Unidades Totales)</label>
-          <input 
-            type="number" name="cantidad" min="1" required 
+          <input
+            type="number" name="cantidad" min="1" required
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold text-gray-700">Costo Unitario</label>
+          <label className="text-sm font-bold text-gray-700">Costo Total de la Compra</label>
           <div className="relative">
             <span className="absolute left-3 top-2.5 text-gray-400">$</span>
-            <input 
-              type="number" name="costoUnitario" min="0" step="0.01" required 
+            <input
+              type="number" name="costoUnitario" min="0" step="0.01" required
               className="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
             />
           </div>
@@ -107,8 +107,8 @@ export default function StockForm() {
       </div>
 
       <div className="md:col-span-2 pt-4">
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={isPending}
           className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
         >

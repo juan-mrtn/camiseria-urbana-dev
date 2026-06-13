@@ -81,3 +81,24 @@ export async function aplicarCuponAction(codigoCupon: string) {
         return { success: false, error: "Error al aplicar el cupón. Intenta nuevamente." };
     }
 }
+
+export async function syncCartAction(localItems: any[]) {
+    const session = await auth();
+    if (!session || !session.user?.id) return { success: false };
+
+    try {
+        for (const item of localItems) {
+            await CarritoRepository.agregarItemAlCarrito(
+                session.user.id,
+                item.id, // En DB el ID de la variante
+                item.cantidad,
+                item.precio
+            );
+        }
+        revalidatePath("/", "layout");
+        return { success: true };
+    } catch (error) {
+        console.error("Error al sincronizar carrito:", error);
+        return { success: false };
+    }
+}

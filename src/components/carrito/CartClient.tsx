@@ -4,24 +4,42 @@ import { useCart, CartItem } from "@/providers/CartProvider";
 import Link from "next/link";
 import Image from "next/image";
 import { Trash2, ArrowRight, ShoppingBag } from "lucide-react";
-import { useTransition } from "react";
-import { removeFromCartAction, aplicarCuponAction } from "@/actions/carrito.actions";
-import { useState } from "react";
+import { useTransition, useEffect, useState } from "react";
+import { removeFromCartAction, aplicarCuponAction, syncCartAction } from "@/actions/carrito.actions";
+import { useSession, signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface CartClientProps {
   dbItems: CartItem[] | null;
 }
 
 export default function CartClient({ dbItems }: CartClientProps) {
-  const { items: localItems, removeFromCart } = useCart();
+  const { items: localItems, removeFromCart, clearCart } = useCart();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
   const [isPending, startTransition] = useTransition();
   const [isApplyingCupon, startCuponTransition] = useTransition();
   const [cupon, setCupon] = useState("");
   const [cuponMsg, setCuponMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
+  // Sincronización automática de carrito local a DB cuando se loguea
+  useEffect(() => {
+    if (status === "authenticated" && dbItems === null && localItems.length > 0) {
+      syncCartAction(localItems).then((res) => {
+        if (res.success) {
+          clearCart();
+          router.refresh();
+        }
+      });
+    }
+  }, [status, dbItems, localItems, clearCart, router]);
+
   // Si dbItems existe (usuario logueado), usamos los datos de la DB como fuente de verdad
   const items = dbItems !== null ? dbItems : localItems;
+  const cartTotalOriginal = items.reduce((total, item) => total + (item.precioOriginal || item.precio) * item.cantidad, 0);
   const cartTotal = items.reduce((total, item) => total + item.precio * item.cantidad, 0);
+  const totalDescuento = cartTotalOriginal - cartTotal;
 
   const handleRemove = (id: string) => {
     // Sincronización Local (siempre lo hacemos por si era invitado)
@@ -91,9 +109,16 @@ export default function CartClient({ dbItems }: CartClientProps) {
                   <p className="text-sm text-gray-500 mt-1">Talle: <span className="font-bold text-gray-700">{item.talle}</span></p>
                   <p className="text-sm text-gray-500">Cantidad: <span className="font-bold text-gray-700">{item.cantidad}</span></p>
                 </div>
-                <p className="font-black text-indigo-600 text-lg">
-                  ${(item.precio * item.cantidad).toLocaleString('es-AR')}
-                </p>
+                <div className="flex flex-col items-start">
+                  {item.precioOriginal && item.precioOriginal > item.precio && (
+                    <p className="text-sm text-gray-400 line-through">
+                      ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
+                    </p>
+                  )}
+                  <p className="font-black text-indigo-600 text-lg">
+                    ${(item.precio * item.cantidad).toLocaleString('es-AR')}
+                  </p>
+                </div>
               </div>
             </div>
           ))}
@@ -106,8 +131,16 @@ export default function CartClient({ dbItems }: CartClientProps) {
           <div className="space-y-4 border-b border-gray-200 pb-6 mb-6">
             <div className="flex justify-between text-gray-600">
               <span>Subtotal</span>
-              <span>${cartTotal.toLocaleString('es-AR')}</span>
+              <span className={totalDescuento > 0 ? "line-through text-gray-400" : ""}>
+                ${cartTotalOriginal.toLocaleString('es-AR')}
+              </span>
             </div>
+            {totalDescuento > 0 && (
+              <div className="flex justify-between text-green-600 font-bold">
+                <span>Descuento aplicado</span>
+                <span>-${totalDescuento.toLocaleString('es-AR')}</span>
+              </div>
+            )}
             <div className="flex justify-between text-gray-600">
               <span>Envío</span>
               <span className="text-gray-500 font-medium">A calcular en checkout</span>
@@ -144,12 +177,18 @@ export default function CartClient({ dbItems }: CartClientProps) {
             )}
           </div>
 
-          <Link
-            href="/checkout"
+          <button
+            onClick={() => {
+              if (status === "unauthenticated") {
+                signIn(undefined, { callbackUrl: "/checkout" });
+              } else {
+                router.push("/checkout");
+              }
+            }}
             className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-4 rounded-lg font-bold uppercase hover:bg-indigo-600 transition"
           >
             Avanzar al pago <ArrowRight size={20} />
-          </Link>
+          </button>
         </div>
       </div>
     </div>
