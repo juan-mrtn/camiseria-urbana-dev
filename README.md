@@ -36,9 +36,9 @@ El sistema implementa el **Patrón Repositorio (Repository Pattern)** para garan
 
 ```mermaid
 graph TD
-    A[Cliente / Browser (React)] -->|Interacción / Hook| B[Server Action (RPC)]
-    B -->|Validación & Auth| C[Repository Layer (SQL)]
-    C -->|Consultas Parametrizadas 'pg'| D[(PostgreSQL)]
+    A["Cliente / Browser (React)"] -->|Interacción / Hook| B["Server Action (RPC)"]
+    B -->|Validación & Auth| C["Repository Layer (SQL)"]
+    C -->|Consultas Parametrizadas 'pg'| D[("PostgreSQL")]
     D -->|Vistas Materializadas / Data| C
     C -->|DTOs Tipados| B
     B -->|Respuesta| A
