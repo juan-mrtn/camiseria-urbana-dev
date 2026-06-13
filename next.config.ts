@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '20mb',
     },
   },
+  // Permitir la conexión HMR de Next.js cuando se usa Ngrok
+  allowedDevOrigins: [
+    'mower-collar-jaywalker.ngrok-free.dev',
+    // Puedes añadir otros dominios aquí si ngrok cambia de URL
+  ],
 };
 
 export default nextConfig;

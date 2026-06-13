@@ -1,15 +1,12 @@
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
 import { CheckCircle2, ShoppingBag, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
-import { enviarFacturaEmail } from "@/lib/email";
 
-export default async function CheckoutSuccessPage({
-  searchParams,
-}: {
-  searchParams: { status?: string };
+export default async function CheckoutSuccessPage(props: {
+  searchParams: Promise<{ status?: string, collection_status?: string, payment_status?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   const session = await auth();
 
   if (!session || !session.user || !session.user.id) {
@@ -17,25 +14,13 @@ export default async function CheckoutSuccessPage({
   }
 
   const usuarioId = session.user.id;
-  const status = searchParams?.status;
+  
+  const status = searchParams?.status || searchParams?.collection_status || searchParams?.payment_status;
   const isApproved = status === "approved";
 
-  // Confirmar el pago en la base de datos (Stored Procedure) SOLO si está aprobado
-  if (isApproved) {
-    try {
-      await db.query("CALL sp_confirmar_pago($1)", [usuarioId]);
-      
-      try {
-        await enviarFacturaEmail(usuarioId);
-      } catch (emailError) {
-        console.error("Error al enviar el email de factura, pero el pago fue procesado:", emailError);
-      }
-
-    } catch (error) {
-      console.error("Error al confirmar el pago:", error);
-      // Podríamos mostrar un mensaje de error o registrar para revisión manual
-    }
-  }
+  // Nota: La confirmación del pago en la base de datos y el envío del correo electrónico
+  // ahora son manejados EXCLUSIVAMENTE por el Webhook de Mercado Pago (/api/webhooks/mercadopago)
+  // para evitar condiciones de carrera (envío de correos duplicados).
 
   return (
     <div className="min-h-[70vh] bg-white flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -50,10 +35,10 @@ export default async function CheckoutSuccessPage({
             </div>
             <div>
               <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                ¡Pago exitoso!
+                ¡Pago aprobado con éxito!
               </h2>
               <p className="mt-2 text-sm text-gray-600">
-                Tu pedido ha sido procesado correctamente y ya estamos preparando tu envío.
+                Tu pago ha sido procesado correctamente. En unos instantes recibirás un correo electrónico con la factura detallada de tu compra y los pasos a seguir.
               </p>
             </div>
             <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mt-8">
@@ -95,7 +80,7 @@ export default async function CheckoutSuccessPage({
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Link 
-            href="/perfil" 
+            href="/mi-cuenta/opiniones" 
             className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl transition-colors"
           >
             <ShoppingBag className="w-5 h-5" /> Mis pedidos

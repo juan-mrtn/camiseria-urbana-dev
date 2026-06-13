@@ -9,13 +9,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function enviarFacturaEmail(usuarioId: string) {
+export async function enviarFacturaEmail(usuarioId: string, costoEnvio: number = 0) {
   const client = await db.getClient();
   try {
     // 1. Obtener datos del usuario
     const userResult = await client.query(
-      `SELECT email, name as nombre FROM "user" WHERE id = $1`, 
-      // Si la tabla se llama estrictamente 'usuario' cámbialo, pero next-auth suele usar "user"
+      `SELECT email, nombre FROM usuario WHERE id = $1`, 
       [usuarioId]
     );
 
@@ -62,7 +61,7 @@ export async function enviarFacturaEmail(usuarioId: string) {
     const lineas = lineasResult.rows;
 
     // 4. Generar el HTML del Ticket / Factura
-    const lineasHtml = lineas.map(linea => `
+    let lineasHtml = lineas.map(linea => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">${linea.producto_nombre} (Talle: ${linea.talle})</td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${linea.cantidad}</td>
@@ -70,6 +69,20 @@ export async function enviarFacturaEmail(usuarioId: string) {
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">$${(Number(linea.precio_unitario) * Number(linea.cantidad)).toLocaleString('es-AR')}</td>
       </tr>
     `).join('');
+
+    // Agregar fila de envío si existe
+    if (costoEnvio > 0) {
+      lineasHtml += `
+      <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; color: #4f46e5; font-weight: bold;">Costo de Envío</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">1</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">$${costoEnvio.toLocaleString('es-AR')}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; color: #4f46e5; font-weight: bold;">$${costoEnvio.toLocaleString('es-AR')}</td>
+      </tr>
+      `;
+    }
+
+    const totalFinal = Number(compra.total) + costoEnvio;
 
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-w-2xl; margin: 0 auto; color: #333; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
@@ -81,7 +94,7 @@ export async function enviarFacturaEmail(usuarioId: string) {
         <div style="padding: 30px;">
           <div style="margin-bottom: 20px;">
             <strong>Número de Orden:</strong> #${compra.numero} <br>
-            <strong>Fecha:</strong> ${new Date(compra.fecha).toLocaleDateString('es-AR')}
+            <strong>Fecha y Hora:</strong> ${new Date(compra.fecha).toLocaleString('es-AR')}
           </div>
           
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -100,7 +113,7 @@ export async function enviarFacturaEmail(usuarioId: string) {
               <tr>
                 <td colspan="3" style="padding: 15px 10px; text-align: right; font-weight: bold; border-top: 2px solid #ddd;">Total:</td>
                 <td style="padding: 15px 10px; text-align: right; font-weight: bold; border-top: 2px solid #ddd; font-size: 18px; color: #4f46e5;">
-                  $${Number(compra.total).toLocaleString('es-AR')}
+                  $${totalFinal.toLocaleString('es-AR')}
                 </td>
               </tr>
             </tfoot>

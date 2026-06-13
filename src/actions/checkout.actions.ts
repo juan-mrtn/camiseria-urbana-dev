@@ -50,7 +50,8 @@ export async function processCheckoutAction(
         failure: `${baseUrl}/checkout/failure`,
         pending: `${baseUrl}/checkout/pending`,
       },
-      external_reference: carritoId,
+      external_reference: usuarioId, // El webhook usa este ID para saber a quién confirmarle el pago
+      notification_url: `${baseUrl}/api/webhooks/mercadopago`,
     };
 
     // Mercado Pago requiere que back_urls sea HTTPS para permitir auto_return

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { Heart, User, Moon, LogOut, Package, Settings } from 'lucide-react';
+import { Heart, User, Moon, LogOut, Package, Settings, Star } from 'lucide-react';
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import SearchBar from "@/components/shop/SearchBar";
@@ -89,11 +89,19 @@ export default function Header({ cartBadge }: HeaderProps) {
                     </Link>
 
                     <Link
-                      href="/mi-cuenta/opiniones"
+                      href="/compras"
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <Package className="w-4 h-4 mr-2" /> Mis Compras
+                    </Link>
+
+                    <Link
+                      href="/mi-cuenta/opiniones"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Star className="w-4 h-4 mr-2" /> Mis Opiniones
                     </Link>
 
                     <button
@@ -109,20 +117,13 @@ export default function Header({ cartBadge }: HeaderProps) {
                 ) : (
                   <>
                     {/* Opciones para usuarios invitados */}
-                    <button
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        signIn();
-                      }}
+                    <Link
+                      href="/login"
+                      onClick={() => setIsMenuOpen(false)}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     >
-                      <Link
-                        href="/login"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Iniciar Sesión
-                      </Link>
-                    </button>
+                      Iniciar Sesión
+                    </Link>
 
                     <Link
                       href="/register"
