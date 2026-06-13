@@ -110,7 +110,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
             </div>
             <div className="flex justify-between text-gray-600">
               <span>Envío</span>
-              <span className="text-green-600 font-bold">¡Gratis!</span>
+              <span className="text-gray-500 font-medium">A calcular en checkout</span>
             </div>
           </div>
 

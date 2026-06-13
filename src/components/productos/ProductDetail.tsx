@@ -9,6 +9,7 @@ import { useCart } from '@/providers/CartProvider'; // O la ruta donde lo hayas 
 import BotonFavorito from '@/components/shop/BotonFavorito';
 import { addToCartAction } from '@/actions/carrito.actions';
 import ProductImageGallery from '@/components/shop/ProductImageGallery';
+import ShippingCalculator from '@/components/shop/ShippingCalculator';
 
 interface ProductDetailProps {
   favoritosIniciales?: string[];
@@ -233,16 +234,8 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
             )}
           </div>
 
-          {/* Calculadora de Envío y Descripción (Mantenemos igual) */}
-          <div className="p-4 bg-gray-50 rounded-lg space-y-3">
-            <div className="flex items-center gap-2 font-semibold text-sm">
-              <Truck size={18} /> Calculadora de envío
-            </div>
-            <div className="flex gap-2">
-              <input type="text" placeholder="Tu código postal" className="flex-1 border p-2 text-sm" />
-              <button className="bg-gray-800 text-white px-4 py-2 text-sm font-bold">Calcular</button>
-            </div>
-          </div>
+          {/* Calculadora de Envío */}
+          <ShippingCalculator total={precioFinal} />
 
           <div>
             <h3 className="font-bold border-b pb-2 mb-3 text-lg">Descripción</h3>

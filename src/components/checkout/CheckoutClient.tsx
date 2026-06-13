@@ -7,13 +7,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CheckCircle2, Circle, Plus, Lock, ArrowLeft, Truck, X } from "lucide-react";
 import { saveDireccionAction } from "@/actions/direccion.actions";
-import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import { processCheckoutAction } from "@/actions/checkout.actions";
-
-// Inicializamos Mercado Pago fuera del componente para evitar re-renderizados innecesarios
-if (process.env.NEXT_PUBLIC_MP_PUBLIC_KEY) {
-  initMercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, { locale: 'es-AR' });
-}
+import { calculateShippingCost } from "@/components/shop/ShippingCalculator";
 interface CheckoutClientProps {
   session: any;
   direcciones: any[];
@@ -23,7 +18,6 @@ interface CheckoutClientProps {
 
 export default function CheckoutClient({ session, direcciones, dbCartItems, carritoId }: CheckoutClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
 
   const handleSubmitDireccion = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -34,7 +28,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
   };
 
   const { items: localItems, cartTotal: localCartTotal } = useCart();
-  
+
   // Usamos los items de la base de datos si existen (ya que el usuario está logueado en checkout)
   const items = dbCartItems !== null ? dbCartItems : localItems;
   const cartTotal = items.reduce((total, item) => total + item.precio * item.cantidad, 0);
@@ -52,10 +46,13 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
     direcciones.find(d => d.principal)?.id || direcciones[0]?.id || null
   );
 
-  const costoEnvio = 3990;
+  const selectedAddressObj = direcciones.find(d => d.id === direccionSeleccionada);
+  const cp = selectedAddressObj?.codigoPostal || "";
+  const costoEnvio = direccionSeleccionada && cp ? calculateShippingCost(cp, cartTotal) : 0;
+
   const totalAPagar = cartTotal + costoEnvio;
 
-  const handlePagar = async () => {
+  const handlePagarConMercadoPago = async () => {
     if (!direccionSeleccionada) {
       alert("Por favor, selecciona o agrega una dirección de envío.");
       return;
@@ -64,12 +61,14 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
     setIsLoadingPayment(true);
     const res = await processCheckoutAction(session.user.id, carritoId, items, costoEnvio);
     
-    if (res.success && res.preferenceId) {
-      setPreferenceId(res.preferenceId);
+    if (res.success && res.initPoint) {
+      // Redirección robusta directa al checkout Pro de MP (bypassea errores del SDK)
+      const isSandbox = process.env.NODE_ENV === "development";
+      window.location.href = isSandbox && res.sandboxInitPoint ? res.sandboxInitPoint : res.initPoint;
     } else {
       alert(res.error || "Hubo un error al iniciar el pago.");
+      setIsLoadingPayment(false);
     }
-    setIsLoadingPayment(false);
   };
 
   if (items.length === 0) return null; // Evita destellos mientras redirige
@@ -180,11 +179,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
             </div>
             <div className="flex justify-between text-gray-600 font-medium">
               <span>Envío (estándar)</span>
-              <span>${costoEnvio.toLocaleString('es-AR')}</span>
-            </div>
-            <div className="flex justify-between text-gray-600 font-medium">
-              <span>Impuestos</span>
-              <span>$0</span>
+              <span>{costoEnvio === 0 ? "¡Gratis!" : `$${costoEnvio.toLocaleString('es-AR')}`}</span>
             </div>
           </div>
 
@@ -193,24 +188,25 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
             <span className="text-2xl font-black text-gray-900">${totalAPagar.toLocaleString('es-AR')}</span>
           </div>
 
-          <div className="mt-6 flex flex-col items-center justify-between p-4 border border-gray-200 rounded-xl gap-4">
-            <div className="w-12 h-8 bg-blue-50 border border-blue-100 rounded flex items-center justify-center font-black text-[#009EE3] text-xs italic self-start">
-              <Image src={"/mp.png"} alt="Mercado Pago" width={48} height={32} className="object-contain" />
-            </div>
-            
-            {preferenceId ? (
-              <div className="w-full">
-                <Wallet initialization={{ preferenceId }} />
-              </div>
-            ) : (
-              <button 
-                onClick={handlePagar} 
+          <div className="mt-6 flex flex-col items-center justify-between p-6 border border-gray-200 rounded-xl gap-4">
+            <div className="w-full relative mt-2">
+              <button
+                onClick={handlePagarConMercadoPago}
                 disabled={isLoadingPayment}
-                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                className="w-full bg-[#009EE3] hover:bg-[#0089C5] disabled:opacity-70 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-colors shadow-sm"
               >
-                {isLoadingPayment ? "Procesando..." : "Pagar con Mercado Pago"} <Lock className="w-4 h-4" />
+                {isLoadingPayment ? (
+                  "Generando link de pago seguro..."
+                ) : (
+                  <>
+                    Pagar con Mercado Pago
+                  </>
+                )}
               </button>
-            )}
+              <div className="flex justify-center mt-3">
+                <Image src="/mp.png" alt="Mercado Pago" width={60} height={40} className="object-contain opacity-80" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -219,11 +215,15 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
           <div className="flex gap-4">
             <Truck className="w-6 h-6 text-gray-700 mt-1" />
             <div>
-              <h4 className="font-bold text-gray-900">Estándar</h4>
-              <p className="text-sm text-gray-500">Llega entre 3-5 días hábiles</p>
+              <h4 className="font-bold text-gray-900">{costoEnvio === 0 ? "Envío Rápido / Gratis" : "Estándar"}</h4>
+              <p className="text-sm text-gray-500">
+                {costoEnvio === 0 && cp.startsWith('1') ? "Llega mañana" : "Llega entre 3-5 días hábiles"}
+              </p>
             </div>
           </div>
-          <span className="font-bold text-gray-900">${costoEnvio.toLocaleString('es-AR')}</span>
+          <span className="font-bold text-gray-900">
+            {costoEnvio === 0 ? "¡Gratis!" : `$${costoEnvio.toLocaleString('es-AR')}`}
+          </span>
         </div>
 
       </div>
@@ -241,15 +241,6 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
             <button onClick={() => router.push('/carrito')} className="flex-1 flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold py-4 rounded-xl transition-colors">
               <ArrowLeft className="w-5 h-5" /> Volver al carrito
             </button>
-            {!preferenceId && (
-              <button 
-                onClick={handlePagar} 
-                disabled={isLoadingPayment}
-                className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-colors"
-              >
-                {isLoadingPayment ? "Procesando..." : "Pagar con Mercado Pago"} <Lock className="w-5 h-5" />
-              </button>
-            )}
           </div>
 
           <p className="text-xs text-gray-500 font-medium">
@@ -272,7 +263,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
 
             <div className="p-6 overflow-y-auto">
               <form onSubmit={handleSubmitDireccion} className="flex flex-col gap-4 text-left">
-                
+
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-gray-700">Título (Ej: Casa, Trabajo)</label>
                   <input type="text" name="titulo" required className="w-full border border-gray-300 rounded-lg px-4 py-2" />
