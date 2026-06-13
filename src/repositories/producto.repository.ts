@@ -113,7 +113,7 @@ export const ProductoRepository = {
         FROM v_producto_detalle v
         INNER JOIN paginados p ON v.producto_id = p.producto_id
         LEFT JOIN opiniones_avg oa ON v.producto_id = oa.producto_id
-        ORDER BY p.prioridad ASC, v.nombre ASC;
+        ORDER BY p.prioridad ASC, v.nombre ASC, v.variante_id ASC;
       `;
 
       const result = await db.query(productsQuery, [take, offset, ...filterLogic.vals]);
@@ -191,8 +191,8 @@ export const ProductoRepository = {
 
   async getById(productoId: string) {
     try {
-      // Buscamos por la columna producto_id (ej: 'P01')
-      const query = `SELECT * FROM v_producto_detalle WHERE producto_id = $1;`;
+      // Buscamos por la columna producto_id y ordenamos por variante para determinismo de imágenes
+      const query = `SELECT * FROM v_producto_detalle WHERE producto_id = $1 ORDER BY variante_id ASC;`;
       const result = await db.query(query, [productoId]);
 
       if (result.rows.length === 0) return null;
@@ -280,7 +280,8 @@ export const ProductoRepository = {
         SELECT v.*, oa.promedio_estrellas
         FROM v_producto_detalle v
         LEFT JOIN opiniones_avg oa ON v.producto_id = oa.producto_id
-        WHERE v.tipo_promocion IS NOT NULL;
+        WHERE v.tipo_promocion IS NOT NULL
+        ORDER BY v.nombre ASC, v.variante_id ASC;
       `;
       const result = await db.query(query);
 
