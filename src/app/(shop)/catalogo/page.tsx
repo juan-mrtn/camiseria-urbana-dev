@@ -5,6 +5,7 @@ import ProductCard from "@/components/productos/ProductCard";
 import Pagination from "@/components/ui/Pagination";
 import { titleFont } from "@/config/fonts";
 import FilterSidebar from "@/components/shop/FilterSidebar";
+import SortDropdown from "@/components/shop/SortDropdown";
 
 export default async function HomePage(props: {
     searchParams: Promise<{
@@ -15,6 +16,7 @@ export default async function HomePage(props: {
         precio_min?: string;
         precio_max?: string;
         q?: string;
+        sort?: string;
     }>
 }) {
     const searchParams = await props.searchParams;
@@ -30,10 +32,12 @@ export default async function HomePage(props: {
         precio_max: searchParams.precio_max ? Number(searchParams.precio_max) : undefined,
         search: searchParams.q,
     };
+    
+    const sortBy = searchParams.sort || "relevance";
 
     // 2. Pedimos los datos paginados y las opciones de filtros dinámicos
     const [paginatedData, filterOptions] = await Promise.all([
-        ProductoRepository.getPaginated({ page, filters }),
+        ProductoRepository.getPaginated({ page, filters, sortBy }),
         ProductoRepository.getAvailableFilterOptions()
     ]);
     const { productos, totalPages } = paginatedData;
@@ -51,11 +55,9 @@ export default async function HomePage(props: {
                     Catálogo <span className="text-gray-400 font-light">({page})</span>
                 </h1>
                 <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <select className="border rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                        <option>Ordenar: Relevancia</option>
-                        <option>Precio: Menor a Mayor</option>
-                        <option>Precio: Mayor a Menor</option>
-                    </select>
+                    <Suspense fallback={<div className="h-10 w-48 bg-gray-200 animate-pulse rounded-md" />}>
+                        <SortDropdown />
+                    </Suspense>
                 </div>
             </div>
 

@@ -10,6 +10,19 @@ export async function processCheckoutAction(
   costoEnvio: number
 ) {
   try {
+    // 0. Validar stock en tiempo real
+    const stockQuery = `
+      SELECT ci.cantidad, fn_obtener_stock_real(ci.producto_variante_id) as stock_disponible
+      FROM carrito_item ci
+      WHERE ci.carrito_id = $1
+    `;
+    const stockResult = await db.query(stockQuery, [carritoId]);
+    
+    const hasStockError = stockResult.rows.some(row => Number(row.cantidad) > Number(row.stock_disponible));
+    if (hasStockError) {
+      return { success: false, error: "Uno o más productos en tu carrito ya no cuentan con stock disponible. Por favor, revisa tu carrito." };
+    }
+
     // 1. Ejecutar procedimiento almacenado para congelar la orden
     await db.query("CALL sp_finalizar_compra($1, $2)", [usuarioId, carritoId]);
 

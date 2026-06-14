@@ -12,6 +12,11 @@ export interface CartItem {
   talle: string;
   cantidad: number;
   imagen_url: string;
+  stock_disponible?: number;
+  promocion?: {
+    tipo: string;
+    descuento?: number;
+  } | null;
 }
 
 interface CartContextType {
@@ -73,7 +78,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   };
 
-  const cartTotal = items.reduce((total, item) => total + item.precio * item.cantidad, 0);
+  const cartTotal = items.reduce((total, item) => {
+    let lineTotal = item.precio * item.cantidad; // Fallback a precio actual
+    
+    // Si tenemos el precio original, lo usamos como base para calcular los descuentos reales
+    const basePrice = item.precioOriginal || item.precio;
+
+    if (item.promocion?.tipo === '2x1') {
+      const pagables = Math.floor(item.cantidad / 2) + (item.cantidad % 2);
+      lineTotal = basePrice * pagables;
+    } else if (item.promocion?.tipo === 'descuento' && item.promocion.descuento) {
+      lineTotal = basePrice * (1 - item.promocion.descuento / 100) * item.cantidad;
+    }
+    
+    return total + lineTotal;
+  }, 0);
+
   const cartCount = items.reduce((count, item) => count + item.cantidad, 0);
 
   return (

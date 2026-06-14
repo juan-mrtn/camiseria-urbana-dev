@@ -41,6 +41,8 @@ export default function CartClient({ dbItems }: CartClientProps) {
   const cartTotal = items.reduce((total, item) => total + item.precio * item.cantidad, 0);
   const totalDescuento = cartTotalOriginal - cartTotal;
 
+  const hasStockErrors = items.some(item => item.stock_disponible !== undefined && item.cantidad > item.stock_disponible);
+
   const handleRemove = (id: string) => {
     // Sincronización Local (siempre lo hacemos por si era invitado)
     removeFromCart(id);
@@ -93,22 +95,33 @@ export default function CartClient({ dbItems }: CartClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Lista de Productos */}
         <div className="lg:col-span-2 space-y-4">
-          {items.map((item) => (
-            <div key={item.id} className="flex gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
-              <div className="relative w-24 h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                <Image src={item.imagen_url} alt={item.nombre} fill sizes="100px" className="object-cover" />
-              </div>
-              <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-lg text-gray-900">{item.nombre}</h3>
-                    <button onClick={() => handleRemove(item.id)} className="text-gray-400 hover:text-red-500 transition">
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">Talle: <span className="font-bold text-gray-700">{item.talle}</span></p>
-                  <p className="text-sm text-gray-500">Cantidad: <span className="font-bold text-gray-700">{item.cantidad}</span></p>
+          {items.map((item) => {
+            const hasStockError = item.stock_disponible !== undefined && item.cantidad > item.stock_disponible;
+            const noStock = item.stock_disponible === 0;
+
+            return (
+              <div key={item.id} className={`flex gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm ${hasStockError ? 'opacity-70 border-red-300' : ''}`}>
+                <div className="relative w-24 h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <Image src={item.imagen_url} alt={item.nombre} fill sizes="100px" className="object-cover" />
                 </div>
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-lg text-gray-900">{item.nombre}</h3>
+                      <button onClick={() => handleRemove(item.id)} className="text-gray-400 hover:text-red-500 transition">
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                    {hasStockError && (
+                      <p className="text-sm font-bold text-red-600 mt-1">
+                        {noStock ? 'Sin stock disponible' : `Stock insuficiente (Disponible: ${item.stock_disponible} unidades)`}
+                      </p>
+                    )}
+                    <p className="text-sm text-gray-500 mt-1">Talle: <span className="font-bold text-gray-700">{item.talle}</span></p>
+                    <p className={`text-sm mt-1 ${hasStockError ? 'text-red-500 font-bold' : 'text-gray-500'}`}>
+                      Cantidad: <span className={`${hasStockError ? 'text-red-600' : 'text-gray-700'} font-bold`}>{item.cantidad}</span>
+                    </p>
+                  </div>
                 <div className="flex flex-col items-start">
                   {item.precioOriginal && item.precioOriginal > item.precio && (
                     <p className="text-sm text-gray-400 line-through">
@@ -121,7 +134,8 @@ export default function CartClient({ dbItems }: CartClientProps) {
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
 
         {/* Resumen del Pedido */}
@@ -185,7 +199,8 @@ export default function CartClient({ dbItems }: CartClientProps) {
                 router.push("/checkout");
               }
             }}
-            className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-4 rounded-lg font-bold uppercase hover:bg-indigo-600 transition"
+            disabled={hasStockErrors || isApplyingCupon}
+            className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-4 rounded-lg font-bold uppercase hover:bg-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Avanzar al pago <ArrowRight size={20} />
           </button>

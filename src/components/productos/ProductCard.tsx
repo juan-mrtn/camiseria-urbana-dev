@@ -12,6 +12,13 @@ interface Producto {
   slug: string;
   stockDisponible?: number;
   promedio_estrellas?: number | null;
+  precioBase?: number;
+  precioFinal?: number;
+  promocionActiva?: boolean;
+  promocion?: {
+    tipo: string;
+    descuento: number;
+  };
 }
 
 interface Props {
@@ -42,6 +49,11 @@ export default function ProductCard({ producto }: Props) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           
+          {producto.promocionActiva && producto.promocion && (
+            <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
+              {producto.promocion.tipo === '2x1' ? '2x1' : `-${producto.promocion.descuento}% OFF`}
+            </div>
+          )}
           {!enStock && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
               <span className="bg-white px-3 py-1 text-xs font-bold uppercase text-black shadow-lg">
@@ -60,9 +72,16 @@ export default function ProductCard({ producto }: Props) {
           </h3>
         </Link>
 
-        <p className="text-lg font-bold text-indigo-600 mt-1">
-          ${producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 0 })}
-        </p>
+        <div className="flex items-baseline gap-2 mt-1">
+          <p className="text-lg font-bold text-indigo-600">
+            ${(producto.precioFinal ?? producto.precio).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+          </p>
+          {producto.promocionActiva && producto.precioBase && (
+            <p className="text-sm font-medium text-gray-400 line-through">
+              ${producto.precioBase.toLocaleString('es-AR', { minimumFractionDigits: 0 })}
+            </p>
+          )}
+        </div>
 
         <div className="flex items-center gap-1 text-[10px] mt-1">
           {[...Array(5)].map((_, i) => (

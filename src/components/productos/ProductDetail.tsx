@@ -19,6 +19,8 @@ interface ProductDetailProps {
     descripcion: string;
     codigo: string;
     precioBase: number;
+    precioFinal: number;
+    promocionActiva: boolean;
     imagenes: string[];
     stockTotal: number;
     variantes: {
@@ -27,6 +29,7 @@ interface ProductDetailProps {
       color: string;
       material: string;
       precio: number;
+      precioFinal: number;
       stock: number;
       imagen: string
     }[];
@@ -58,7 +61,9 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
   const [isPending, startTransition] = useTransition();
 
   const tallesDisponibles = Array.from(new Set(producto.variantes.map(v => v.talle)));
-  const precioFinal = producto.promocion ? producto.precioBase * (1 - producto.promocion.descuento / 100) : producto.precioBase;
+  
+  const precioBase = selectedVariant?.precio ?? producto.precioBase;
+  const precioFinal = selectedVariant?.precioFinal ?? producto.precioFinal;
 
   // Función que se ejecuta al presionar "Agregar al carrito"
   const handleAddToCart = () => {
@@ -68,10 +73,15 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
     addToCart({
       id: selectedVariant.id, // Usamos el ID único de la variante
       nombre: producto.nombre,
-      precio: precioFinal, // Usamos el precio con descuento si lo hay
+      precio: precioFinal, // Mantenemos para fallback
+      precioOriginal: precioBase, // Necesario para calcular el 2x1 correcto
       talle: selectedVariant.talle,
       cantidad: cantidad,
-      imagen_url: selectedVariant.imagen || producto.imagenes[0]
+      imagen_url: selectedVariant.imagen || producto.imagenes[0],
+      promocion: producto.promocionActiva && producto.promocion ? {
+        tipo: producto.promocion.tipo,
+        descuento: producto.promocion.descuento
+      } : null
     });
 
     // 2. Sincronización Remota (DB del lado del servidor)
@@ -104,9 +114,9 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
           <ProductImageGallery images={producto.imagenes} altText={producto.nombre} />
 
           {/* Badge de Promoción superpuesto en la imagen */}
-          {producto.promocion && (
-            <div className="absolute top-4 left-4 z-20 bg-red-600 text-white px-3 py-1 text-sm font-bold rounded-full pointer-events-none shadow-md">
-              {producto.promocion.tipo?.toLowerCase() === 'descuento' ? `-${producto.promocion.descuento}% OFF` : producto.promocion.tipo}
+          {producto.promocionActiva && producto.promocion && (
+            <div className="absolute top-4 left-4 z-20 bg-indigo-500 text-white px-3 py-1 text-sm font-bold rounded-full pointer-events-none shadow-md">
+              {producto.promocion.tipo?.toLowerCase() === '2x1' ? '2x1' : `-${producto.promocion.descuento}% OFF`}
             </div>
           )}
         </div>
@@ -117,12 +127,12 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
             <h1 className="text-3xl font-bold text-gray-900">{producto.nombre}</h1>
 
             <div className="flex items-baseline gap-3 mt-2">
-              <span className={`text-2xl font-bold ${producto.precioBase > precioFinal ? 'text-green-600' : 'text-indigo-600'}`}>
+              <span className={`text-2xl font-bold ${precioBase > precioFinal ? 'text-indigo-600' : 'text-indigo-600'}`}>
                 ${precioFinal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
-              {producto.promocion?.tipo?.toLowerCase() === 'descuento' && (
+              {producto.promocionActiva && (
                 <span className="text-lg text-gray-400 line-through">
-                  ${producto.precioBase.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                  ${precioBase.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>
               )}
             </div>

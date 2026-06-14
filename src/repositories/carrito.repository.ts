@@ -40,26 +40,58 @@ export const CarritoRepository = {
                 carritoId = carritoResult.rows[0].id;
             }
 
-            // 3. Buscar si el item ya está en el carrito
+            // 3. Buscar información base del producto y su promoción activa
+            const infoResult = await client.query(`
+                SELECT pv.precio, p.tipo_promocion, p.valor_descuento
+                FROM producto_variante pv
+                JOIN v_producto_detalle p ON p.variante_id = pv.id
+                WHERE pv.id = $1
+            `, [varianteId]);
+            
+            const info = infoResult.rows[0];
+            const precioBase = Number(info?.precio) || precioUnitario;
+            const tienePromo = !!info?.tipo_promocion;
+            let tipoPromo = info?.tipo_promocion;
+            let descuentoValor = Number(info?.valor_descuento) || 0;
+
+            // 4. Buscar si el item ya está en el carrito
             const itemResult = await client.query(`
                 SELECT id, cantidad FROM carrito_item 
                 WHERE carrito_id = $1 AND producto_variante_id = $2 LIMIT 1;
             `, [carritoId, varianteId]);
 
-            if (itemResult.rowCount && itemResult.rowCount > 0) {
-                // Si existe, sumar cantidad
+            const existe = itemResult.rowCount && itemResult.rowCount > 0;
+            const cantidadActual = existe ? Number(itemResult.rows[0].cantidad) : 0;
+            const nuevaCantidad = cantidadActual + cantidad;
+
+            // 5. Calcular nuevo precio unitario efectivo basado en la nueva cantidad
+            let nuevoPrecioUnitario = precioBase;
+            
+            if (tienePromo) {
+                if (tipoPromo === 'descuento') {
+                    nuevoPrecioUnitario = precioBase * (1 - descuentoValor / 100);
+                } else if (tipoPromo === '2x1') {
+                    const pagables = Math.floor(nuevaCantidad / 2) + (nuevaCantidad % 2);
+                    const totalLinea = precioBase * pagables;
+                    nuevoPrecioUnitario = totalLinea / nuevaCantidad;
+                }
+            }
+
+            if (existe) {
+                // Si existe, actualizar cantidad y recalcular el precio unitario efectivo
                 await client.query(`
                     UPDATE carrito_item 
-                    SET cantidad = cantidad + $1 
-                    WHERE id = $2;
-                `, [cantidad, itemResult.rows[0].id]);
+                    SET cantidad = $1,
+                        precio_unitario = $2
+                    WHERE id = $3;
+                `, [nuevaCantidad, nuevoPrecioUnitario, itemResult.rows[0].id]);
             } else {
                 // Si no existe, insertar
                 const itemId = crypto.randomUUID().slice(0, 8);
                 await client.query(`
                     INSERT INTO carrito_item (id, carrito_id, producto_variante_id, cantidad, precio_unitario)
                     VALUES ($1, $2, $3, $4, $5);
-                `, [itemId, carritoId, varianteId, cantidad, precioUnitario]);
+                `, [itemId, carritoId, varianteId, cantidad, nuevoPrecioUnitario]);
             }
 
             await client.query('COMMIT');
@@ -109,7 +141,9 @@ export const CarritoRepository = {
                     v.talle,
                     ci.cantidad,
                     v.imagen_principal as imagen_url,
-                    ci.promocion_id
+                    v.tipo_promocion,
+                    v.valor_descuento,
+                    fn_obtener_stock_real(ci.producto_variante_id) AS stock_disponible
                 FROM carrito c
                 JOIN carrito_item ci ON c.id = ci.carrito_id
                 JOIN v_producto_detalle v ON v.variante_id = ci.producto_variante_id
@@ -126,7 +160,12 @@ export const CarritoRepository = {
                     precioOriginal: Number(row.precio_base),
                     talle: row.talle || 'Único',
                     cantidad: Number(row.cantidad) || 1,
-                    imagen_url: row.imagen_url && !row.imagen_url.includes('example.com') ? row.imagen_url : "/camisa.png"
+                    imagen_url: row.imagen_url && !row.imagen_url.includes('example.com') ? row.imagen_url : "/camisa.png",
+                    stock_disponible: Number(row.stock_disponible) || 0,
+                    promocion: row.tipo_promocion ? {
+                        tipo: row.tipo_promocion,
+                        descuento: Number(row.valor_descuento) || 0
+                    } : null
                 };
             });
         } finally {

@@ -46,7 +46,7 @@ export const ProductoRepository = {
     }
   },
 
-  async getPaginated({ page = 1, take = 12, filters = {} }: { page?: number; take?: number; filters?: CatalogoFilters }) {
+  async getPaginated({ page = 1, take = 12, filters = {}, sortBy = 'relevance' }: { page?: number; take?: number; filters?: CatalogoFilters, sortBy?: string }) {
     page = Number(page);
     take = Number(take);
 
@@ -89,31 +89,56 @@ export const ProductoRepository = {
 
       const filterLogic = buildConditions(3); // values $1 and $2 are take and offset
 
+      let orderLogic = "og.promedio_estrellas_sort DESC NULLS LAST, pf.producto_id DESC";
+      if (sortBy === 'price_asc') {
+          orderLogic = "pg.precio_final ASC, pf.producto_id ASC";
+      } else if (sortBy === 'price_desc') {
+          orderLogic = "pg.precio_final DESC, pf.producto_id DESC";
+      }
+
       const productsQuery = `
         WITH productos_filtrados AS (
             SELECT DISTINCT producto_id
             FROM v_producto_detalle
             WHERE ${filterLogic.conds}
         ),
-        paginados AS (
-            SELECT pf.producto_id, v.prioridad
-            FROM productos_filtrados pf
-            JOIN v_catalogo_publico v ON pf.producto_id = v.producto_id
-            ORDER BY v.prioridad ASC, v.producto ASC 
-            LIMIT $1 OFFSET $2
-        ),
-        opiniones_avg AS (
-            SELECT pv.producto_id, COALESCE(AVG(o.estrellas), NULL)::numeric(2,1) AS promedio_estrellas
+        opiniones_global AS (
+            SELECT pv.producto_id, 
+                   AVG(o.estrellas)::numeric(2,1) AS promedio_estrellas_real,
+                   COALESCE(AVG(o.estrellas), 4.0)::numeric(2,1) AS promedio_estrellas_sort
             FROM producto_variante pv
             LEFT JOIN opinion o ON pv.id = o.producto_variante_id
-            WHERE pv.producto_id IN (SELECT producto_id FROM paginados)
+            WHERE pv.producto_id IN (SELECT producto_id FROM productos_filtrados)
             GROUP BY pv.producto_id
+        ),
+        precios_global AS (
+            SELECT producto_id, MIN(
+                CASE 
+                    WHEN tipo_promocion = 'descuento' AND valor_descuento IS NOT NULL 
+                    THEN precio * (1 - valor_descuento / 100)
+                    WHEN tipo_promocion = '2x1'
+                    THEN precio * 0.5
+                    ELSE precio
+                END
+            ) as precio_final
+            FROM v_producto_detalle
+            WHERE producto_id IN (SELECT producto_id FROM productos_filtrados)
+            GROUP BY producto_id
+        ),
+        paginados AS (
+            SELECT pf.producto_id, 
+                   ROW_NUMBER() OVER(ORDER BY ${orderLogic}) as sort_order
+            FROM productos_filtrados pf
+            LEFT JOIN opiniones_global og ON pf.producto_id = og.producto_id
+            LEFT JOIN precios_global pg ON pf.producto_id = pg.producto_id
+            ORDER BY ${orderLogic}
+            LIMIT $1 OFFSET $2
         )
-        SELECT v.*, p.prioridad, oa.promedio_estrellas
+        SELECT v.*, p.sort_order, og.promedio_estrellas_real as promedio_estrellas
         FROM v_producto_detalle v
         INNER JOIN paginados p ON v.producto_id = p.producto_id
-        LEFT JOIN opiniones_avg oa ON v.producto_id = oa.producto_id
-        ORDER BY p.prioridad ASC, v.nombre ASC, v.variante_id ASC;
+        LEFT JOIN opiniones_global og ON v.producto_id = og.producto_id
+        ORDER BY p.sort_order ASC, v.nombre ASC, v.variante_id ASC;
       `;
 
       const result = await db.query(productsQuery, [take, offset, ...filterLogic.vals]);
@@ -133,11 +158,24 @@ export const ProductoRepository = {
 
       for (const row of result.rows) {
         if (!grouped[row.producto_id]) {
+          const precioBase = Number(row.precio) || 0;
+          let precioFinal = precioBase;
+          const promocionActiva = !!row.tipo_promocion;
+
+          if (promocionActiva) {
+            if (row.tipo_promocion === 'descuento' && row.valor_descuento) {
+              precioFinal = precioBase * (1 - Number(row.valor_descuento) / 100);
+            } else if (row.tipo_promocion === '2x1') {
+              precioFinal = precioBase * 0.5;
+            }
+          }
+
           grouped[row.producto_id] = {
             id: row.producto_id,
             nombre: row.nombre,
             codigo: row.codigo,
-            precioBase: Number(row.precio) || 0, 
+            precioBase, 
+            precioFinal,
             // Filtramos las URLs falsas de example.com generadas por el script de prueba
             imagenPrincipal: row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : (Array.isArray(row.galeria_imagenes) && row.galeria_imagenes.length > 0 && !row.galeria_imagenes[0].includes('example.com') ? row.galeria_imagenes[0] : null) || "/camisa.png",
             stockTotal: 0,
@@ -146,6 +184,7 @@ export const ProductoRepository = {
               tipo: row.tipo_promocion,
               descuento: Number(row.valor_descuento)
             } : null,
+            promocionActiva
           };
         } else if (grouped[row.producto_id].imagenPrincipal === "/camisa.png") {
           const fallbackImage = (row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : null) || (Array.isArray(row.galeria_imagenes) && row.galeria_imagenes.length > 0 && !row.galeria_imagenes[0].includes('example.com') ? row.galeria_imagenes[0] : null);
@@ -166,14 +205,15 @@ export const ProductoRepository = {
         return {
           id: p.id,
           nombre: p.nombre,
-          precio: p.precioBase,
-          // ProductCard espera un array 'imagenes', así que lo metemos en uno
+          precio: p.precioBase, // Keep for backward compatibility
           imagen: p.imagenPrincipal, 
           slug: p.codigo,
           stockDisponible: p.stockTotal,
           precioBase: p.precioBase,
+          precioFinal: p.precioFinal,
           promedio_estrellas: p.promedio_estrellas,
-          promocion: p.promocion
+          promocion: p.promocion,
+          promocionActiva: p.promocionActiva
         };
       });
 
@@ -219,12 +259,24 @@ export const ProductoRepository = {
         // Mapeo del stock v_stock_actual
         const stockParseado = parseInt(row.stock_disponible as string) || 0;
         
+        const precioBase = Number(row.precio) || 0;
+        let precioFinal = precioBase;
+        
+        if (row.tipo_promocion) {
+            if (row.tipo_promocion === 'descuento' && row.valor_descuento) {
+                precioFinal = precioBase * (1 - Number(row.valor_descuento) / 100);
+            } else if (row.tipo_promocion === '2x1') {
+                precioFinal = precioBase * 0.5;
+            }
+        }
+        
         return {
           id: row.variante_id,
           talle: row.talle || 'Único', 
           color: row.color || 'No especificado',
           material: row.material || 'No especificado',
-          precio: Number(row.precio) || 0,
+          precio: precioBase,
+          precioFinal: precioFinal,
           stock: stockParseado,
           imagen: row.imagen_principal
         };
@@ -239,12 +291,25 @@ export const ProductoRepository = {
 
       const stockTotal = variantes.reduce((acc, v) => acc + v.stock, 0);
       
+      const basePrecio = Number(base.precio) || 0;
+      let basePrecioFinal = basePrecio;
+      const basePromocionActiva = !!base.tipo_promocion;
+      
+      if (basePromocionActiva) {
+          if (base.tipo_promocion === 'descuento' && base.valor_descuento) {
+              basePrecioFinal = basePrecio * (1 - Number(base.valor_descuento) / 100);
+          } else if (base.tipo_promocion === '2x1') {
+              basePrecioFinal = basePrecio * 0.5;
+          }
+      }
+
       return {
         id: base.producto_id,
         nombre: base.nombre,
         descripcion: base.descripcion,
         codigo: base.codigo,
-        precioBase: Number(base.precio),
+        precioBase: basePrecio,
+        precioFinal: basePrecioFinal,
         imagenes: imagenes.length > 0 ? imagenes : ['/camisa.png'],
         variantes,
         stockTotal,
@@ -254,7 +319,8 @@ export const ProductoRepository = {
         promocion: base.tipo_promocion ? {
           tipo: base.tipo_promocion,
           descuento: Number(base.valor_descuento)
-        } : null
+        } : null,
+        promocionActiva: basePromocionActiva
       };
     } catch (error) {
       console.error(error);
