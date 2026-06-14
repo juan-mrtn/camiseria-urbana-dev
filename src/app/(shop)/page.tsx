@@ -9,7 +9,7 @@ import { BannerRepository } from "@/repositories/banner.repository";
 
 export default async function HomePage() {
   // Obtenemos los 3 productos destacados reales desde la Base de Datos
-  const { productos: destacados } = await ProductoRepository.getPaginated({ take: 3 });
+  const destacados = await ProductoRepository.obtenerProductosDestacados();
   
   // Obtenemos los Banners Activos
   const banners = await BannerRepository.getActiveBanners();

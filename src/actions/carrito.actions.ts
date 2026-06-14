@@ -51,6 +51,28 @@ export async function removeFromCartAction(productoVarianteId: string) {
     }
 }
 
+export async function updateCartItemQuantityAction(productoVarianteId: string, cantidad: number) {
+    const session = await auth();
+
+    if (!session || !session.user?.id) {
+        return { success: false, error: "not_logged_in" };
+    }
+
+    if (cantidad <= 0) {
+        return removeFromCartAction(productoVarianteId);
+    }
+
+    try {
+        await CarritoRepository.actualizarCantidadItem(session.user.id, productoVarianteId, cantidad);
+        revalidatePath("/", "layout");
+        revalidatePath("/(shop)/carrito", "page");
+        return { success: true };
+    } catch (error) {
+        console.error("Error al actualizar cantidad en DB:", error);
+        return { success: false, error: "db_error" };
+    }
+}
+
 export async function aplicarCuponAction(codigoCupon: string) {
     const session = await auth();
     if (!session || !session.user?.id) {

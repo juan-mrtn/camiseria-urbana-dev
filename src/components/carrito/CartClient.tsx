@@ -3,9 +3,9 @@
 import { useCart, CartItem } from "@/providers/CartProvider";
 import Link from "next/link";
 import Image from "next/image";
-import { Trash2, ArrowRight, ShoppingBag } from "lucide-react";
+import { Trash2, ArrowRight, ShoppingBag, Plus, Minus } from "lucide-react";
 import { useTransition, useEffect, useState } from "react";
-import { removeFromCartAction, aplicarCuponAction, syncCartAction } from "@/actions/carrito.actions";
+import { removeFromCartAction, aplicarCuponAction, syncCartAction, updateCartItemQuantityAction } from "@/actions/carrito.actions";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -14,7 +14,7 @@ interface CartClientProps {
 }
 
 export default function CartClient({ dbItems }: CartClientProps) {
-  const { items: localItems, removeFromCart, clearCart } = useCart();
+  const { items: localItems, removeFromCart, updateQuantity, clearCart } = useCart();
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -53,6 +53,28 @@ export default function CartClient({ dbItems }: CartClientProps) {
         await removeFromCartAction(id);
       } catch (error) {
         console.error("Error eliminando del carrito en DB:", error);
+      }
+    });
+  };
+
+  const handleUpdateQuantity = (item: CartItem, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      handleRemove(item.id);
+      return;
+    }
+    
+    if (item.stock_disponible !== undefined && newQuantity > item.stock_disponible) {
+      alert(`Solo quedan ${item.stock_disponible} unidades disponibles.`);
+      return;
+    }
+
+    updateQuantity(item.id, newQuantity);
+
+    startTransition(async () => {
+      try {
+        await updateCartItemQuantityAction(item.id, newQuantity);
+      } catch (error) {
+        console.error("Error al actualizar cantidad:", error);
       }
     });
   };
@@ -118,9 +140,28 @@ export default function CartClient({ dbItems }: CartClientProps) {
                       </p>
                     )}
                     <p className="text-sm text-gray-500 mt-1">Talle: <span className="font-bold text-gray-700">{item.talle}</span></p>
-                    <p className={`text-sm mt-1 ${hasStockError ? 'text-red-500 font-bold' : 'text-gray-500'}`}>
-                      Cantidad: <span className={`${hasStockError ? 'text-red-600' : 'text-gray-700'} font-bold`}>{item.cantidad}</span>
-                    </p>
+                    <div className="flex items-center mt-3 gap-3">
+                      <span className="text-sm text-gray-500">Cantidad:</span>
+                      <div className={`flex items-center border border-gray-200 rounded-lg overflow-hidden ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
+                        <button 
+                          onClick={() => handleUpdateQuantity(item, item.cantidad - 1)}
+                          disabled={isPending}
+                          className="px-3 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 transition"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className={`px-3 py-1 text-sm font-bold min-w-[2.5rem] text-center ${hasStockError ? 'text-red-600' : 'text-gray-900'}`}>
+                          {item.cantidad}
+                        </span>
+                        <button 
+                          onClick={() => handleUpdateQuantity(item, item.cantidad + 1)}
+                          disabled={isPending || (item.stock_disponible !== undefined && item.cantidad >= item.stock_disponible)}
+                          className="px-3 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 transition disabled:opacity-50"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 <div className="flex flex-col items-start">
                   {item.precioOriginal && item.precioOriginal > item.precio && (

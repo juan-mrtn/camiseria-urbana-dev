@@ -198,3 +198,32 @@ export async function getAdminMetricsAction() {
   if (!session || session.user?.rol !== 'admin') throw new Error("Acceso denegado.");
   return await AdminRepository.obtenerMetricasVentas();
 }
+
+export async function toggleProductoDestacadoAction(productoId: string, destacar: boolean) {
+  const session = await auth();
+  if (!session || session.user?.rol !== 'admin') throw new Error("Acceso denegado.");
+
+  try {
+    await AdminRepository.toggleProductoDestacado(productoId, destacar);
+    revalidatePath("/(admin)/dashboard/productos", "page");
+    revalidatePath("/(shop)", "page");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Error al destacar el producto." };
+  }
+}
+
+export async function toggleProductoVisibilidadAction(id: string, activo: boolean) {
+  const session = await auth();
+  if (!session || session.user?.rol !== 'admin') throw new Error("Acceso denegado.");
+
+  try {
+    await AdminRepository.cambiarVisibilidadProducto(id, activo);
+    revalidatePath("/(admin)/dashboard/productos", "page");
+    revalidatePath("/(shop)/catalogo", "page");
+    revalidatePath("/(shop)", "page");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Error al cambiar la visibilidad." };
+  }
+}

@@ -129,6 +129,38 @@ export const CarritoRepository = {
         }
     },
 
+    async actualizarCantidadItem(usuarioId: string, varianteId: string, nuevaCantidad: number): Promise<void> {
+        if (nuevaCantidad <= 0) {
+            throw new Error("Invalid quantity");
+        }
+
+        const client = await db.getClient();
+        try {
+            await client.query('BEGIN');
+
+            const carritoResult = await client.query(`
+                SELECT id FROM carrito WHERE usuario_id = $1 AND estado = 'abierto' LIMIT 1;
+            `, [usuarioId]);
+
+            if (carritoResult.rowCount && carritoResult.rowCount > 0) {
+                const carritoId = carritoResult.rows[0].id;
+                
+                await client.query(`
+                    UPDATE carrito_item 
+                    SET cantidad = $1
+                    WHERE carrito_id = $2 AND producto_variante_id = $3;
+                `, [nuevaCantidad, carritoId, varianteId]);
+            }
+
+            await client.query('COMMIT');
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
+    },
+
     async getCartWithItems(usuarioId: string) {
         const client = await db.getClient();
         try {

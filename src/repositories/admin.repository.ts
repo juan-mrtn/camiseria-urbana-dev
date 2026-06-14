@@ -164,17 +164,36 @@ export const AdminRepository = {
         p.id, 
         p.nombre, 
         p.codigo,
+        p.activo,
         COUNT(v.id) as cantidad_variantes,
         COALESCE(MIN(v.precio), 0) as precio_base,
         COALESCE(SUM(s.stock_disponible), 0) as stock_total
       FROM producto p
       LEFT JOIN producto_variante v ON p.id = v.producto_id
       LEFT JOIN v_stock_actual s ON v.id = s.producto_variante_id
-      GROUP BY p.id, p.nombre, p.codigo
+      GROUP BY p.id, p.nombre, p.codigo, p.activo
       ORDER BY p.nombre ASC;
     `;
     const result = await db.query(query);
     return result.rows;
+  },
+
+  async cambiarVisibilidadProducto(id: string, activo: boolean) {
+    const query = `UPDATE producto SET activo = $1 WHERE id = $2`;
+    await db.query(query, [activo, id]);
+  },
+
+  async toggleProductoDestacado(productoId: string, destacar: boolean) {
+    // Si queremos destacar, podemos verificar cuántos hay ya destacados
+    if (destacar) {
+      const res = await db.query(`SELECT COUNT(*) FROM producto WHERE es_destacado = TRUE`);
+      const count = parseInt(res.rows[0].count, 10);
+      if (count >= 3) {
+        throw new Error("No puedes destacar más de 3 productos.");
+      }
+    }
+    
+    await db.query(`UPDATE producto SET es_destacado = $1 WHERE id = $2`, [destacar, productoId]);
   },
 
   // PBI-27: Crear Promocion / Cupon

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AdminRepository } from "@/repositories/admin.repository";
 import { Plus, Edit, Trash2, PackageSearch, ChevronLeft } from "lucide-react";
+import ProductVisibilidadToggle from "./ProductVisibilidadToggle";
 
 export default async function GestionProductosPage() {
   const session = await auth();
@@ -67,8 +68,11 @@ export default async function GestionProductosPage() {
               <tbody className="divide-y divide-gray-100">
                 {productos.map((prod) => (
                   <tr key={prod.id} className="hover:bg-gray-50/80 transition-colors group">
-                    <td className="p-4 pl-6 font-bold text-gray-900">{prod.nombre}</td>
-                    <td className="p-4 text-gray-500 text-sm font-mono">{prod.codigo}</td>
+                    <td className="p-4 pl-6 font-bold text-gray-900 flex items-center gap-2">
+                      <span className={prod.activo ? "" : "line-through text-gray-400"}>{prod.nombre}</span>
+                      {!prod.activo && <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Oculto</span>}
+                    </td>
+                    <td className={`p-4 text-gray-500 text-sm font-mono ${!prod.activo ? 'opacity-50' : ''}`}>{prod.codigo}</td>
                     <td className="p-4 text-center">
                       <span className="bg-gray-100 text-gray-700 py-1 px-3 rounded-full text-xs font-bold">
                         {prod.cantidad_variantes}
@@ -87,6 +91,7 @@ export default async function GestionProductosPage() {
                     </td>
                     <td className="p-4 pr-6 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ProductVisibilidadToggle productoId={prod.id} activo={prod.activo} />
                         <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar">
                           <Edit className="w-4 h-4" />
                         </button>

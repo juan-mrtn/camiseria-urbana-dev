@@ -100,7 +100,7 @@ export const ProductoRepository = {
         WITH productos_filtrados AS (
             SELECT DISTINCT producto_id
             FROM v_producto_detalle
-            WHERE ${filterLogic.conds}
+            WHERE (${filterLogic.conds}) AND producto_id IN (SELECT id FROM producto WHERE activo = TRUE)
         ),
         opiniones_global AS (
             SELECT pv.producto_id, 
@@ -147,7 +147,7 @@ export const ProductoRepository = {
       const countQuery = `
         SELECT COUNT(DISTINCT producto_id) AS total 
         FROM v_producto_detalle 
-        WHERE ${countLogic.conds}
+        WHERE (${countLogic.conds}) AND producto_id IN (SELECT id FROM producto WHERE activo = TRUE)
       `;
       const totalCountResult = await db.query(countQuery, countLogic.vals);
       const totalCount = Number(totalCountResult.rows[0]?.total ?? 0);
@@ -232,7 +232,13 @@ export const ProductoRepository = {
   async getById(productoId: string) {
     try {
       // Buscamos por la columna producto_id y ordenamos por variante para determinismo de imágenes
-      const query = `SELECT * FROM v_producto_detalle WHERE producto_id = $1 ORDER BY variante_id ASC;`;
+      const query = `
+        SELECT v.* 
+        FROM v_producto_detalle v 
+        JOIN producto p ON v.producto_id = p.id 
+        WHERE v.producto_id = $1 AND p.activo = TRUE 
+        ORDER BY v.variante_id ASC;
+      `;
       const result = await db.query(query, [productoId]);
 
       if (result.rows.length === 0) return null;
@@ -334,7 +340,7 @@ export const ProductoRepository = {
         WITH en_promocion AS (
             SELECT DISTINCT producto_id
             FROM v_producto_detalle
-            WHERE tipo_promocion IS NOT NULL
+            WHERE tipo_promocion IS NOT NULL AND producto_id IN (SELECT id FROM producto WHERE activo = TRUE)
         ),
         opiniones_avg AS (
             SELECT pv.producto_id, COALESCE(AVG(o.estrellas), NULL)::numeric(2,1) AS promedio_estrellas
@@ -388,6 +394,54 @@ export const ProductoRepository = {
     } catch (error) {
       console.error("Error al obtener productos en promoción:", error);
       throw new Error("No se pudo cargar las promociones");
+    }
+  },
+
+  async obtenerProductosDestacados() {
+    try {
+      const query = `
+        WITH ranked_productos AS (
+            SELECT p.id, COALESCE(SUM(lc.cantidad), 0) as total_ventas
+            FROM producto p
+            LEFT JOIN producto_variante pv ON p.id = pv.producto_id
+            LEFT JOIN linea_de_compra lc ON pv.id = lc.producto_variante_id
+            LEFT JOIN compra c ON lc.compra_id = c.id AND c.estado_pago = 'confirmado'
+            WHERE p.activo = TRUE
+            GROUP BY p.id
+            ORDER BY total_ventas DESC, p.id ASC
+            LIMIT 3
+        )
+        SELECT p.id as producto_id, p.nombre, p.codigo, v.precio, v.imagen_url as imagen_principal
+        FROM producto p
+        JOIN ranked_productos rp ON p.id = rp.id
+        LEFT JOIN producto_variante v ON p.id = v.producto_id
+        ORDER BY rp.total_ventas DESC, p.id ASC, v.id ASC
+      `;
+      const result = await db.query(query);
+
+      const grouped: Record<string, any> = {};
+
+      for (const row of result.rows) {
+        if (!grouped[row.producto_id]) {
+          grouped[row.producto_id] = {
+            id: row.producto_id,
+            nombre: row.nombre,
+            codigo: row.codigo,
+            precioBase: Number(row.precio) || 0,
+            imagen: row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : "/camisa.png",
+          };
+        } else if (grouped[row.producto_id].imagen === "/camisa.png") {
+          const fallbackImage = row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : null;
+          if (fallbackImage) {
+            grouped[row.producto_id].imagen = fallbackImage;
+          }
+        }
+      }
+
+      return Object.values(grouped).slice(0, 3);
+    } catch (error) {
+      console.error("Error al obtener productos destacados:", error);
+      return [];
     }
   }
 };

@@ -2,7 +2,8 @@
 "use client";
 
 import Image from 'next/image';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Truck, Star, AlertCircle, Minus, Plus, CheckCircle2, X } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/providers/CartProvider'; // O la ruta donde lo hayas guardado
@@ -59,6 +60,8 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
   const [cantidad, setCantidad] = useState(1);
   const [showToast, setShowToast] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [flyingDrops, setFlyingDrops] = useState<{ id: number; startX: number; startY: number; targetX: number; targetY: number }[]>([]);
 
   const tallesDisponibles = Array.from(new Set(producto.variantes.map(v => v.talle)));
   
@@ -66,8 +69,31 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
   const precioFinal = selectedVariant?.precioFinal ?? producto.precioFinal;
 
   // Función que se ejecuta al presionar "Agregar al carrito"
-  const handleAddToCart = () => {
+  const getCartTarget = () => {
+    const icon = document.getElementById("cart-icon");
+    if (icon) {
+      const rect = icon.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2 - 25, y: rect.top + rect.height / 2 - 25 };
+    }
+    return { x: window.innerWidth - 50, y: 50 };
+  };
+
+  const handleAddToCart = (e?: React.MouseEvent<HTMLButtonElement>) => {
     if (!selectedVariant || selectedVariant.stock === 0) return;
+
+    if (e) {
+      const buttonRect = buttonRef.current?.getBoundingClientRect();
+      const startX = buttonRect ? buttonRect.left + buttonRect.width / 2 - 12 : e.clientX - 12;
+      const startY = buttonRect ? buttonRect.top + buttonRect.height / 2 - 12 : e.clientY - 12;
+      const target = getCartTarget();
+      const id = Date.now();
+      
+      setFlyingDrops(prev => [...prev, { id, startX, startY, targetX: target.x, targetY: target.y }]);
+      
+      setTimeout(() => {
+        setFlyingDrops(prev => prev.filter(drop => drop.id !== id));
+      }, 1000);
+    }
 
     // 1. Sincronización Local (Contexto del lado del cliente)
     addToCart({
@@ -228,13 +254,15 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
 
           {/* Botones de Acción */}
           <div className="flex gap-4">
-            <button
+            <motion.button
+              whileTap={{ scale: 0.95, borderRadius: "1.5rem" }}
+              ref={buttonRef as any}
               onClick={handleAddToCart}
               disabled={!selectedVariant || selectedVariant.stock === 0}
-              className="flex-1 bg-indigo-600 text-white py-4 font-bold uppercase hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg"
+              className="flex-1 bg-indigo-600 text-white py-4 font-bold uppercase hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md"
             >
               {selectedVariant?.stock > 0 ? 'Agregar al carrito' : 'Variante Agotada'}
-            </button>
+            </motion.button>
             {selectedVariant && (
               <BotonFavorito
                 key={selectedVariant.id}
@@ -295,6 +323,18 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {flyingDrops.map(drop => (
+          <motion.div
+            key={drop.id}
+            initial={{ opacity: 1, scale: 0.5, x: drop.startX, y: drop.startY }}
+            animate={{ opacity: 0.3, scale: 1, x: drop.targetX, y: drop.targetY }}
+            transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
+            className="fixed top-0 left-0 z-[100] w-6 h-6 bg-orange-500 rounded-full shadow-lg pointer-events-none"
+          />
+        ))}
+      </AnimatePresence>
 
     </div>
   );
