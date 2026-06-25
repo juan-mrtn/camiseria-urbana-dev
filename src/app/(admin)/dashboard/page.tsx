@@ -107,6 +107,17 @@ export default async function AdminDashboard() {
                 <span className="text-xs text-gray-500">Descuentos y 2x1 globales</span>
               </div>
             </Link>
+
+            <Link href="/dashboard/combos/nuevo" 
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-purple-500 hover:shadow-md transition-all group">
+              <div className="p-3 bg-purple-50 rounded-lg group-hover:bg-purple-600 transition-colors">
+                <Package className="w-6 h-6 text-purple-600 group-hover:text-white" />
+              </div>
+              <div>
+                <span className="block font-bold text-gray-900">Crear Combo Especial</span>
+                <span className="text-xs text-gray-500">Arma paquetes con vigencia temporal</span>
+              </div>
+            </Link>
           </div>
 
           {/* Columna Derecha: Gestión de Stock (PBI-24) */}

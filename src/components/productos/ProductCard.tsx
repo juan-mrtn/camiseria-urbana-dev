@@ -19,6 +19,7 @@ interface Producto {
     tipo: string;
     descuento: number;
   };
+  isCombo?: boolean;
 }
 
 interface Props {
@@ -26,20 +27,23 @@ interface Props {
 }
 
 export default function ProductCard({ producto }: Props) {
-// Lógica de stock basada en los datos de la DB
+  // Lógica de stock basada en los datos de la DB
   // Si no viene el dato del stock, asumimos true para no bloquear la venta
   const enStock = producto.stockDisponible !== undefined ? producto.stockDisponible > 0 : true;
 
   // Calcula las estrellas activas usando el promedio real de la DB, con fallback a 5
-  const activeStars = producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined 
-    ? Math.round(producto.promedio_estrellas) 
+  const activeStars = producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined
+    ? Math.round(producto.promedio_estrellas)
     : 5;
-    
+
+  const isCombo = producto.isCombo;
+  const linkHref = isCombo ? `/combos/${producto.id}` : `/productos/${producto.id}`;
+
   return (
-    <div className="group border p-4 rounded-lg flex flex-col gap-2 shadow-sm hover:shadow-md transition bg-white h-full">
+    <div className={`group border p-4 rounded-lg flex flex-col gap-2 shadow-sm hover:shadow-md transition bg-white h-full ${isCombo ? 'border-purple-200 shadow-purple-100' : ''}`}>
       {/* IMAGEN Y OVERLAY DE STOCK */}
       {/* Redirigimos al detalle usando el ID que espera tu Page Component */}
-      <Link href={`/productos/${producto.id}`}>
+      <Link href={linkHref}>
         <div className="relative aspect-square w-full overflow-hidden rounded-md bg-gray-100">
           <Image
             src={producto.imagen || '/placeholder.jpg'} // Fallback de imagen
@@ -48,8 +52,13 @@ export default function ProductCard({ producto }: Props) {
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-          
-          {producto.promocionActiva && producto.promocion && (
+
+          {isCombo && (
+            <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-20">
+              PACK COMBO
+            </div>
+          )}
+          {producto.promocionActiva && producto.promocion && !isCombo && (
             <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
               {producto.promocion.tipo === '2x1' ? '2x1' : `-${producto.promocion.descuento}% OFF`}
             </div>
@@ -66,7 +75,7 @@ export default function ProductCard({ producto }: Props) {
 
       {/* INFORMACIÓN Y ESTRELLAS */}
       <div className="mt-2 flex-grow">
-        <Link href={`/productos/${producto.id}`}>
+        <Link href={linkHref}>
           <h3 className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors line-clamp-2">
             {producto.nombre}
           </h3>
@@ -96,19 +105,19 @@ export default function ProductCard({ producto }: Props) {
       </div>
 
       {/* BOTÓN AGREGAR AL CARRITO */}
-      <Link href={`/productos/${producto.id}`}>
-      <button
-        
-        disabled={!enStock}
-        className={`mt-4 w-full py-2.5 rounded-md font-bold text-white transition text-xs uppercase tracking-wider
+      <Link href={linkHref}>
+        <button
+
+          disabled={!enStock}
+          className={`mt-4 w-full py-2.5 rounded-md font-bold text-white transition text-xs uppercase tracking-wider
           ${enStock
-            ? 'bg-gray-900 hover:bg-indigo-600 shadow-sm active:scale-95'
-            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-      >
-        {enStock ? 'Ver detalle' : 'Agotado'}
-      </button>
-        </Link>
+              ? 'bg-gray-900 hover:bg-indigo-600 shadow-sm active:scale-95'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+        >
+          {enStock ? 'Ver detalle' : 'Agotado'}
+        </button>
+      </Link>
     </div>
   );
 }

@@ -134,10 +134,12 @@ export const ProductoRepository = {
             ORDER BY ${orderLogic}
             LIMIT $1 OFFSET $2
         )
-        SELECT v.*, p.sort_order, og.promedio_estrellas_real as promedio_estrellas
+        SELECT v.*, p.sort_order, og.promedio_estrellas_real as promedio_estrellas,
+               COALESCE(vsa.stock_disponible, v.stock_disponible) as real_stock
         FROM v_producto_detalle v
         INNER JOIN paginados p ON v.producto_id = p.producto_id
         LEFT JOIN opiniones_global og ON v.producto_id = og.producto_id
+        LEFT JOIN v_stock_actual vsa ON vsa.producto_variante_id = v.codigo AND vsa.tipo_item = 'combo'
         ORDER BY p.sort_order ASC, v.nombre ASC, v.variante_id ASC;
       `;
 
@@ -195,15 +197,17 @@ export const ProductoRepository = {
 
         // Si tiene variante, parseamos su stock como en getById y lo sumamos
         if (row.variante_id) {
-          const stockParseado = parseInt(row.stock_disponible as string) || 0;
+          const stockParseado = parseInt(row.real_stock as string) || parseInt(row.stock_disponible as string) || 0;
           grouped[row.producto_id].stockTotal += stockParseado;
         }
       }
 
       // 3. Mapeamos al formato exacto que espera tu ProductCard
       const productos = Object.values(grouped).map((p: any) => {
+        const isCombo = p.codigo && p.codigo.startsWith('C-');
+        
         return {
-          id: p.id,
+          id: isCombo ? p.codigo : p.id,
           nombre: p.nombre,
           precio: p.precioBase, // Keep for backward compatibility
           imagen: p.imagenPrincipal, 
@@ -213,7 +217,8 @@ export const ProductoRepository = {
           precioFinal: p.precioFinal,
           promedio_estrellas: p.promedio_estrellas,
           promocion: p.promocion,
-          promocionActiva: p.promocionActiva
+          promocionActiva: p.promocionActiva,
+          isCombo: isCombo
         };
       });
 

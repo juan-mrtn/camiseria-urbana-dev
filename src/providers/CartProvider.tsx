@@ -17,6 +17,7 @@ export interface CartItem {
     tipo: string;
     descuento?: number;
   } | null;
+  esCombo?: boolean;
 }
 
 interface CartContextType {

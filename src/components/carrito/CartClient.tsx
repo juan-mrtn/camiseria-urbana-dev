@@ -139,7 +139,13 @@ export default function CartClient({ dbItems }: CartClientProps) {
                         {noStock ? 'Sin stock disponible' : `Stock insuficiente (Disponible: ${item.stock_disponible} unidades)`}
                       </p>
                     )}
-                    <p className="text-sm text-gray-500 mt-1">Talle: <span className="font-bold text-gray-700">{item.talle}</span></p>
+                    {item.esCombo ? (
+                      <div className="mt-2">
+                        <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">Pack / Combo</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 mt-1">Talle: <span className="font-bold text-gray-700">{item.talle}</span></p>
+                    )}
                     <div className="flex items-center mt-3 gap-3">
                       <span className="text-sm text-gray-500">Cantidad:</span>
                       <div className={`flex items-center border border-gray-200 rounded-lg overflow-hidden ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>

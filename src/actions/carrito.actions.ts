@@ -4,7 +4,7 @@ import { auth } from "@/server/auth";
 import { CarritoRepository } from "@/repositories/carrito.repository";
 import { revalidatePath } from "next/cache";
 
-export async function addToCartAction(productoVarianteId: string, cantidad: number, precioUnitario: number) {
+export async function addToCartAction(productoVarianteId: string, cantidad: number, precioUnitario: number, isCombo: boolean = false) {
     const session = await auth();
 
     // Si el usuario no está logueado, no hacemos nada en DB, se manejará en el Contexto local.
@@ -17,7 +17,8 @@ export async function addToCartAction(productoVarianteId: string, cantidad: numb
             session.user.id,
             productoVarianteId,
             cantidad,
-            precioUnitario
+            precioUnitario,
+            isCombo
         );
 
         // Actualiza mágicamente el badge del carrito y cualquier página que dependa de esto
@@ -114,7 +115,8 @@ export async function syncCartAction(localItems: any[]) {
                 session.user.id,
                 item.id, // En DB el ID de la variante
                 item.cantidad,
-                item.precio
+                item.precio,
+                item.esCombo || false
             );
         }
         revalidatePath("/", "layout");
