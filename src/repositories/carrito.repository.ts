@@ -61,7 +61,7 @@ export const CarritoRepository = {
                 const carritoId = carritoResult.rows[0].id;
                 await client.query(`
                     DELETE FROM carrito_item 
-                    WHERE carrito_id = $1 AND producto_variante_id = $2;
+                    WHERE carrito_id = $1 AND (producto_variante_id = $2 OR combo_id = $2);
                 `, [carritoId, varianteId]);
             }
 
@@ -93,7 +93,7 @@ export const CarritoRepository = {
                 await client.query(`
                     UPDATE carrito_item 
                     SET cantidad = $1
-                    WHERE carrito_id = $2 AND producto_variante_id = $3;
+                    WHERE carrito_id = $2 AND (producto_variante_id = $3 OR combo_id = $3);
                 `, [nuevaCantidad, carritoId, varianteId]);
             }
 
