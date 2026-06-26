@@ -41,9 +41,6 @@ export default function Header({ cartBadge }: HeaderProps) {
 
         {/* Acciones de Usuario */}
         <div className="flex items-center gap-4">
-          <button title="Modo Oscuro" className="p-2 hover:bg-gray-100 rounded-full">
-            <Moon className="w-5 h-5 text-gray-600" />
-          </button>
           <Link href="/mi-cuenta/favoritos" className="p-2 hover:bg-gray-100 rounded-full relative">
             <Heart className="w-5 h-5 text-gray-600" />
           </Link>
