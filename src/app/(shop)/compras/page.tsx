@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Check, Clock, XCircle, ArrowLeft, ChevronRight } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ComprasPage() {
   const result = await getPurchaseHistoryAction();
 

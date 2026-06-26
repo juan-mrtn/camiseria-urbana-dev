@@ -28,7 +28,7 @@ export const ProductoRepository = {
         WHERE talle IS NOT NULL AND TRIM(talle) != ''
         ORDER BY talle ASC;
       `);
-      
+
       const materialesRes = await db.query(`
         SELECT DISTINCT INITCAP(TRIM(material)) AS material 
         FROM producto_variante 
@@ -59,7 +59,7 @@ export const ProductoRepository = {
       const buildConditions = (startIdx: number) => {
         const vals: any[] = [];
         let conds = "1=1";
-        
+
         if (filters.color) {
           vals.push(`%${filters.color}%`);
           conds += ` AND color ILIKE $${startIdx + vals.length - 1}`;
@@ -91,9 +91,9 @@ export const ProductoRepository = {
 
       let orderLogic = "og.promedio_estrellas_sort DESC NULLS LAST, pf.producto_id DESC";
       if (sortBy === 'price_asc') {
-          orderLogic = "pg.precio_final ASC, pf.producto_id ASC";
+        orderLogic = "pg.precio_final ASC, pf.producto_id ASC";
       } else if (sortBy === 'price_desc') {
-          orderLogic = "pg.precio_final DESC, pf.producto_id DESC";
+        orderLogic = "pg.precio_final DESC, pf.producto_id DESC";
       }
 
       const productsQuery = `
@@ -176,7 +176,7 @@ export const ProductoRepository = {
             id: row.producto_id,
             nombre: row.nombre,
             codigo: row.codigo,
-            precioBase, 
+            precioBase,
             precioFinal,
             // Filtramos las URLs falsas de example.com generadas por el script de prueba
             imagenPrincipal: row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : (Array.isArray(row.galeria_imagenes) && row.galeria_imagenes.length > 0 && !row.galeria_imagenes[0].includes('example.com') ? row.galeria_imagenes[0] : null) || "/camisa.png",
@@ -205,12 +205,12 @@ export const ProductoRepository = {
       // 3. Mapeamos al formato exacto que espera tu ProductCard
       const productos = Object.values(grouped).map((p: any) => {
         const isCombo = p.codigo && p.codigo.startsWith('C-');
-        
+
         return {
           id: isCombo ? p.codigo : p.id,
           nombre: p.nombre,
           precio: p.precioBase, // Keep for backward compatibility
-          imagen: p.imagenPrincipal, 
+          imagen: p.imagenPrincipal,
           slug: p.codigo,
           stockDisponible: p.stockTotal,
           precioBase: p.precioBase,
@@ -260,8 +260,8 @@ export const ProductoRepository = {
       const opinionesResult = await db.query(opinionesQuery, [productoId]);
       const opiniones = opinionesResult.rows;
 
-      const promedio_estrellas = opiniones.length > 0 
-        ? opiniones.reduce((acc, curr) => acc + Number(curr.estrellas), 0) / opiniones.length 
+      const promedio_estrellas = opiniones.length > 0
+        ? opiniones.reduce((acc, curr) => acc + Number(curr.estrellas), 0) / opiniones.length
         : null;
 
       const base = result.rows[0];
@@ -269,21 +269,21 @@ export const ProductoRepository = {
       const variantes = result.rows.map(row => {
         // Mapeo del stock v_stock_actual
         const stockParseado = parseInt(row.stock_disponible as string) || 0;
-        
+
         const precioBase = Number(row.precio) || 0;
         let precioFinal = precioBase;
-        
+
         if (row.tipo_promocion) {
-            if (row.tipo_promocion === 'descuento' && row.valor_descuento) {
-                precioFinal = precioBase * (1 - Number(row.valor_descuento) / 100);
-            } else if (row.tipo_promocion === '2x1') {
-                precioFinal = precioBase * 0.5;
-            }
+          if (row.tipo_promocion === 'descuento' && row.valor_descuento) {
+            precioFinal = precioBase * (1 - Number(row.valor_descuento) / 100);
+          } else if (row.tipo_promocion === '2x1') {
+            precioFinal = precioBase * 0.5;
+          }
         }
-        
+
         return {
           id: row.variante_id,
-          talle: row.talle || 'Único', 
+          talle: row.talle || 'Único',
           color: row.color || 'No especificado',
           material: row.material || 'No especificado',
           precio: precioBase,
@@ -301,17 +301,17 @@ export const ProductoRepository = {
       const imagenes = [...new Set(todasLasImagenes)];
 
       const stockTotal = variantes.reduce((acc, v) => acc + v.stock, 0);
-      
+
       const basePrecio = Number(base.precio) || 0;
       let basePrecioFinal = basePrecio;
       const basePromocionActiva = !!base.tipo_promocion;
-      
+
       if (basePromocionActiva) {
-          if (base.tipo_promocion === 'descuento' && base.valor_descuento) {
-              basePrecioFinal = basePrecio * (1 - Number(base.valor_descuento) / 100);
-          } else if (base.tipo_promocion === '2x1') {
-              basePrecioFinal = basePrecio * 0.5;
-          }
+        if (base.tipo_promocion === 'descuento' && base.valor_descuento) {
+          basePrecioFinal = basePrecio * (1 - Number(base.valor_descuento) / 100);
+        } else if (base.tipo_promocion === '2x1') {
+          basePrecioFinal = basePrecio * 0.5;
+        }
       }
 
       return {
@@ -368,11 +368,11 @@ export const ProductoRepository = {
         if (!grouped[row.producto_id]) {
           let precioBase = Number(row.precio) || 0;
           let precioCalculado = precioBase;
-          
+
           if (row.tipo_promocion?.toLowerCase() === 'descuento' && row.valor_descuento) {
-              precioCalculado = precioBase * (1 - Number(row.valor_descuento) / 100);
+            precioCalculado = precioBase * (1 - Number(row.valor_descuento) / 100);
           }
-          
+
           grouped[row.producto_id] = {
             id: row.producto_id,
             nombre: row.nombre,

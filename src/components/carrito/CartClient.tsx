@@ -21,7 +21,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
   const [isPending, startTransition] = useTransition();
   const [isApplyingCupon, startCuponTransition] = useTransition();
   const [cupon, setCupon] = useState("");
-  const [cuponMsg, setCuponMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [cuponMsg, setCuponMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   // Sincronización automática de carrito local a DB cuando se loguea
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
   const handleRemove = (id: string) => {
     // Sincronización Local (siempre lo hacemos por si era invitado)
     removeFromCart(id);
-    
+
     // Sincronización DB
     startTransition(async () => {
       try {
@@ -62,7 +62,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
       handleRemove(item.id);
       return;
     }
-    
+
     if (item.stock_disponible !== undefined && newQuantity > item.stock_disponible) {
       alert(`Solo quedan ${item.stock_disponible} unidades disponibles.`);
       return;
@@ -149,7 +149,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
                     <div className="flex items-center mt-3 gap-3">
                       <span className="text-sm text-gray-500">Cantidad:</span>
                       <div className={`flex items-center border border-gray-200 rounded-lg overflow-hidden ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <button 
+                        <button
                           onClick={() => handleUpdateQuantity(item, item.cantidad - 1)}
                           disabled={isPending}
                           className="px-3 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 transition"
@@ -159,7 +159,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
                         <span className={`px-3 py-1 text-sm font-bold min-w-[2.5rem] text-center ${hasStockError ? 'text-red-600' : 'text-gray-900'}`}>
                           {item.cantidad}
                         </span>
-                        <button 
+                        <button
                           onClick={() => handleUpdateQuantity(item, item.cantidad + 1)}
                           disabled={isPending || (item.stock_disponible !== undefined && item.cantidad >= item.stock_disponible)}
                           className="px-3 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 transition disabled:opacity-50"
@@ -169,20 +169,20 @@ export default function CartClient({ dbItems }: CartClientProps) {
                       </div>
                     </div>
                   </div>
-                <div className="flex flex-col items-start">
-                  {item.precioOriginal && item.precioOriginal > item.precio && (
-                    <p className="text-sm text-gray-400 line-through">
-                      ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
+                  <div className="flex flex-col items-start">
+                    {item.precioOriginal && item.precioOriginal > item.precio && (
+                      <p className="text-sm text-gray-400 line-through">
+                        ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
+                      </p>
+                    )}
+                    <p className="font-black text-indigo-600 text-lg">
+                      ${(item.precio * item.cantidad).toLocaleString('es-AR')}
                     </p>
-                  )}
-                  <p className="font-black text-indigo-600 text-lg">
-                    ${(item.precio * item.cantidad).toLocaleString('es-AR')}
-                  </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
 
         {/* Resumen del Pedido */}
@@ -216,14 +216,14 @@ export default function CartClient({ dbItems }: CartClientProps) {
           <div className="mb-8 border-t border-gray-200 pt-6">
             <label className="text-sm font-bold text-gray-700 block mb-2">¿Tienes un cupón?</label>
             <div className="flex gap-2">
-              <input 
-                type="text" 
-                placeholder="Ingresa tu cupón" 
+              <input
+                type="text"
+                placeholder="Ingresa tu cupón"
                 value={cupon}
                 onChange={(e) => setCupon(e.target.value)}
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
               />
-              <button 
+              <button
                 onClick={handleAplicarCupon}
                 disabled={isApplyingCupon || !cupon.trim()}
                 className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50"

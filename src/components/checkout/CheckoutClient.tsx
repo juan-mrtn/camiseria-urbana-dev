@@ -84,10 +84,10 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
       alert("Sincronizando carrito anónimo... Aguarda unos instantes.");
       return;
     }
-    
+
     setIsLoadingPayment(true);
     const res = await processCheckoutAction(session.user.id, carritoId, items, costoEnvio);
-    
+
     if (res.success && res.initPoint) {
       // Redirección robusta directa al checkout Pro de MP (bypassea errores del SDK)
       const isSandbox = process.env.NODE_ENV === "development";
