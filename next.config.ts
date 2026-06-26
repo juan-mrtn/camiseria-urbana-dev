@@ -6,9 +6,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com',
+        hostname: 'res.cloudinary.com',
         port: '',
-        pathname: '/**',
+        pathname: '/dxxuqxba4/**',
       },
       {
         protocol: 'https',
@@ -26,7 +26,6 @@ const nextConfig: NextConfig = {
   // Permitir la conexión HMR de Next.js cuando se usa Ngrok
   allowedDevOrigins: [
     'mower-collar-jaywalker.ngrok-free.dev',
-    // Puedes añadir otros dominios aquí si ngrok cambia de URL
   ],
 };
 
