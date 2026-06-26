@@ -16,7 +16,7 @@ Este proyecto está construido con una arquitectura moderna que prioriza el rend
 
 | Capa | Tecnologías Clave | Descripción |
 | :--- | :--- | :--- |
-| **Frontend** | React, Next.js (App Router), Tailwind CSS | Interfaces reactivas y dinámicas con soporte nativo para **Modo Oscuro**. |
+| **Frontend** | React, Next.js (App Router), Tailwind CSS | Interfaces reactivas y dinámicas. |
 | **Backend** | TypeScript, Next.js Server Actions | Arquitectura RPC (Remote Procedure Call) segura. **No utilizamos API REST tradicionales** para las mutaciones; toda la lógica se invoca directamente de forma segura desde el cliente al servidor. |
 | **Autenticación** | NextAuth.js, Google OAuth | Autenticación unificada y segura delegada a proveedores externos y persistida en BD. |
 | **Base de Datos** | PostgreSQL, `pg` (node-postgres) | Persistencia relacional de alto rendimiento mediante *Connection Pooling*. **No se utiliza ORM (ni Prisma ni Drizzle)**. Toda la delegación de datos se maneja mediante vistas optimizadas, CTEs y procedimientos almacenados (Triggers). |
