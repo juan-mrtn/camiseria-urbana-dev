@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AdminRepository } from "@/repositories/admin.repository";
 import { Plus, Edit, Trash2, PackageSearch, ChevronLeft } from "lucide-react";
 import ProductVisibilidadToggle from "./ProductVisibilidadToggle";
+import ProductFeaturedButton from "./ProductFeaturedButton";
 
 export default async function GestionProductosPage() {
   const session = await auth();
@@ -18,9 +19,9 @@ export default async function GestionProductosPage() {
 
   return (
     <div className="min-h-screen bg-gray-50/50 p-8">
-      
+
       {/* HEADER DE LA SECCIÓN */}
-      <Link href="/dashboard" className="flex items-center gap-2 text-indigo-600 font-bold hover:underline w-fit mb-6">
+      <Link href="/dashboard" className="flex items-center gap-2 text-[#31572C] font-bold hover:underline w-fit mb-6">
         <ChevronLeft className="w-4 h-4" /> Volver al Dashboard
       </Link>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -28,11 +29,11 @@ export default async function GestionProductosPage() {
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Gestión de Productos</h1>
           <p className="text-gray-500 text-sm mt-1">Administra el catálogo, precios y variantes.</p>
         </div>
-        
+
         {/* Este botón enlaza a la página de ProductForm que ya armaste */}
-        <Link 
-          href="/dashboard/productos/nuevo" 
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors"
+        <Link
+          href="/dashboard/productos/nuevo"
+          className="flex items-center gap-2 bg-[#31572C] hover:bg-[#254221] text-white font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors"
         >
           <Plus className="w-5 h-5" />
           Cargar Producto
@@ -48,7 +49,7 @@ export default async function GestionProductosPage() {
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">No hay productos cargados</h3>
             <p className="text-gray-500 mb-6">Comienza agregando tu primer producto al catálogo.</p>
-            <Link href="/dashboard/productos/nuevo" className="text-indigo-600 font-bold hover:underline">
+            <Link href="/dashboard/productos/nuevo" className="text-[#31572C] font-bold hover:underline">
               Crear nuevo producto &rarr;
             </Link>
           </div>
@@ -79,10 +80,9 @@ export default async function GestionProductosPage() {
                       </span>
                     </td>
                     <td className="p-4 text-center">
-                      <span className={`py-1 px-3 rounded-full text-xs font-bold ${
-                        Number(prod.stock_total) > 10 ? 'bg-green-100 text-green-700' : 
-                        Number(prod.stock_total) > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                      }`}>
+                      <span className={`py-1 px-3 rounded-full text-xs font-bold ${Number(prod.stock_total) > 10 ? 'bg-green-100 text-green-700' :
+                          Number(prod.stock_total) > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                        }`}>
                         {prod.stock_total}
                       </span>
                     </td>
@@ -91,13 +91,9 @@ export default async function GestionProductosPage() {
                     </td>
                     <td className="p-4 pr-6 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ProductFeaturedButton productoId={prod.id} esDestacado={!!prod.es_destacado} />
                         <ProductVisibilidadToggle productoId={prod.id} activo={prod.activo} />
-                        <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+
                       </div>
                     </td>
                   </tr>

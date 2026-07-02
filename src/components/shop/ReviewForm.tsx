@@ -67,15 +67,15 @@ export default function ReviewForm({ productoVarianteId }: Props) {
         value={comentario}
         onChange={(e) => setComentario(e.target.value)}
         placeholder="Escribe tu comentario..."
-        className="w-full text-sm border border-gray-200 rounded-lg p-3 mb-3 focus:outline-none focus:ring-2 focus:ring-[#6D28D9] resize-none"
+        className="w-full text-sm border border-gray-200 rounded-lg p-3 mb-3 focus:outline-none focus:ring-2 focus:ring-[#31572C] resize-none"
         rows={3}
       />
 
       <button
         type="submit"
         disabled={isPending || rating === 0 || !comentario.trim()}
-        className={`bg-[#6D28D9] text-white px-5 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center transition w-max
-          ${(isPending || rating === 0 || !comentario.trim()) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-violet-800'}`}
+        className={`bg-[#31572C] text-white px-5 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center transition w-max
+          ${(isPending || rating === 0 || !comentario.trim()) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#90A955]'}`}
       >
         {isPending ? 'Publicando...' : 'Publicar opinión'}
       </button>

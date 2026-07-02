@@ -45,15 +45,15 @@ export default async function CheckoutSuccessPage(props: {
               <h3 className="text-lg font-bold text-gray-900 mb-4">¿Qué sigue?</h3>
               <ul className="text-sm text-gray-600 text-left space-y-3">
                 <li className="flex gap-2">
-                  <span className="font-bold text-indigo-600">1.</span>
+                  <span className="font-bold text-[#31572C]">1.</span>
                   Te enviaremos un correo con los detalles de tu compra.
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-bold text-indigo-600">2.</span>
+                  <span className="font-bold text-[#31572C]">2.</span>
                   Podrás hacer el seguimiento de tu envío desde tu cuenta.
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-bold text-indigo-600">3.</span>
+                  <span className="font-bold text-[#31572C]">3.</span>
                   ¡Disfruta de tus nuevas prendas de La Camisería Urbana!
                 </li>
               </ul>
@@ -80,14 +80,14 @@ export default async function CheckoutSuccessPage(props: {
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Link 
-            href="/mi-cuenta/opiniones" 
+            href="/compras" 
             className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl transition-colors"
           >
-            <ShoppingBag className="w-5 h-5" /> Mis pedidos
+            <ShoppingBag className="w-5 h-5" /> Mis compras
           </Link>
           <Link 
             href="/" 
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-[#31572C] hover:bg-[#90A955] text-white font-bold py-3 px-6 rounded-xl transition-colors"
           >
             Volver al inicio <ArrowRight className="w-5 h-5" />
           </Link>

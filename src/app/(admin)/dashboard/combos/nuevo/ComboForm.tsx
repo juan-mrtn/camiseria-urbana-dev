@@ -69,11 +69,11 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
     <div className="min-h-screen bg-gray-50/50 pb-20">
       <div className="bg-white border-b border-gray-200 mb-8">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <Link href="/dashboard" className="flex items-center gap-2 text-indigo-600 font-bold hover:underline w-fit mb-6">
+          <Link href="/dashboard" className="flex items-center gap-2 text-[#31572C] font-bold hover:underline w-fit mb-6">
             <ChevronLeft className="w-4 h-4" /> Volver al Dashboard
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <Package className="w-6 h-6 text-purple-600" />
+            <Package className="w-6 h-6 text-[#31572C]" />
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">
               Crear Combo Especial
             </h1>
@@ -100,7 +100,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
                 name="nombre"
                 required
                 placeholder="Ej: Pack Invierno x3"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
               />
             </div>
 
@@ -113,7 +113,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
                 min="0"
                 step="0.01"
                 placeholder="Ej: 45000"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
               />
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
               name="descripcion"
               rows={3}
               placeholder="Detalla qué productos incluye este combo..."
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
             />
           </div>
 
@@ -141,7 +141,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
                     <select
                       value={item.varianteId}
                       onChange={(e) => updateItem(index, "varianteId", e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all bg-white"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#31572C] outline-none transition-all bg-white"
                       required
                     >
                       <option value="" disabled>Selecciona una variante...</option>
@@ -160,7 +160,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
                       min="1"
                       value={item.cantidad}
                       onChange={(e) => updateItem(index, "cantidad", parseInt(e.target.value) || 1)}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
                       required
                     />
                   </div>
@@ -180,7 +180,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
             <button
               type="button"
               onClick={handleAddItem}
-              className="mt-4 flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 transition-colors"
+              className="mt-4 flex items-center gap-2 text-sm font-bold text-[#31572C] hover:text-[#90A955] transition-colors"
             >
               <Plus className="w-4 h-4" /> Añadir otro producto al combo
             </button>
@@ -196,7 +196,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
                 <input
                   type="date"
                   name="fecha_inicio"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
                 />
               </div>
 
@@ -205,7 +205,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
                 <input
                   type="date"
                   name="fecha_fin"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
                 />
               </div>
             </div>
@@ -218,7 +218,7 @@ export default function ComboForm({ availableVariants }: ComboFormProps) {
             <button
               type="submit"
               disabled={isPending}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
+              className="bg-[#31572C] hover:bg-[#90A955] text-white px-8 py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
             >
               {isPending ? "Creando..." : "Crear Combo"}
             </button>

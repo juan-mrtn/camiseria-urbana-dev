@@ -7,7 +7,8 @@ export async function processCheckoutAction(
   usuarioId: string,
   carritoId: string,
   items: any[],
-  costoEnvio: number
+  costoEnvio: number,
+  direccionId: string
 ) {
   try {
     // 0. Validar stock en tiempo real
@@ -24,7 +25,7 @@ export async function processCheckoutAction(
     }
 
     // 1. Ejecutar procedimiento almacenado para congelar la orden
-    await db.query("CALL sp_finalizar_compra($1, $2)", [usuarioId, carritoId]);
+    await db.query("CALL sp_finalizar_compra($1, $2, $3)", [usuarioId, carritoId, direccionId]);
 
     // 2. Inicializar MercadoPago
     const client = new MercadoPagoConfig({

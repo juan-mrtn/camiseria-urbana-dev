@@ -3,6 +3,8 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
+import { enviarCorreoPromocional, generarHtmlPromocional } from "@/lib/email";
+import { UsuarioRepository } from "@/repositories/usuario.repository";
 
 export async function createComboAction(formData: FormData) {
   const nombre = formData.get("nombre") as string;
@@ -67,6 +69,39 @@ export async function createComboAction(formData: FormData) {
     }
 
     await client.query("COMMIT");
+
+    // --- SEND EMAILS ASYNCHRONOUSLY ---
+    const envUserEmail = process.env.EMAIL_USER;
+    if (envUserEmail) {
+      try {
+        const usuarios = await UsuarioRepository.obtenerUsuariosSuscritos();
+        if (usuarios.length > 0) {
+          const htmlContent = generarHtmlPromocional(
+            nombre,
+            descripcion,
+            `${process.env.NEXTAUTH_URL}/combos/${comboId}`,
+            `$${precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+          );
+
+          const results = await Promise.allSettled(
+            usuarios.map((user) => 
+              enviarCorreoPromocional(
+                user.email,
+                `¡Nueva Oferta Exclusiva: ${nombre}!`,
+                htmlContent
+              )
+            )
+          );
+          console.log(`[Newsletter] Se procesaron ${results.length} correos usando Nodemailer.`);
+        }
+      } catch (err) {
+        console.error("[Newsletter] Error enviando emails:", err);
+      }
+    } else {
+      console.warn("[Newsletter] No EMAIL_USER found, correos promocionales omitidos.");
+    }
+    // ----------------------------------
+
     revalidatePath("/(shop)/catalogo", "page");
     return { success: true, comboId };
   } catch (error) {

@@ -121,7 +121,7 @@ export default function ProductForm() {
       {/* SECCIÓN 1: PRODUCTO BASE Y STOCK */}
       <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Package className="w-5 h-5 text-indigo-600" /> Paso 2: Vincular Producto Base
+          <Package className="w-5 h-5 text-[#31572C]" /> Paso 2: Vincular Producto Base
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -130,7 +130,7 @@ export default function ProductForm() {
             <select
               defaultValue={selectedProductoId}
               onChange={e => setSelectedProductoId(e.target.value)}
-              className="border p-3 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="border p-3 rounded-lg bg-white outline-none focus:ring-2 focus:ring-[#31572C] transition-all"
             >
               <option value="" disabled>Seleccione un producto base...</option>
               {productos.map(p => (
@@ -145,7 +145,7 @@ export default function ProductForm() {
               {unallocatedStock !== null ? (
                 <>
                   <span className="font-medium text-gray-600">Unidades Totales</span>
-                  <span className="font-black text-xl text-indigo-600">{unallocatedStock} u.</span>
+                  <span className="font-black text-xl text-[#31572C]">{unallocatedStock} u.</span>
                 </>
               ) : (
                 <span className="text-gray-400 italic">Seleccione un producto para ver su stock</span>
@@ -159,9 +159,9 @@ export default function ProductForm() {
       <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-indigo-600" /> Paso 3: Definir Variantes
+            <CheckCircle className="w-5 h-5 text-[#31572C]" /> Paso 3: Definir Variantes
           </h2>
-          <button type="button" onClick={agregarVariante} className="flex items-center gap-2 text-sm bg-indigo-50 text-indigo-700 font-bold px-4 py-2 rounded-lg hover:bg-indigo-100 transition-colors">
+          <button type="button" onClick={agregarVariante} className="flex items-center gap-2 text-sm bg-[#31572C]/10 text-indigo-700 font-bold px-4 py-2 rounded-lg hover:bg-[#31572C]/20 transition-colors">
             <Plus className="w-4 h-4" /> Agregar Variante
           </button>
         </div>
@@ -183,19 +183,19 @@ export default function ProductForm() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Talle</label>
-                    <input required type="text" value={variante.talle} onChange={e => actualizarVariante(index, 'talle', e.target.value)} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="Ej: L" />
+                    <input required type="text" value={variante.talle} onChange={e => actualizarVariante(index, 'talle', e.target.value)} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-[#31572C] transition-all" placeholder="Ej: L" />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Color</label>
-                    <input required type="text" value={variante.color} onChange={e => actualizarVariante(index, 'color', e.target.value)} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="Ej: Azul" />
+                    <input required type="text" value={variante.color} onChange={e => actualizarVariante(index, 'color', e.target.value)} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-[#31572C] transition-all" placeholder="Ej: Azul" />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Material</label>
-                    <input required type="text" value={variante.material} onChange={e => actualizarVariante(index, 'material', e.target.value)} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="Ej: Algodón" />
+                    <input required type="text" value={variante.material} onChange={e => actualizarVariante(index, 'material', e.target.value)} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-[#31572C] transition-all" placeholder="Ej: Algodón" />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Precio Retail ($)</label>
-                    <input required type="number" min="0" step="0.01" value={variante.precio} onChange={e => actualizarVariante(index, 'precio', e.target.value === '' ? '' : parseFloat(e.target.value))} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
+                    <input required type="number" min="0" step="0.01" value={variante.precio} onChange={e => actualizarVariante(index, 'precio', e.target.value === '' ? '' : parseFloat(e.target.value))} className="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-[#31572C] transition-all" />
                   </div>
                 </div>
 
@@ -203,7 +203,7 @@ export default function ProductForm() {
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Imágenes (Multi-Upload)</label>
 
-                  <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-white cursor-pointer hover:border-indigo-500 transition-colors group h-full">
+                  <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-white cursor-pointer hover:border-[#31572C] transition-colors group h-full">
                     <input
                       type="file"
                       accept="image/*"
@@ -213,8 +213,8 @@ export default function ProductForm() {
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
                     <div className="flex flex-col items-center gap-2 pointer-events-none">
-                      <div className="p-3 bg-indigo-50 rounded-full group-hover:scale-110 transition-transform">
-                        <ImageIcon className="w-6 h-6 text-indigo-600" />
+                      <div className="p-3 bg-[#31572C]/10 rounded-full group-hover:scale-110 transition-transform">
+                        <ImageIcon className="w-6 h-6 text-[#31572C]" />
                       </div>
                       <span className="text-sm font-medium text-gray-600">Click o arrastrar imágenes</span>
                     </div>
@@ -251,7 +251,7 @@ export default function ProductForm() {
         </div>
       </div>
 
-      <button type="submit" disabled={isPending || !selectedProductoId ? true : undefined} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-xl shadow-lg transition-all disabled:opacity-50 text-lg mb-10">
+      <button type="submit" disabled={isPending || !selectedProductoId ? true : undefined} className="w-full flex items-center justify-center gap-2 bg-[#31572C] hover:bg-indigo-700 text-white font-black py-4 rounded-xl shadow-lg transition-all disabled:opacity-50 text-lg mb-10">
         {isPending ? (
           <><Loader2 className="w-6 h-6 animate-spin" /> Procesando Configuración...</>
         ) : (

@@ -83,12 +83,12 @@ export default function FilterSidebar({ talles, materiales }: Props) {
     <aside className="w-full md:w-64 shrink-0 space-y-8">
       {/* Filtro Material */}
       <div>
-        <h3 className="font-bold text-xs uppercase tracking-widest mb-4 border-l-4 border-indigo-600 pl-2">
+        <h3 className="font-bold text-xs uppercase tracking-widest mb-4 border-l-4 border-[#31572C] pl-2">
           Material
         </h3>
         <ul className="space-y-2 text-sm text-gray-600">
           {materiales.map((mat) => (
-            <li key={mat} className="flex items-center gap-2 cursor-pointer hover:text-indigo-600">
+            <li key={mat} className="flex items-center gap-2 cursor-pointer hover:text-[#31572C]">
               <input 
                 type="checkbox" 
                 className="rounded border-gray-300" 
@@ -104,7 +104,7 @@ export default function FilterSidebar({ talles, materiales }: Props) {
 
       {/* Filtro Talle */}
       <div>
-        <h3 className="font-bold text-xs uppercase tracking-widest mb-4 border-l-4 border-indigo-600 pl-2">
+        <h3 className="font-bold text-xs uppercase tracking-widest mb-4 border-l-4 border-[#31572C] pl-2">
           Talle
         </h3>
         <div className="grid grid-cols-4 gap-2">
@@ -114,7 +114,7 @@ export default function FilterSidebar({ talles, materiales }: Props) {
               <button 
                 key={talle} 
                 onClick={() => updateFilter("talle", isSelected ? "" : talle)}
-                className={`border py-2 text-xs font-bold transition rounded ${isSelected ? 'bg-indigo-600 text-white border-indigo-600' : 'hover:bg-black hover:text-white hover:border-black'}`}
+                className={`border py-2 text-xs font-bold transition rounded ${isSelected ? 'bg-[#31572C] text-white border-[#31572C]' : 'hover:bg-black hover:text-white hover:border-black'}`}
               >
                 {talle}
               </button>
@@ -125,13 +125,13 @@ export default function FilterSidebar({ talles, materiales }: Props) {
       
       {/* Filtro Color */}
       <div>
-        <h3 className="font-bold text-xs uppercase tracking-widest mb-4 border-l-4 border-indigo-600 pl-2">
+        <h3 className="font-bold text-xs uppercase tracking-widest mb-4 border-l-4 border-[#31572C] pl-2">
           Color
         </h3>
         <input 
           type="text" 
           placeholder="Ej: Azul, Blanco, Negro" 
-          className="w-full border p-2 text-sm rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+          className="w-full border p-2 text-sm rounded focus:ring-2 focus:ring-[#31572C] outline-none"
           value={currentColor}
           onChange={(e) => updateFilter("color", e.target.value)}
         />
@@ -139,14 +139,14 @@ export default function FilterSidebar({ talles, materiales }: Props) {
 
       {/* Filtro Precio */}
       <div>
-        <h3 className="font-bold text-xs uppercase tracking-widest mb-4 border-l-4 border-indigo-600 pl-2">
+        <h3 className="font-bold text-xs uppercase tracking-widest mb-4 border-l-4 border-[#31572C] pl-2">
           Rango de Precio
         </h3>
         <div className="flex items-center gap-2">
           <input 
             type="number" 
             placeholder="Mín" 
-            className="w-full border p-2 text-sm rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full border p-2 text-sm rounded focus:ring-2 focus:ring-[#31572C] outline-none"
             value={minPrice}
             onChange={(e) => setMinPrice(e.target.value)}
           />
@@ -154,7 +154,7 @@ export default function FilterSidebar({ talles, materiales }: Props) {
           <input 
             type="number" 
             placeholder="Máx" 
-            className="w-full border p-2 text-sm rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full border p-2 text-sm rounded focus:ring-2 focus:ring-[#31572C] outline-none"
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
           />

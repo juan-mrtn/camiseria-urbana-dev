@@ -35,7 +35,7 @@ export default async function ComprasPage() {
         <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Aún no tienes compras</h2>
           <p className="text-gray-500 mb-6">Explora nuestro catálogo y encuentra tus prendas favoritas.</p>
-          <Link href="/catalogo" className="inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors">
+          <Link href="/catalogo" className="inline-flex items-center justify-center bg-[#31572C] hover:bg-[#90A955] text-white font-medium py-2.5 px-6 rounded-lg transition-colors">
             Ir al catálogo
           </Link>
         </div>
@@ -93,10 +93,10 @@ export default async function ComprasPage() {
                 </div>
 
                 {/* Footer del pedido */}
-                <div className="p-4 bg-gray-50 border-t border-gray-100">
-                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm py-2.5 px-5 rounded-lg transition-colors">
+                <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+                  <Link href={`/mis-compras/${compra.id}`} className="bg-[#31572C] hover:bg-[#90A955] text-white font-medium text-sm py-2.5 px-5 rounded-lg transition-colors inline-block">
                     Detalle de la compra
-                  </button>
+                  </Link>
                 </div>
               </div>
             );

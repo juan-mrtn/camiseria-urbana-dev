@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { db } from "@/lib/db";
 
 import sharp from "sharp";
 
@@ -163,7 +164,7 @@ export async function crearCuponAction(formData: FormData) {
   let descuento: number | null = null;
   if (tipo === 'descuento') {
     const descRaw = formData.get("descuento") as string;
-    descuento = descRaw ? parseFloat(descRaw) / 100 : null;
+    descuento = descRaw ? parseFloat(descRaw) : null;
   }
 
   try {
@@ -225,5 +226,21 @@ export async function toggleProductoVisibilidadAction(id: string, activo: boolea
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || "Error al cambiar la visibilidad." };
+  }
+}
+
+export async function toggleProductFeaturedAction(productId: string, currentStatus: boolean) {
+  const session = await auth();
+  if (!session || session.user?.rol !== 'admin') throw new Error("Acceso denegado.");
+
+  try {
+    const nextStatus = !currentStatus;
+    await AdminRepository.actualizarEstadoDestacado(productId, nextStatus);
+    
+    revalidatePath('/');
+    revalidatePath('/dashboard/productos');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Error al actualizar estado destacado." };
   }
 }

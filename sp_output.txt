@@ -1,0 +1,86 @@
+CREATE OR REPLACE PROCEDURE public.sp_agregar_al_carrito(IN p_carrito_id character varying, IN p_item_id character varying, IN p_cantidad integer, IN p_es_combo boolean)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    v_precio_original DECIMAL(12,2);
+    v_precio_final DECIMAL(12,2);
+    v_descuento_unitario DECIMAL(12,2);
+    v_promocion_id VARCHAR;
+    v_existe_en_carrito BOOLEAN;
+    v_tipo_item VARCHAR;
+BEGIN
+    -- 1. Obtener precio original y promoción asociada (solo si no es combo)
+    IF p_es_combo THEN
+        SELECT precio INTO v_precio_original FROM combo WHERE id = p_item_id;
+        IF NOT FOUND THEN RAISE EXCEPTION 'El combo % no existe.', p_item_id; END IF;
+        -- Los combos no tienen promociones directas (se puede extender si se desea)
+        v_promocion_id := NULL;
+        v_precio_final := v_precio_original;
+        v_descuento_unitario := 0;
+    ELSE
+        -- Obtener precio y promoción de la variante
+        SELECT pv.precio, pv.promocion_id 
+        INTO v_precio_original, v_promocion_id
+        FROM producto_variante pv
+        WHERE pv.id = p_item_id;
+        
+        IF NOT FOUND THEN 
+            RAISE EXCEPTION 'La variante % no existe.', p_item_id; 
+        END IF;
+        
+        -- Aplicar función de promoción (solo si hay promoción vigente)
+        IF v_promocion_id IS NOT NULL THEN
+            SELECT precio_final, descuento_unitario 
+            INTO v_precio_final, v_descuento_unitario
+            FROM fn_aplicar_promocion(v_precio_original, v_promocion_id, p_cantidad);
+        ELSE
+            v_precio_final := v_precio_original;
+            v_descuento_unitario := 0;
+        END IF;
+    END IF;
+
+    -- 2. Verificar si el ítem ya existe en el carrito
+    IF p_es_combo THEN
+        SELECT EXISTS(
+            SELECT 1 FROM carrito_item 
+            WHERE carrito_id = p_carrito_id AND combo_id = p_item_id
+        ) INTO v_existe_en_carrito;
+        v_tipo_item := 'combo';
+    ELSE
+        SELECT EXISTS(
+            SELECT 1 FROM carrito_item 
+            WHERE carrito_id = p_carrito_id AND producto_variante_id = p_item_id
+        ) INTO v_existe_en_carrito;
+        v_tipo_item := 'variante';
+    END IF;
+
+    -- 3. Insertar o actualizar con los datos de promoción
+    IF v_existe_en_carrito THEN
+        -- Actualizar: sumar cantidad, pero mantener precio y descuento originales
+        -- (podría recalcularse, pero se asume que los precios no cambian durante la sesión)
+        IF p_es_combo THEN
+            UPDATE carrito_item 
+            SET cantidad = cantidad + p_cantidad
+            WHERE carrito_id = p_carrito_id AND combo_id = p_item_id;
+        ELSE
+            UPDATE carrito_item 
+            SET cantidad = cantidad + p_cantidad
+            WHERE carrito_id = p_carrito_id AND producto_variante_id = p_item_id;
+        END IF;
+    ELSE
+        -- Insertar nuevo ítem con promoción y descuento
+        IF p_es_combo THEN
+            INSERT INTO carrito_item (id, carrito_id, combo_id, cantidad, precio_unitario, descuento_unitario, promocion_id)
+            VALUES (gen_random_uuid()::VARCHAR, p_carrito_id, p_item_id, p_cantidad, v_precio_final, v_descuento_unitario, NULL);
+        ELSE
+            INSERT INTO carrito_item (id, carrito_id, producto_variante_id, cantidad, precio_unitario, descuento_unitario, promocion_id)
+            VALUES (gen_random_uuid()::VARCHAR, p_carrito_id, p_item_id, p_cantidad, v_precio_final, v_descuento_unitario, v_promocion_id);
+        END IF;
+    END IF;
+    
+    -- El trigger trg_actualizar_total_carrito actualizará automáticamente el total del carrito
+    RAISE NOTICE 'Agregado % unidades de % (precio unitario final: %, descuento: %)', 
+                 p_cantidad, p_item_id, v_precio_final, v_descuento_unitario;
+END;
+$procedure$
+

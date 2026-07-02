@@ -31,15 +31,15 @@ export default async function CatalogoPage({ searchParams }: Props) {
           <ul className="space-y-2 text-xs">
             <li className="flex items-center gap-2">
               <input type="checkbox" id="algodon" className="rounded border-gray-300" /> 
-              <label htmlFor="algodon" className="cursor-pointer hover:text-indigo-600">Algodón</label>
+              <label htmlFor="algodon" className="cursor-pointer hover:text-[#31572C]">Algodón</label>
             </li>
             <li className="flex items-center gap-2">
               <input type="checkbox" id="jean" className="rounded border-gray-300" /> 
-              <label htmlFor="jean" className="cursor-pointer hover:text-indigo-600">Jean</label>
+              <label htmlFor="jean" className="cursor-pointer hover:text-[#31572C]">Jean</label>
             </li>
             <li className="flex items-center gap-2">
               <input type="checkbox" id="lino" className="rounded border-gray-300" /> 
-              <label htmlFor="lino" className="cursor-pointer hover:text-indigo-600">Lino</label>
+              <label htmlFor="lino" className="cursor-pointer hover:text-[#31572C]">Lino</label>
             </li>
           </ul>
         </section>

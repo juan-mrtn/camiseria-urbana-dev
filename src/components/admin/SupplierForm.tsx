@@ -35,7 +35,7 @@ export default function SupplierForm() {
         <label className="text-sm font-bold text-gray-700">Nombre del Proveedor</label>
         <input 
           type="text" name="nombre" required 
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
           placeholder="Ej: TexSur S.A." 
         />
       </div>
@@ -44,7 +44,7 @@ export default function SupplierForm() {
         <label className="text-sm font-bold text-gray-700">Contacto (Email/Teléfono)</label>
         <input 
           type="text" name="contacto" required 
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
           placeholder="Ej: contacto@texsur.com" 
         />
       </div>
@@ -53,7 +53,7 @@ export default function SupplierForm() {
         <button 
           type="submit" 
           disabled={isPending}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 bg-[#31572C] hover:bg-indigo-700 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
         >
           {isPending ? (
             <><Loader2 className="w-5 h-5 animate-spin" /> Guardando...</>

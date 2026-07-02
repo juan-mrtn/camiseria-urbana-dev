@@ -46,7 +46,7 @@ export default function Pagination({ totalPages }: Props) {
                             <Link
                                 className={`page-link relative block py-1.5 px-3 border-0 outline-none transition-all duration-300 rounded focus:shadow-none
                   ${page === currentPage
-                                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                        ? 'bg-[#31572C] text-white hover:bg-[#254221]'
                                         : 'bg-transparent text-gray-800 hover:bg-gray-200'}`}
                                 href={createPageUrl(page)}>
                                 {page}

@@ -28,7 +28,7 @@ export default function BaseProductForm() {
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm mb-8">
       <div className="mb-4">
         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <Tag className="w-5 h-5 text-indigo-600" /> Paso 1: Crear Producto Base
+          <Tag className="w-5 h-5 text-[#31572C]" /> Paso 1: Crear Producto Base
         </h2>
         <p className="text-sm text-gray-500">Registra el nombre genérico del producto antes de asignarle talles o colores.</p>
       </div>
@@ -38,7 +38,7 @@ export default function BaseProductForm() {
           <label className="text-sm font-bold text-gray-700">Nombre del Producto</label>
           <input 
             type="text" name="nombre" required 
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
             placeholder="Ej: Camisa Taverniti"
           />
         </div>
@@ -47,7 +47,7 @@ export default function BaseProductForm() {
           <label className="text-sm font-bold text-gray-700">Código interno (SKU)</label>
           <input 
             type="text" name="codigo" required 
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
             placeholder="Ej: TV-001"
           />
         </div>
@@ -56,7 +56,7 @@ export default function BaseProductForm() {
           <label className="text-sm font-bold text-gray-700">Descripción</label>
           <input 
             type="text" name="descripcion" required 
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
             placeholder="Ej: Camisa 100% algodón"
           />
         </div>
@@ -66,7 +66,7 @@ export default function BaseProductForm() {
         <button 
           type="submit" 
           disabled={isPending}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md disabled:opacity-50"
+          className="flex items-center gap-2 bg-[#31572C] hover:bg-[#90A955] text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md disabled:opacity-50"
         >
           {isPending ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>

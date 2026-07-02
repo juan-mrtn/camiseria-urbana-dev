@@ -87,7 +87,7 @@ export default function BannerForm({ productosDisponibles }: BannerFormProps) {
                 name="titulo" 
                 required 
                 placeholder="Ej: Promo 2x1 en Nueva Colección"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow"
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#31572C] outline-none transition-shadow"
               />
             </div>
             
@@ -99,23 +99,23 @@ export default function BannerForm({ productosDisponibles }: BannerFormProps) {
                 required 
                 rows={2}
                 placeholder="Ej: Aprovechá por tiempo limitado nuestras prendas exclusivas."
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none transition-shadow"
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#31572C] outline-none transition-shadow"
               />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Destino al hacer clic en el Banner</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${destino === '/catalogo' ? 'border-indigo-500 bg-indigo-50' : 'hover:bg-gray-50'}`}>
-                  <input type="radio" name="destino" value="/catalogo" checked={destino === '/catalogo'} onChange={() => setDestino('/catalogo')} className="text-indigo-600 focus:ring-indigo-500" />
+                <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${destino === '/catalogo' ? 'border-[#31572C] bg-[#31572C]/10' : 'hover:bg-gray-50'}`}>
+                  <input type="radio" name="destino" value="/catalogo" checked={destino === '/catalogo'} onChange={() => setDestino('/catalogo')} className="text-[#31572C] focus:ring-[#31572C]" />
                   <span className="text-sm font-medium">Catálogo General</span>
                 </label>
-                <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${destino === '/ofertas' ? 'border-indigo-500 bg-indigo-50' : 'hover:bg-gray-50'}`}>
-                  <input type="radio" name="destino" value="/ofertas" checked={destino === '/ofertas'} onChange={() => setDestino('/ofertas')} className="text-indigo-600 focus:ring-indigo-500" />
+                <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${destino === '/ofertas' ? 'border-[#31572C] bg-[#31572C]/10' : 'hover:bg-gray-50'}`}>
+                  <input type="radio" name="destino" value="/ofertas" checked={destino === '/ofertas'} onChange={() => setDestino('/ofertas')} className="text-[#31572C] focus:ring-[#31572C]" />
                   <span className="text-sm font-medium">Ofertas Especiales</span>
                 </label>
-                <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${destino === 'coleccion' ? 'border-indigo-500 bg-indigo-50' : 'hover:bg-gray-50'}`}>
-                  <input type="radio" name="destino" value="coleccion" checked={destino === 'coleccion'} onChange={() => setDestino('coleccion')} className="text-indigo-600 focus:ring-indigo-500" />
+                <label className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${destino === 'coleccion' ? 'border-[#31572C] bg-[#31572C]/10' : 'hover:bg-gray-50'}`}>
+                  <input type="radio" name="destino" value="coleccion" checked={destino === 'coleccion'} onChange={() => setDestino('coleccion')} className="text-[#31572C] focus:ring-[#31572C]" />
                   <span className="text-sm font-medium">Colección Específica</span>
                 </label>
               </div>
@@ -136,7 +136,7 @@ export default function BannerForm({ productosDisponibles }: BannerFormProps) {
               onChange={handleImageChange}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             />
-            <div className={`w-full aspect-[21/9] md:aspect-[3/1] border-2 border-dashed rounded-xl overflow-hidden flex flex-col items-center justify-center transition-colors ${imagePreview ? 'border-indigo-500' : 'border-gray-300 hover:border-indigo-400 bg-gray-50'}`}>
+            <div className={`w-full aspect-[21/9] md:aspect-[3/1] border-2 border-dashed rounded-xl overflow-hidden flex flex-col items-center justify-center transition-colors ${imagePreview ? 'border-[#31572C]' : 'border-gray-300 hover:border-[#90A955] bg-gray-50'}`}>
               {imagePreview ? (
                 <div className="relative w-full h-full">
                   <Image src={imagePreview} alt="Preview" fill className="object-cover" />
@@ -148,7 +148,7 @@ export default function BannerForm({ productosDisponibles }: BannerFormProps) {
               ) : (
                 <div className="text-center p-6">
                   <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4">
-                    <UploadCloud className="w-8 h-8 text-indigo-500" />
+                    <UploadCloud className="w-8 h-8 text-[#31572C]" />
                   </div>
                   <p className="text-sm font-semibold text-gray-900">Arrastra una imagen o haz clic</p>
                   <p className="text-xs text-gray-500 mt-1">Recomendado: 1920x720px (JPG, PNG, WebP)</p>
@@ -163,7 +163,7 @@ export default function BannerForm({ productosDisponibles }: BannerFormProps) {
           <div>
           <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2 flex items-center justify-between">
             <span>Asignar Productos (La "Colección")</span>
-            <span className="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+            <span className="text-sm font-medium text-[#31572C] bg-[#31572C]/10 px-3 py-1 rounded-full">
               {selectedProducts.length} seleccionados
             </span>
           </h3>
@@ -179,7 +179,7 @@ export default function BannerForm({ productosDisponibles }: BannerFormProps) {
                 <div 
                   key={producto.id}
                   onClick={() => toggleProduct(producto.id)}
-                  className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all ${selectedProducts.includes(producto.id) ? 'border-indigo-600 bg-indigo-50/50 shadow-sm' : 'border-gray-200 hover:border-gray-300'}`}
+                  className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all ${selectedProducts.includes(producto.id) ? 'border-[#31572C] bg-[#31572C]/10/50 shadow-sm' : 'border-gray-200 hover:border-gray-300'}`}
                 >
                   <div className="relative w-12 h-16 bg-white rounded overflow-hidden shrink-0 border border-gray-100">
                     {producto.imagen_url ? (
@@ -196,7 +196,7 @@ export default function BannerForm({ productosDisponibles }: BannerFormProps) {
                   </div>
                   <div>
                     {selectedProducts.includes(producto.id) && (
-                      <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                      <CheckCircle2 className="w-5 h-5 text-[#31572C]" />
                     )}
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export default function BannerForm({ productosDisponibles }: BannerFormProps) {
         <button
           type="submit"
           disabled={isSubmitting || !imagePreview || (destino === 'coleccion' && selectedProducts.length === 0)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="bg-[#31572C] hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {isSubmitting ? "Creando banner..." : "Crear Banner y Colección"}
         </button>

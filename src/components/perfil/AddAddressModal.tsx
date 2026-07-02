@@ -98,7 +98,7 @@ export default function AddAddressModal() {
                 Cancelar
               </button>
               <button 
-                className="px-5 py-2.5 text-sm font-bold text-white bg-[#7C3AED] rounded-lg hover:bg-[#6D28D9] transition-colors shadow-md"
+                className="px-5 py-2.5 text-sm font-bold text-white bg-[#31572C] rounded-lg hover:bg-[#90A955] transition-colors shadow-md"
               >
                 Guardar dirección
               </button>

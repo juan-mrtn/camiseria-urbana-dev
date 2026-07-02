@@ -30,7 +30,7 @@ export default async function OfertasPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-black text-gray-900 mb-4 flex justify-center items-center gap-3">
-          <Tag className="w-10 h-10 text-violet-600" />
+          <Tag className="w-10 h-10 text-[#31572C]" />
           Ofertas Exclusivas
         </h1>
         <p className="text-gray-500 max-w-2xl mx-auto">
@@ -73,7 +73,7 @@ export default async function OfertasPage() {
             {/* Contenedor Info */}
             <div className="p-5 flex flex-col flex-1">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{producto.codigo}</p>
-              <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-violet-600 transition-colors flex-1">
+              <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-[#31572C] transition-colors flex-1">
                 {producto.nombre}
               </h3>
               

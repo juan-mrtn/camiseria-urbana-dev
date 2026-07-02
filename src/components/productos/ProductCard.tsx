@@ -59,7 +59,7 @@ export default function ProductCard({ producto }: Props) {
             </div>
           )}
           {producto.promocionActiva && producto.promocion && !isCombo && (
-            <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
+            <div className="absolute top-2 right-2 bg-[#31572C] text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
               {producto.promocion.tipo === '2x1' ? '2x1' : `-${producto.promocion.descuento}% OFF`}
             </div>
           )}
@@ -76,13 +76,13 @@ export default function ProductCard({ producto }: Props) {
       {/* INFORMACIÓN Y ESTRELLAS */}
       <div className="mt-2 flex-grow">
         <Link href={linkHref}>
-          <h3 className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors line-clamp-2">
+          <h3 className="text-sm font-semibold text-gray-800 group-hover:text-[#31572C] transition-colors line-clamp-2">
             {producto.nombre}
           </h3>
         </Link>
 
         <div className="flex items-baseline gap-2 mt-1">
-          <p className="text-lg font-bold text-indigo-600">
+          <p className="text-lg font-bold text-[#31572C]">
             ${(producto.precioFinal ?? producto.precio).toLocaleString('es-AR', { minimumFractionDigits: 0 })}
           </p>
           {producto.promocionActiva && producto.precioBase && (
@@ -92,16 +92,18 @@ export default function ProductCard({ producto }: Props) {
           )}
         </div>
 
-        <div className="flex items-center gap-1 text-[10px] mt-1">
-          {[...Array(5)].map((_, i) => (
-            <span key={i} className={`text-base ${i < activeStars ? "text-yellow-400" : "text-gray-300"}`}>
-              ★
+        {(producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined && producto.promedio_estrellas > 0) && (
+          <div className="flex items-center gap-1 text-[10px] mt-1">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className={`text-base ${i < activeStars ? "text-yellow-400" : "text-gray-300"}`}>
+                ★
+              </span>
+            ))}
+            <span className="text-gray-400 text-xs ml-1 font-medium">
+              ({producto.promedio_estrellas.toFixed(1)})
             </span>
-          ))}
-          <span className="text-gray-400 text-xs ml-1 font-medium">
-            ({producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined ? producto.promedio_estrellas.toFixed(1) : "5.0"})
-          </span>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* BOTÓN AGREGAR AL CARRITO */}
@@ -111,7 +113,7 @@ export default function ProductCard({ producto }: Props) {
           disabled={!enStock}
           className={`mt-4 w-full py-2.5 rounded-md font-bold text-white transition text-xs uppercase tracking-wider
           ${enStock
-              ? 'bg-gray-900 hover:bg-indigo-600 shadow-sm active:scale-95'
+              ? 'bg-gray-900 hover:bg-[#90A955] shadow-sm active:scale-95'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
         >

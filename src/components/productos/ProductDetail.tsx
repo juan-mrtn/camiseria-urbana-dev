@@ -14,6 +14,7 @@ import ShippingCalculator from '@/components/shop/ShippingCalculator';
 
 interface ProductDetailProps {
   favoritosIniciales?: string[];
+  userRole?: string;
   producto: {
     id: string;
     nombre: string;
@@ -32,7 +33,9 @@ interface ProductDetailProps {
       precio: number;
       precioFinal: number;
       stock: number;
-      imagen: string
+      imagen: string;
+      promocion?: { tipo: string; descuento: number } | null;
+      promocionActiva?: boolean;
     }[];
     promocion: { tipo: string; descuento: number } | null;
     opinionesCount?: number;
@@ -47,7 +50,7 @@ interface ProductDetailProps {
   }
 }
 
-export default function ProductDetail({ producto, favoritosIniciales = [] }: ProductDetailProps) {
+export default function ProductDetail({ producto, favoritosIniciales = [], userRole = 'guest' }: ProductDetailProps) {
   // Traemos la función para agregar al carrito desde nuestro Contexto Global
   const { addToCart } = useCart();
 
@@ -104,9 +107,9 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
       talle: selectedVariant.talle,
       cantidad: cantidad,
       imagen_url: selectedVariant.imagen || producto.imagenes[0],
-      promocion: producto.promocionActiva && producto.promocion ? {
-        tipo: producto.promocion.tipo,
-        descuento: producto.promocion.descuento
+      promocion: (selectedVariant?.promocionActiva || producto.promocionActiva) && (selectedVariant?.promocion || producto.promocion) ? {
+        tipo: (selectedVariant?.promocion || producto.promocion)!.tipo,
+        descuento: (selectedVariant?.promocion || producto.promocion)!.descuento
       } : null
     });
 
@@ -129,8 +132,8 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2">
-        <Link href="/" className="hover:text-indigo-600 transition-colors">Inicio</Link> &gt; 
-        <Link href="/catalogo" className="hover:text-indigo-600 transition-colors">Catálogo</Link> &gt; 
+        <Link href="/" className="hover:text-[#31572C] transition-colors">Inicio</Link> &gt; 
+        <Link href="/catalogo" className="hover:text-[#31572C] transition-colors">Catálogo</Link> &gt; 
         <span className="text-gray-900 font-medium line-clamp-1">{producto.nombre}</span>
       </nav>
 
@@ -140,9 +143,9 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
           <ProductImageGallery images={producto.imagenes} altText={producto.nombre} />
 
           {/* Badge de Promoción superpuesto en la imagen */}
-          {producto.promocionActiva && producto.promocion && (
-            <div className="absolute top-4 left-4 z-20 bg-indigo-500 text-white px-3 py-1 text-sm font-bold rounded-full pointer-events-none shadow-md">
-              {producto.promocion.tipo?.toLowerCase() === '2x1' ? '2x1' : `-${producto.promocion.descuento}% OFF`}
+          {(selectedVariant?.promocionActiva || producto.promocionActiva) && (selectedVariant?.promocion || producto.promocion) && (
+            <div className="absolute top-4 left-4 z-20 bg-[#31572C] text-white px-3 py-1 text-sm font-bold rounded-full pointer-events-none shadow-md">
+              {(selectedVariant?.promocion || producto.promocion)!.tipo?.toLowerCase() === '2x1' ? '2x1' : `-${(selectedVariant?.promocion || producto.promocion)!.descuento}% OFF`}
             </div>
           )}
         </div>
@@ -153,10 +156,10 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
             <h1 className="text-3xl font-bold text-gray-900">{producto.nombre}</h1>
 
             <div className="flex items-baseline gap-3 mt-2">
-              <span className={`text-2xl font-bold ${precioBase > precioFinal ? 'text-indigo-600' : 'text-indigo-600'}`}>
+              <span className={`text-2xl font-bold ${precioBase > precioFinal ? 'text-[#31572C]' : 'text-[#31572C]'}`}>
                 ${precioFinal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
-              {producto.promocionActiva && (
+              {precioBase > precioFinal && (
                 <span className="text-lg text-gray-400 line-through">
                   ${precioBase.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>
@@ -164,23 +167,25 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
             </div>
           </div>
 
-          <div className="flex items-center gap-1 mt-1">
-            {[...Array(5)].map((_, i) => {
-              const activeStars = producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined ? Math.round(producto.promedio_estrellas) : 5;
-              return (
-                <Star key={i} size={16} className={i < activeStars ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
-              );
-            })}
-            <span className="text-gray-500 text-sm ml-2 font-medium">
-              {producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined ? producto.promedio_estrellas.toFixed(1) : "5.0"} ({producto.opinionesCount || 0} opiniones)
-            </span>
-          </div>
+          {(producto.opinionesCount !== undefined && producto.opinionesCount > 0) && (
+            <div className="flex items-center gap-1 mt-1">
+              {[...Array(5)].map((_, i) => {
+                const activeStars = producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined ? Math.round(producto.promedio_estrellas) : 0;
+                return (
+                  <Star key={i} size={16} className={i < activeStars ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
+                );
+              })}
+              <span className="text-gray-500 text-sm ml-2 font-medium">
+                {producto.promedio_estrellas !== null && producto.promedio_estrellas !== undefined ? producto.promedio_estrellas.toFixed(1) : "0.0"} ({producto.opinionesCount} opiniones)
+              </span>
+            </div>
+          )}
 
           {/* Indicador de Stock */}
           <div className={`flex items-center gap-2 text-sm font-medium ${producto.stockTotal > 0 ? 'text-green-600' : 'text-red-600'}`}>
             <AlertCircle size={16} />
             {producto.stockTotal > 0
-              ? `${producto.stockTotal} unidades disponibles`
+              ? (userRole === 'admin' ? `${producto.stockTotal} unidades disponibles` : 'Disponible')
               : 'Sin stock por el momento'}
           </div>
 
@@ -211,9 +216,9 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
                       className={`
                         w-12 h-12 rounded-lg font-bold text-sm flex items-center justify-center transition-all duration-200
                         ${isSelected
-                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border-2 border-indigo-600 scale-105'
+                          ? 'bg-[#31572C] text-white shadow-md shadow-[#90A955]/20 border-2 border-[#31572C] scale-105'
                           : tieneStock
-                            ? 'bg-white text-gray-700 border-2 border-gray-200 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-50'
+                            ? 'bg-white text-gray-700 border-2 border-gray-200 hover:border-[#31572C] hover:text-[#31572C] hover:bg-[#31572C]/10'
                             : 'bg-gray-100 text-gray-400 border-2 border-gray-100 cursor-not-allowed opacity-60'
                         }
                       `}
@@ -246,9 +251,19 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
                   <Plus size={18} />
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Stock de esta variante: <span className="font-bold">{selectedVariant.stock}</span>
-              </p>
+              <div className="text-xs text-gray-500 mt-2">
+                {userRole === 'admin' ? (
+                  <>Stock de esta variante: <span className="font-bold">{selectedVariant.stock}</span></>
+                ) : (
+                  selectedVariant.stock >= 1 && selectedVariant.stock <= 5 ? (
+                    <span className="font-bold text-yellow-600 bg-yellow-100 px-2 py-1 rounded inline-block">
+                      ¡Últimas unidades disponibles!
+                    </span>
+                  ) : selectedVariant.stock > 5 ? (
+                    <span className="font-bold text-green-600 hidden">Disponible</span>
+                  ) : null
+                )}
+              </div>
             </div>
           )}
 
@@ -259,7 +274,7 @@ export default function ProductDetail({ producto, favoritosIniciales = [] }: Pro
               ref={buttonRef as any}
               onClick={handleAddToCart}
               disabled={!selectedVariant || selectedVariant.stock === 0}
-              className="flex-1 bg-indigo-600 text-white py-4 font-bold uppercase hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md"
+              className="flex-1 bg-[#31572C] text-white py-4 font-bold uppercase hover:bg-[#90A955] transition disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md"
             >
               {selectedVariant?.stock > 0 ? 'Agregar al carrito' : 'Variante Agotada'}
             </motion.button>

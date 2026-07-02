@@ -51,7 +51,7 @@ export default function ShippingCalculator({ total }: ShippingCalculatorProps) {
           value={cp}
           onChange={(e) => setCp(e.target.value.replace(/\D/g, '').slice(0, 4))}
           placeholder="Tu código postal" 
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#31572C]" 
         />
         <button 
           type="submit"

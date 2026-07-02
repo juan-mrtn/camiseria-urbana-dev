@@ -26,7 +26,7 @@ export default function ProductVisibilidadToggle({ productoId, activo }: Product
       onClick={handleToggle}
       disabled={isPending}
       className={`p-2 rounded-lg transition-colors ${
-        activo ? "text-indigo-600 hover:bg-indigo-50" : "text-gray-400 hover:text-indigo-600 hover:bg-indigo-50"
+        activo ? "text-[#31572C] hover:bg-[#31572C]/10" : "text-gray-400 hover:text-[#31572C] hover:bg-[#31572C]/10"
       } disabled:opacity-50`}
       title={activo ? "Ocultar producto (Baja lógica)" : "Mostrar producto en catálogo"}
     >

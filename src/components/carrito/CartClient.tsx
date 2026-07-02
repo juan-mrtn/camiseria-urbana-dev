@@ -103,7 +103,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
         <ShoppingBag className="w-20 h-20 text-gray-300 mb-6" />
         <h1 className="text-3xl font-black text-gray-900 mb-4">Tu carrito está vacío</h1>
         <p className="text-gray-500 mb-8">¿Aún no te decides? Tenemos modelos increíbles esperándote.</p>
-        <Link href="/catalogo" className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition">
+        <Link href="/catalogo" className="bg-[#31572C] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#90A955] transition">
           Volver a la tienda
         </Link>
       </div>
@@ -141,7 +141,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
                     )}
                     {item.esCombo ? (
                       <div className="mt-2">
-                        <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">Pack / Combo</span>
+                        <span className="px-2 py-1 bg-[#31572C]/10 text-[#31572C] text-xs font-bold rounded-full">Pack / Combo</span>
                       </div>
                     ) : (
                       <p className="text-sm text-gray-500 mt-1">Talle: <span className="font-bold text-gray-700">{item.talle}</span></p>
@@ -175,7 +175,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
                         ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
                       </p>
                     )}
-                    <p className="font-black text-indigo-600 text-lg">
+                    <p className="font-black text-[#31572C] text-lg">
                       ${(item.precio * item.cantidad).toLocaleString('es-AR')}
                     </p>
                   </div>
@@ -210,7 +210,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
 
           <div className="flex justify-between items-end mb-8">
             <span className="font-bold text-gray-900">Total</span>
-            <span className="text-3xl font-black text-indigo-600">${cartTotal.toLocaleString('es-AR')}</span>
+            <span className="text-3xl font-black text-[#31572C]">${cartTotal.toLocaleString('es-AR')}</span>
           </div>
 
           <div className="mb-8 border-t border-gray-200 pt-6">
@@ -221,12 +221,12 @@ export default function CartClient({ dbItems }: CartClientProps) {
                 placeholder="Ingresa tu cupón"
                 value={cupon}
                 onChange={(e) => setCupon(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#31572C] outline-none uppercase"
               />
               <button
                 onClick={handleAplicarCupon}
                 disabled={isApplyingCupon || !cupon.trim()}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition disabled:opacity-50"
+                className="bg-[#31572C] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#90A955] transition disabled:opacity-50"
               >
                 {isApplyingCupon ? "..." : "Aplicar"}
               </button>
@@ -238,6 +238,19 @@ export default function CartClient({ dbItems }: CartClientProps) {
             )}
           </div>
 
+          {hasStockErrors && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-red-600 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p className="text-sm text-red-700">
+                  <strong>Acción requerida:</strong> Algunos productos no tienen stock suficiente. Por favor, <strong>elimínalos</strong> o reduce la cantidad para poder avanzar al pago.
+                </p>
+              </div>
+            </div>
+          )}
+
           <button
             onClick={() => {
               if (status === "unauthenticated") {
@@ -247,7 +260,7 @@ export default function CartClient({ dbItems }: CartClientProps) {
               }
             }}
             disabled={hasStockErrors || isApplyingCupon}
-            className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-4 rounded-lg font-bold uppercase hover:bg-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-4 rounded-lg font-bold uppercase hover:bg-[#90A955] transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Avanzar al pago <ArrowRight size={20} />
           </button>

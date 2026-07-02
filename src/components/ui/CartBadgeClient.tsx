@@ -38,15 +38,15 @@ export default function CartBadgeClient({ initialCount }: CartBadgeClientProps) 
   }, [count, mounted]);
 
   return (
-    <Link id="cart-icon" href="/carrito" className="relative p-2 text-gray-600 hover:text-black transition-colors focus:outline-none flex items-center justify-center">
+    <Link id="cart-icon" href="/carrito" className="relative p-1.5 text-gray-600 hover:text-black transition-colors focus:outline-none flex items-center justify-center">
       <motion.div
         animate={isBouncing ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <ShoppingCart className="w-6 h-6" />
+        <ShoppingCart className="w-7 h-7" />
       </motion.div>
       {count > 0 && (
-        <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 min-w-[20px] h-[20px] text-[10px] font-bold text-white bg-orange-500 rounded-full translate-x-1 -translate-y-1 border-2 border-white">
+        <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1 min-w-[20px] h-[20px] text-[10px] font-bold text-black bg-orange-500 rounded-full translate-x-0.5 -translate-y-0.5 border-2 border-white">
           {count > 99 ? '99+' : count}
         </span>
       )}

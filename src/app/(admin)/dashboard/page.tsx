@@ -19,11 +19,11 @@ export default async function AdminDashboard() {
       {/* Header del Dashboard */}
       <div className="bg-white border-b border-gray-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <Link href="/" className="flex items-center gap-2 text-indigo-600 font-bold hover:underline w-fit mb-6">
+          <Link href="/" className="flex items-center gap-2 text-[#31572C] font-bold hover:underline w-fit mb-6">
             <ChevronLeft className="w-4 h-4" /> Volver a la Tienda
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <LayoutDashboard className="w-6 h-6 text-indigo-600" />
+            <LayoutDashboard className="w-6 h-6 text-[#31572C]" />
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">
               Panel de Control
             </h1>
@@ -43,9 +43,9 @@ export default async function AdminDashboard() {
               Accesos Rápidos
             </h2>
             <Link href="/dashboard/productos" 
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
-              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
-                <ListCollapse className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-[#31572C]/100 hover:shadow-md transition-all group">
+              <div className="p-3 bg-[#31572C]/10 rounded-lg group-hover:bg-[#31572C] transition-colors">
+                <ListCollapse className="w-6 h-6 text-[#31572C] group-hover:text-white" />
               </div>
               <div>
                 <span className="block font-bold text-gray-900">Catálogo de Productos</span>
@@ -54,9 +54,9 @@ export default async function AdminDashboard() {
             </Link>
 
             <Link href="/dashboard/productos/nuevo" 
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
-              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
-                <PlusCircle className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-[#31572C]/100 hover:shadow-md transition-all group">
+              <div className="p-3 bg-[#31572C]/10 rounded-lg group-hover:bg-[#31572C] transition-colors">
+                <PlusCircle className="w-6 h-6 text-[#31572C] group-hover:text-white" />
               </div>
               <div>
                 <span className="block font-bold text-gray-900">Alta de Productos</span>
@@ -65,9 +65,9 @@ export default async function AdminDashboard() {
             </Link>
 
             <Link href="/dashboard/banners" 
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
-              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
-                <LayoutDashboard className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-[#31572C]/100 hover:shadow-md transition-all group">
+              <div className="p-3 bg-[#31572C]/10 rounded-lg group-hover:bg-[#31572C] transition-colors">
+                <LayoutDashboard className="w-6 h-6 text-[#31572C] group-hover:text-white" />
               </div>
               <div>
                 <span className="block font-bold text-gray-900">Banners Principales</span>
@@ -76,9 +76,9 @@ export default async function AdminDashboard() {
             </Link>
 
             <Link href="/dashboard/metricas" 
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
-              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
-                <BarChart3 className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-[#31572C]/100 hover:shadow-md transition-all group">
+              <div className="p-3 bg-[#31572C]/10 rounded-lg group-hover:bg-[#31572C] transition-colors">
+                <BarChart3 className="w-6 h-6 text-[#31572C] group-hover:text-white" />
               </div>
               <div>
                 <span className="block font-bold text-gray-900">Métricas de Ventas</span>
@@ -87,9 +87,9 @@ export default async function AdminDashboard() {
             </Link>
 
             <Link href="/dashboard/promociones" 
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
-              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
-                <Tag className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-[#31572C]/100 hover:shadow-md transition-all group">
+              <div className="p-3 bg-[#31572C]/10 rounded-lg group-hover:bg-[#31572C] transition-colors">
+                <Tag className="w-6 h-6 text-[#31572C] group-hover:text-white" />
               </div>
               <div>
                 <span className="block font-bold text-gray-900">Gestión de Promos</span>
@@ -98,9 +98,9 @@ export default async function AdminDashboard() {
             </Link>
 
             <Link href="/dashboard/cupones" 
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-500 hover:shadow-md transition-all group">
-              <div className="p-3 bg-indigo-50 rounded-lg group-hover:bg-indigo-600 transition-colors">
-                <Ticket className="w-6 h-6 text-indigo-600 group-hover:text-white" />
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-[#31572C]/100 hover:shadow-md transition-all group">
+              <div className="p-3 bg-[#31572C]/10 rounded-lg group-hover:bg-[#31572C] transition-colors">
+                <Ticket className="w-6 h-6 text-[#31572C] group-hover:text-white" />
               </div>
               <div>
                 <span className="block font-bold text-gray-900">Crear Cupón</span>
@@ -109,9 +109,9 @@ export default async function AdminDashboard() {
             </Link>
 
             <Link href="/dashboard/combos/nuevo" 
-              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-purple-500 hover:shadow-md transition-all group">
-              <div className="p-3 bg-purple-50 rounded-lg group-hover:bg-purple-600 transition-colors">
-                <Package className="w-6 h-6 text-purple-600 group-hover:text-white" />
+              className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-[#31572C]/100 hover:shadow-md transition-all group">
+              <div className="p-3 bg-[#31572C]/10 rounded-lg group-hover:bg-[#31572C] transition-colors">
+                <Package className="w-6 h-6 text-[#31572C] group-hover:text-white" />
               </div>
               <div>
                 <span className="block font-bold text-gray-900">Crear Combo Especial</span>
@@ -133,7 +133,7 @@ export default async function AdminDashboard() {
             <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden">
               <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                 <div className="flex items-center gap-2">
-                  <Package className="w-5 h-5 text-indigo-600" />
+                  <Package className="w-5 h-5 text-[#31572C]" />
                   <span className="font-bold text-gray-900 text-lg">Entrada de Mercadería</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">

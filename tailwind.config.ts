@@ -13,9 +13,33 @@ const config: Config = {
       colors: {
         // Colores personalizados basados en tus Mockups [cite: 1324]
         brand: {
-          primary: "#4f46e5",   // Indigo para botones "Agregar" [cite: 1338]
-          secondary: "#f97316", // Naranja para etiquetas de "Oferta" [cite: 1348]
+          primary: "#57883bff",   // Indigo para botones "Agregar" [cite: 1338]
+          secondary: "#abdd21ff", // Naranja para etiquetas de "Oferta" [cite: 1348]
           dark: "#1e1b4b",      // Azul oscuro para textos o headers
+        },
+        indigo: {
+          50: '#f4f7f4',
+          100: '#e5ebe5',
+          200: '#c2d2c2',
+          300: '#a3baa3',
+          400: '#7fa17f',
+          500: '#90A955',
+          600: '#31572C',
+          700: '#90A955', // para que hover:bg-indigo-700 sea #90A955
+          800: '#233e20',
+          900: '#152513',
+        },
+        orange: {
+          50: '#fefef2',
+          100: '#fdfde6',
+          200: '#fafaa3',
+          300: '#f8f870',
+          400: '#f5f548',
+          500: '#f2f230',
+          600: '#dada20',
+          700: '#8c8c00',
+          800: '#696900',
+          900: '#464600',
         },
         // Configuración para el Modo Oscuro (PBI-20) [cite: 1023]
         background: "var(--background)",

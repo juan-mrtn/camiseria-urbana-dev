@@ -49,5 +49,20 @@ export const UsuarioRepository = {
       console.error("Error al actualizar suscripción:", error);
       throw new Error("No se pudo actualizar la suscripción");
     }
+  },
+
+  async obtenerUsuariosSuscritos() {
+    try {
+      const query = `
+        SELECT email, nombre 
+        FROM usuario 
+        WHERE suscrito = TRUE;
+      `;
+      const result = await db.query(query);
+      return result.rows as { email: string; nombre: string | null }[];
+    } catch (error) {
+      console.error("Error al obtener usuarios suscritos:", error);
+      return [];
+    }
   }
 };

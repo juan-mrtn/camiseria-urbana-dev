@@ -90,7 +90,7 @@ export default async function FavoritosPage() {
                             <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 shrink-0">
                                 <Link
                                     href={`/productos/${producto.producto_id}`}
-                                    className="flex items-center justify-center gap-2 bg-[#6D28D9] hover:bg-violet-800 text-white px-5 py-2.5 rounded-lg font-medium transition"
+                                    className="flex items-center justify-center gap-2 bg-[#31572C] hover:bg-[#90A955] text-white px-5 py-2.5 rounded-lg font-medium transition"
                                 >
                                     <Eye className="w-4 h-4" />
                                     Ver producto

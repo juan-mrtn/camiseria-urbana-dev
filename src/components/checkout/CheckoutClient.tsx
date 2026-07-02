@@ -86,7 +86,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
     }
 
     setIsLoadingPayment(true);
-    const res = await processCheckoutAction(session.user.id, carritoId, items, costoEnvio);
+    const res = await processCheckoutAction(session.user.id, carritoId, items, costoEnvio, direccionSeleccionada);
 
     if (res.success && res.initPoint) {
       // Redirección robusta directa al checkout Pro de MP (bypassea errores del SDK)
@@ -113,7 +113,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
             {session.user.image ? (
               <img src={session.user.image} alt="Avatar" className="w-12 h-12 rounded-full border border-gray-200" />
             ) : (
-              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl">
+              <div className="w-12 h-12 bg-[#31572C]/10 rounded-full flex items-center justify-center text-[#31572C] font-bold text-xl">
                 {session.user.name?.charAt(0)}
               </div>
             )}
@@ -141,7 +141,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
                   <div
                     key={dir.id}
                     onClick={() => setDireccionSeleccionada(dir.id)}
-                    className={`border rounded-xl p-4 flex justify-between items-start cursor-pointer transition-all ${isSelected ? 'border-violet-600 bg-violet-50/30' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                    className={`border rounded-xl p-4 flex justify-between items-start cursor-pointer transition-all ${isSelected ? 'border-[#31572C] bg-[#31572C]/5' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
                   >
                     <div>
                       <p className="font-bold text-gray-900 mb-1">{dir.titulo}</p>
@@ -151,7 +151,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
                     </div>
                     <div>
                       {isSelected ? (
-                        <span className="flex items-center gap-1.5 text-sm font-bold text-violet-700 bg-violet-100 px-3 py-1.5 rounded-lg border border-violet-200">
+                        <span className="flex items-center gap-1.5 text-sm font-bold text-[#31572C] bg-[#31572C]/10 px-3 py-1.5 rounded-lg border border-[#31572C]/20">
                           <CheckCircle2 className="w-4 h-4" /> Usar esta
                         </span>
                       ) : (
@@ -344,7 +344,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
                 </div>
 
                 <div className="flex items-center gap-3 mt-2">
-                  <input type="checkbox" name="principal" id="principal" className="w-4 h-4 text-indigo-600" />
+                  <input type="checkbox" name="principal" id="principal" className="w-4 h-4 text-[#31572C]" />
                   <label htmlFor="principal" className="text-sm font-medium text-gray-700 cursor-pointer">
                     Establecer como principal
                   </label>
@@ -354,7 +354,7 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
                   <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-300 rounded-lg">
                     Cancelar
                   </button>
-                  <button type="submit" className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                  <button type="submit" className="px-5 py-2 text-sm font-bold text-white bg-[#31572C] rounded-lg hover:bg-[#90A955]">
                     Guardar dirección
                   </button>
                 </div>

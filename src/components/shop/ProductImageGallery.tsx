@@ -87,7 +87,7 @@ export default function ProductImageGallery({
         <>
           <button
             onClick={() => scrollToIndex(Math.max(0, activeIndex - 1))}
-            className={`absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hidden md:flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500 z-10 ${
+            className={`absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hidden md:flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#31572C] z-10 ${
               activeIndex === 0 ? "invisible" : "visible"
             }`}
             aria-label="Ver imagen anterior"
@@ -97,7 +97,7 @@ export default function ProductImageGallery({
           
           <button
             onClick={() => scrollToIndex(Math.min(displayImages.length - 1, activeIndex + 1))}
-            className={`absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hidden md:flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500 z-10 ${
+            className={`absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hidden md:flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#31572C] z-10 ${
               activeIndex === displayImages.length - 1 ? "invisible" : "visible"
             }`}
             aria-label="Ver siguiente imagen"
@@ -120,7 +120,7 @@ export default function ProductImageGallery({
               role="tab"
               aria-selected={activeIndex === index}
               aria-label={`Ir a la imagen ${index + 1}`}
-              className={`transition-all duration-300 rounded-full h-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:ring-offset-transparent ${
+              className={`transition-all duration-300 rounded-full h-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#31572C] focus:ring-offset-1 focus:ring-offset-transparent ${
                 activeIndex === index 
                   ? "w-6 bg-white" 
                   : "w-2 bg-white/60 hover:bg-white/90"

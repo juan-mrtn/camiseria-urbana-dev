@@ -30,16 +30,16 @@ export default function SearchBar() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative w-full max-w-md">
+    <form onSubmit={handleSubmit} className="relative w-full max-w-lg">
       <input
         ref={inputRef}
         type="text"
         name="q"
         placeholder="Buscar productos por nombre o material..."
-        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm text-gray-800"
+        className="w-full h-10 pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F772D] bg-white text-base text-gray-800"
       />
-      <div className="absolute left-3 top-2.5 text-gray-400">
-        <Search className="h-4.5 w-4.5" />
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 flex items-center">
+        <Search className="h-4 w-4" />
       </div>
       <button type="submit" className="hidden">Buscar</button>
     </form>

@@ -19,7 +19,7 @@ export default async function BannersPage() {
     <div className="min-h-screen bg-gray-50/50 pb-20">
       <div className="bg-white border-b border-gray-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <Link href="/dashboard" className="flex items-center gap-2 text-indigo-600 font-bold hover:underline w-fit mb-6">
+          <Link href="/dashboard" className="flex items-center gap-2 text-[#31572C] font-bold hover:underline w-fit mb-6">
             <ChevronLeft className="w-4 h-4" /> Volver al Dashboard
           </Link>
           <div className="flex items-center gap-4 mb-2">
@@ -38,7 +38,7 @@ export default async function BannersPage() {
           <h2 className="text-xl font-bold text-gray-800">Banners Activos</h2>
           <Link
             href="/dashboard/banners/crear"
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-[#31572C] hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
           >
             <PlusCircle className="w-5 h-5" />
             Nuevo Banner

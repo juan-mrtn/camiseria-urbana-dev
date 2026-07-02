@@ -19,20 +19,20 @@ export default function PromoCarouselClient({ productos }: { productos: any[] })
   if (!productos || productos.length === 0) return null;
 
   return (
-    <section className="w-full bg-violet-600 py-12 overflow-hidden relative">
+    <section className="w-full bg-[#bde4a8] py-12 overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 flex justify-between items-end relative z-10">
         <div>
-          <h2 className="text-3xl font-black text-white flex items-center gap-3">
-            <Tag className="w-8 h-8 text-yellow-300" />
+          <h2 className="text-3xl font-black text-[#31572C] flex items-center gap-3">
+            <Tag className="w-8 h-8 text-[#31572C]" />
             Ofertas por Tiempo Limitado
           </h2>
-          <p className="text-violet-200 mt-2 font-medium">
+          <p className="text-[#31572C]/80 mt-2 font-medium">
             Descuentos exclusivos en nuestras mejores prendas
           </p>
         </div>
         <Link
           href="/ofertas"
-          className="hidden sm:inline-block bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full font-bold transition-colors backdrop-blur-sm border border-white/20"
+          className="hidden sm:inline-block bg-[#31572C]/10 hover:bg-[#31572C]/20 text-[#31572C] px-6 py-2 rounded-full font-bold transition-colors backdrop-blur-sm border border-[#31572C]/20"
         >
           Ver todo
         </Link>
@@ -42,7 +42,7 @@ export default function PromoCarouselClient({ productos }: { productos: any[] })
         {/* Flechas de Navegación (Desktop) */}
         <button
           onClick={() => scroll('left')}
-          className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20 bg-white text-violet-900 p-3 rounded-full shadow-xl opacity-0 group-hover:opacity-100 hover:scale-110 transition-all border border-gray-100"
+          className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20 bg-white text-[#31572C] p-3 rounded-full shadow-xl opacity-0 group-hover:opacity-100 hover:scale-110 transition-all border border-gray-100"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-6 h-6" />
@@ -50,7 +50,7 @@ export default function PromoCarouselClient({ productos }: { productos: any[] })
 
         <button
           onClick={() => scroll('right')}
-          className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20 bg-white text-violet-900 p-3 rounded-full shadow-xl opacity-0 group-hover:opacity-100 hover:scale-110 transition-all border border-gray-100"
+          className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20 bg-white text-[#31572C] p-3 rounded-full shadow-xl opacity-0 group-hover:opacity-100 hover:scale-110 transition-all border border-gray-100"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-6 h-6" />
@@ -85,7 +85,7 @@ export default function PromoCarouselClient({ productos }: { productos: any[] })
                   </div>
                 )}
                 {producto.promocion?.tipo === '2x1' && (
-                  <div className="absolute top-4 right-4 bg-indigo-500 text-white px-3 py-1.5 rounded-sm font-black text-sm shadow-xl">
+                  <div className="absolute top-4 right-4 bg-[#31572C] text-white px-3 py-1.5 rounded-sm font-black text-sm shadow-xl">
                     2x1
                   </div>
                 )}
@@ -94,7 +94,7 @@ export default function PromoCarouselClient({ productos }: { productos: any[] })
               {/* Contenedor Info */}
               <div className="p-5 flex-1 flex flex-col">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 line-clamp-1">{producto.codigo}</p>
-                <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover/card:text-violet-600 transition-colors flex-1">
+                <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover/card:text-[#31572C] transition-colors flex-1">
                   {producto.nombre}
                 </h3>
 

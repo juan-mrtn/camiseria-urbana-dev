@@ -94,15 +94,15 @@ export default function ComboDetailClient({ combo, comboItems, stockDisponible }
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2">
-        <Link href="/" className="hover:text-indigo-600 transition-colors">Inicio</Link> &gt; 
-        <Link href="/catalogo" className="hover:text-indigo-600 transition-colors">Catálogo</Link> &gt; 
+        <Link href="/" className="hover:text-[#31572C] transition-colors">Inicio</Link> &gt; 
+        <Link href="/catalogo" className="hover:text-[#31572C] transition-colors">Catálogo</Link> &gt; 
         <span className="text-gray-900 font-medium line-clamp-1">{combo.nombre}</span>
       </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div className="relative w-full rounded-lg overflow-hidden border border-gray-100">
           <ProductImageGallery images={images} altText={combo.nombre} />
-          <div className="absolute top-4 left-4 z-20 bg-indigo-500 text-white px-3 py-1 text-sm font-bold rounded-full pointer-events-none shadow-md">
+          <div className="absolute top-4 left-4 z-20 bg-[#31572C] text-white px-3 py-1 text-sm font-bold rounded-full pointer-events-none shadow-md">
             COMBO ESPECIAL
           </div>
         </div>
@@ -111,7 +111,7 @@ export default function ComboDetailClient({ combo, comboItems, stockDisponible }
           <div>
             <h1 className="text-4xl font-black text-gray-900">{combo.nombre}</h1>
             <div className="flex items-baseline gap-3 mt-2">
-              <span className="text-3xl font-black text-indigo-600">
+              <span className="text-3xl font-black text-[#31572C]">
                 ${Number(combo.precio).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -171,7 +171,7 @@ export default function ComboDetailClient({ combo, comboItems, stockDisponible }
               ref={buttonRef as any}
               onClick={handleAddToCart}
               disabled={stockDisponible === 0 || isPending}
-              className="flex-1 bg-indigo-600 text-white py-4 font-bold uppercase hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md"
+              className="flex-1 bg-[#31572C] text-white py-4 font-bold uppercase hover:bg-[#90A955] transition disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md"
             >
               {stockDisponible > 0 ? (isPending ? 'Agregando...' : 'Agregar Combo al carrito') : 'Combo Agotado'}
             </motion.button>
@@ -209,7 +209,7 @@ export default function ComboDetailClient({ combo, comboItems, stockDisponible }
             initial={{ opacity: 1, scale: 0.5, x: drop.startX, y: drop.startY }}
             animate={{ opacity: 0.3, scale: 1, x: drop.targetX, y: drop.targetY }}
             transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
-            className="fixed top-0 left-0 z-[100] w-6 h-6 bg-indigo-500 rounded-full shadow-lg pointer-events-none"
+            className="fixed top-0 left-0 z-[100] w-6 h-6 bg-[#31572C] rounded-full shadow-lg pointer-events-none"
           />
         ))}
       </AnimatePresence>

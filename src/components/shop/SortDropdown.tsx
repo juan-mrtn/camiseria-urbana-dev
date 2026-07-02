@@ -27,7 +27,7 @@ export default function SortDropdown() {
 
   return (
     <select 
-      className="border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white font-medium text-gray-700 outline-none cursor-pointer"
+      className="border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-[#31572C] bg-white font-medium text-gray-700 outline-none cursor-pointer"
       value={currentSort}
       onChange={handleSortChange}
     >

@@ -51,7 +51,7 @@ export default async function MetricasPage() {
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-4">
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Ticket Promedio</h3>
-            <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <div className="w-10 h-10 rounded-full bg-[#31572C]/10 flex items-center justify-center text-[#31572C]">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
@@ -96,7 +96,7 @@ export default async function MetricasPage() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
                     <div 
-                      className="bg-indigo-500 h-full rounded-full transition-all duration-1000 ease-out"
+                      className="bg-[#31572C] h-full rounded-full transition-all duration-1000 ease-out"
                       style={{ width: `${widthPercent}%` }}
                     />
                   </div>
@@ -111,7 +111,7 @@ export default async function MetricasPage() {
         {/* Ingresos Mensuales (Gráfico de Barras CSS) */}
         <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
+            <div className="w-12 h-12 rounded-xl bg-[#31572C]/10 flex items-center justify-center text-[#31572C]">
               <TrendingUp className="w-6 h-6" />
             </div>
             <div>
@@ -138,7 +138,7 @@ export default async function MetricasPage() {
                     </div>
                     {/* Barra */}
                     <div 
-                      className="w-full bg-indigo-100 hover:bg-indigo-400 rounded-t-md transition-all duration-500 ease-out cursor-pointer"
+                      className="w-full bg-[#31572C]/20 hover:bg-[#90A955] rounded-t-md transition-all duration-500 ease-out cursor-pointer"
                       style={{ height: `${heightPercent}%` }}
                     />
                     {/* Etiqueta Mes */}
@@ -190,7 +190,7 @@ export default async function MetricasPage() {
                           {cliente.cantidad_compras}
                         </span>
                       </td>
-                      <td className="py-4 px-2 text-right font-black text-indigo-600">
+                      <td className="py-4 px-2 text-right font-black text-[#31572C]">
                         ${cliente.total_gastado.toLocaleString('es-AR')}
                       </td>
                     </tr>

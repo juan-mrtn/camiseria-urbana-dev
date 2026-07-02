@@ -184,3 +184,55 @@ export async function enviarFacturaEmail(usuarioId: string, costoEnvio: number =
     client.release();
   }
 }
+
+export async function enviarCorreoPromocional(toEmail: string, subject: string, htmlContent: string) {
+  try {
+    const info = await transporter.sendMail({
+      from: `"La Camisería Urbana" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: subject,
+      html: htmlContent,
+    });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Error enviando email promocional a", toEmail, ":", error);
+    return { success: false, error };
+  }
+}
+
+export function generarHtmlPromocional(promoName: string, promoDescription: string, ctaUrl: string, promoPriceString?: string): string {
+  return `
+    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 8px; overflow: hidden;">
+      <div style="background-color: #31572C; padding: 30px 20px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 24px;">¡Nueva Oferta Exclusiva en La Camisería Urbana!</h1>
+      </div>
+      
+      <div style="padding: 40px 20px; background-color: #ffffff; text-align: center;">
+        <h2 style="font-size: 20px; color: #1a1a1a; margin-bottom: 16px;">${promoName}</h2>
+        <p style="font-size: 16px; line-height: 1.5; color: #555; margin-bottom: 24px;">
+          ${promoDescription}
+        </p>
+        
+        ${promoPriceString ? `
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <p style="margin: 0; font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Precio Especial</p>
+            <p style="margin: 8px 0 0; font-size: 28px; font-weight: bold; color: #31572C;">
+              ${promoPriceString}
+            </p>
+          </div>
+        ` : ''}
+
+        <a 
+          href="${ctaUrl}"
+          style="display: inline-block; background-color: #31572C; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: bold; font-size: 16px;"
+        >
+          Ver y Comprar Ahora
+        </a>
+      </div>
+      
+      <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888;">
+        <p style="margin: 0;">Recibes este correo porque estás suscrito al newsletter de La Camisería Urbana.</p>
+      </div>
+    </div>
+  `;
+}

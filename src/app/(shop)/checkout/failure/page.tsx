@@ -51,7 +51,7 @@ export default async function CheckoutFailurePage() {
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Link 
             href="/checkout" 
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-[#31572C] hover:bg-[#90A955] text-white font-bold py-3 px-6 rounded-xl transition-colors"
           >
             <ShoppingCart className="w-5 h-5" /> Ir a pagar
           </Link>

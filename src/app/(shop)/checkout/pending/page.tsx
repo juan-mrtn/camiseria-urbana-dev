@@ -57,7 +57,7 @@ export default async function CheckoutPendingPage() {
           </Link>
           <Link 
             href="/" 
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-[#31572C] hover:bg-[#90A955] text-white font-bold py-3 px-6 rounded-xl transition-colors"
           >
             Volver al inicio <ArrowRight className="w-5 h-5" />
           </Link>

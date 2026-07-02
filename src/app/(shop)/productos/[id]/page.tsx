@@ -27,7 +27,7 @@ export default async function PaginaDetalleProducto({ params }: PageProps) {
 
   return (
     <div className="bg-white min-h-screen">
-      <ProductDetail producto={productos} favoritosIniciales={favoritosDelProducto} />
+      <ProductDetail producto={productos} favoritosIniciales={favoritosDelProducto} userRole={session?.user?.rol} />
     </div>
   );
 }

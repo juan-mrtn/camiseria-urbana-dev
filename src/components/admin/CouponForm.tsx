@@ -43,7 +43,7 @@ export default function CouponForm() {
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm mt-8">
       <div className="md:col-span-2 mb-2">
         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <Tag className="w-5 h-5 text-indigo-600" /> Crear Cupón de Descuento (PBI-27)
+          <Tag className="w-5 h-5 text-[#31572C]" /> Crear Cupón de Descuento (PBI-27)
         </h2>
         <p className="text-sm text-gray-500">Crea nuevos cupones o promociones generales para la tienda.</p>
       </div>
@@ -58,7 +58,7 @@ export default function CouponForm() {
         <label className="text-sm font-bold text-gray-700">Código de Cupón (ID)</label>
         <input 
           type="text" name="id" required 
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all uppercase"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all uppercase"
           placeholder="Ej: VERANO2026"
         />
       </div>
@@ -69,7 +69,7 @@ export default function CouponForm() {
           name="tipo"
           value={tipoPromo}
           onChange={(e) => setTipoPromo(e.target.value as 'descuento' | '2x1')}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-white"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all bg-white"
         >
           <option value="descuento">Descuento Porcentual</option>
           <option value="2x1">Promoción 2x1</option>
@@ -81,7 +81,7 @@ export default function CouponForm() {
           <label className="text-sm font-bold text-gray-700">Porcentaje de Descuento (%)</label>
           <input 
             type="number" name="descuento" min="1" max="99" required 
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
             placeholder="Ej: 20"
           />
         </div>
@@ -91,7 +91,7 @@ export default function CouponForm() {
         <label className="text-sm font-bold text-gray-700">Descripción</label>
         <input 
           type="text" name="descripcion" required 
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
           placeholder="Ej: Descuento especial por fin de temporada"
         />
       </div>
@@ -100,7 +100,7 @@ export default function CouponForm() {
         <label className="text-sm font-bold text-gray-700">Fecha de Inicio</label>
         <input 
           type="date" name="fecha_inicio" required 
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
         />
       </div>
 
@@ -108,7 +108,7 @@ export default function CouponForm() {
         <label className="text-sm font-bold text-gray-700">Fecha de Fin</label>
         <input 
           type="date" name="fecha_fin" required 
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
         />
       </div>
 
@@ -116,7 +116,7 @@ export default function CouponForm() {
         <button 
           type="submit" 
           disabled={isPending}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 bg-[#31572C] hover:bg-indigo-700 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
         >
           {isPending ? (
             <><Loader2 className="w-5 h-5 animate-spin" /> Creando Cupón...</>

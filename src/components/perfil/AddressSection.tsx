@@ -41,7 +41,7 @@ export default function AddressSection({ direcciones }: { direcciones: Direccion
     <section className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm mt-6">
       <div className="flex justify-between items-center mb-5">
         <h2 className="text-lg font-bold text-gray-900">Direcciones de envío</h2>
-        <button onClick={() => { setDireccionEditando(null); setIsModalOpen(true); }} className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2 px-4 rounded-lg transition-colors text-sm">
+        <button onClick={() => { setDireccionEditando(null); setIsModalOpen(true); }} className="flex items-center gap-2 bg-[#31572C]/10 hover:bg-[#31572C]/20 text-[#31572C] font-bold py-2 px-4 rounded-lg transition-colors text-sm">
           <Plus className="w-4 h-4" /> Nueva
         </button>
       </div>
@@ -52,13 +52,13 @@ export default function AddressSection({ direcciones }: { direcciones: Direccion
           <p className="text-gray-500 text-sm italic py-4 text-center border-2 border-dashed rounded-lg">No tenés direcciones guardadas.</p>
         ) : (
           direcciones.map((dir) => (
-            <div key={dir.id} className={`border rounded-xl p-5 flex flex-col md:flex-row md:items-start justify-between gap-4 ${dir.principal ? 'bg-indigo-50/30 border-indigo-200' : 'bg-gray-50 border-gray-200'}`}>
+            <div key={dir.id} className={`border rounded-xl p-5 flex flex-col md:flex-row md:items-start justify-between gap-4 ${dir.principal ? 'bg-[#31572C]/5 border-[#31572C]/20' : 'bg-gray-50 border-gray-200'}`}>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   {getIcon(dir.titulo)}
                   <span className="font-bold text-gray-900">{dir.titulo}</span>
                   {dir.principal && (
-                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full ml-2">Principal</span>
+                    <span className="bg-[#31572C]/15 text-[#31572C] text-xs font-bold px-2.5 py-0.5 rounded-full ml-2">Principal</span>
                   )}
                 </div>
                 <p className="text-sm text-gray-700 mt-3 font-medium">
@@ -141,7 +141,7 @@ export default function AddressSection({ direcciones }: { direcciones: Direccion
                 </div>
 
                 <div className="flex items-center gap-3 mt-2">
-                  <input type="checkbox" name="principal" id="principal" defaultChecked={direccionEditando?.principal} className="w-4 h-4 text-indigo-600" />
+                  <input type="checkbox" name="principal" id="principal" defaultChecked={direccionEditando?.principal} className="w-4 h-4 text-[#31572C]" />
                   <label htmlFor="principal" className="text-sm font-medium text-gray-700 cursor-pointer">
                     Establecer como principal
                   </label>
@@ -151,7 +151,7 @@ export default function AddressSection({ direcciones }: { direcciones: Direccion
                   <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-300 rounded-lg">
                     Cancelar
                   </button>
-                  <button type="submit" className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                  <button type="submit" className="px-5 py-2 text-sm font-bold text-white bg-[#31572C] rounded-lg hover:bg-[#90A955]">
                     {direccionEditando ? 'Guardar cambios' : 'Guardar dirección'}
                   </button>
                 </div>

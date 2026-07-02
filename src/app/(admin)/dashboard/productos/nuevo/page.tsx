@@ -17,7 +17,7 @@ export default async function NuevoProductoPage() {
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20 pt-8">
       <div className="max-w-4xl mx-auto px-4 mb-6">
-        <Link href="/dashboard" className="flex items-center gap-2 text-indigo-600 font-bold hover:underline w-fit">
+        <Link href="/dashboard" className="flex items-center gap-2 text-[#31572C] font-bold hover:underline w-fit">
           <ChevronLeft className="w-4 h-4" /> Volver al Dashboard
         </Link>
         <h1 className="text-3xl font-black text-gray-900 mt-4">Cargar Nuevo Producto</h1>

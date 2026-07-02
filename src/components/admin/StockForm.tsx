@@ -50,7 +50,7 @@ export default function StockForm() {
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
       <div className="md:col-span-2 mb-2">
         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-          <PackagePlus className="w-5 h-5 text-indigo-600" /> Ingreso de Mercadería (Stock)
+          <PackagePlus className="w-5 h-5 text-[#31572C]" /> Ingreso de Mercadería (Stock)
         </h2>
         <p className="text-sm text-gray-500">Selecciona el proveedor y la variante de producto específica para registrar una compra. Este ingreso sumará al stock disponible inmediatamente.</p>
       </div>
@@ -59,7 +59,7 @@ export default function StockForm() {
         <label className="text-sm font-bold text-gray-700">Proveedor</label>
         <select
           name="proveedorId" required defaultValue=""
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-white"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all bg-white"
         >
           <option value="" disabled>Selecciona un proveedor...</option>
           {proveedores.map(p => (
@@ -74,7 +74,7 @@ export default function StockForm() {
           required
           value={selectedVariante}
           onChange={(e) => setSelectedVariante(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all bg-white"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all bg-white"
         >
           <option value="" disabled>Selecciona la variante que ingresa al stock...</option>
           {variantes.map((v, i) => (
@@ -90,7 +90,7 @@ export default function StockForm() {
           <label className="text-sm font-bold text-gray-700">Cantidad (Unidades Totales)</label>
           <input
             type="number" name="cantidad" min="1" required
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
           />
         </div>
 
@@ -100,7 +100,7 @@ export default function StockForm() {
             <span className="absolute left-3 top-2.5 text-gray-400">$</span>
             <input
               type="number" name="costoUnitario" min="0" step="0.01" required
-              className="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              className="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-2.5 focus:ring-2 focus:ring-[#31572C] outline-none transition-all"
             />
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function StockForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 bg-[#31572C] hover:bg-indigo-700 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
         >
           {isPending ? (
             <><Loader2 className="w-5 h-5 animate-spin" /> Procesando Compra...</>

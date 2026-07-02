@@ -165,13 +165,14 @@ export const AdminRepository = {
         p.nombre, 
         p.codigo,
         p.activo,
+        p.es_destacado,
         COUNT(v.id) as cantidad_variantes,
         COALESCE(MIN(v.precio), 0) as precio_base,
         COALESCE(SUM(s.stock_disponible), 0) as stock_total
       FROM producto p
       LEFT JOIN producto_variante v ON p.id = v.producto_id
       LEFT JOIN v_stock_actual s ON v.id = s.producto_variante_id
-      GROUP BY p.id, p.nombre, p.codigo, p.activo
+      GROUP BY p.id, p.nombre, p.codigo, p.activo, p.es_destacado
       ORDER BY p.nombre ASC;
     `;
     const result = await db.query(query);
@@ -181,6 +182,11 @@ export const AdminRepository = {
   async cambiarVisibilidadProducto(id: string, activo: boolean) {
     const query = `UPDATE producto SET activo = $1 WHERE id = $2`;
     await db.query(query, [activo, id]);
+  },
+
+  async actualizarEstadoDestacado(id: string, esDestacado: boolean) {
+    const query = `UPDATE producto SET es_destacado = $1 WHERE id = $2`;
+    await db.query(query, [esDestacado, id]);
   },
 
   async toggleProductoDestacado(productoId: string, destacar: boolean) {
@@ -227,7 +233,7 @@ export const AdminRepository = {
           ELSE 'Vencido'
         END as estado
       FROM promocion
-      ORDER BY fecha_fin DESC, fecha_inicio DESC
+      ORDER BY fecha_inicio DESC
     `;
     const result = await db.query(query);
     return result.rows;

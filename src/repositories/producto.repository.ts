@@ -91,9 +91,9 @@ export const ProductoRepository = {
 
       let orderLogic = "og.promedio_estrellas_sort DESC NULLS LAST, pf.producto_id DESC";
       if (sortBy === 'price_asc') {
-        orderLogic = "pg.precio_final ASC, pf.producto_id ASC";
+        orderLogic = "pg.precio_ordenamiento ASC, pf.producto_id DESC";
       } else if (sortBy === 'price_desc') {
-        orderLogic = "pg.precio_final DESC, pf.producto_id DESC";
+        orderLogic = "pg.precio_ordenamiento DESC, pf.producto_id DESC";
       }
 
       const productsQuery = `
@@ -105,28 +105,32 @@ export const ProductoRepository = {
         opiniones_global AS (
             SELECT pv.producto_id, 
                    AVG(o.estrellas)::numeric(2,1) AS promedio_estrellas_real,
-                   COALESCE(AVG(o.estrellas), 4.0)::numeric(2,1) AS promedio_estrellas_sort
+                   AVG(o.estrellas)::numeric(2,1) AS promedio_estrellas_sort
             FROM producto_variante pv
             LEFT JOIN opinion o ON pv.id = o.producto_variante_id
             WHERE pv.producto_id IN (SELECT producto_id FROM productos_filtrados)
             GROUP BY pv.producto_id
         ),
         precios_global AS (
-            SELECT producto_id, MIN(
-                CASE 
-                    WHEN tipo_promocion = 'descuento' AND valor_descuento IS NOT NULL 
-                    THEN precio * (1 - valor_descuento / 100)
-                    WHEN tipo_promocion = '2x1'
-                    THEN precio * 0.5
-                    ELSE precio
-                END
-            ) as precio_final
+            SELECT producto_id, 
+                   MIN(precio) as precio_base,
+                   MIN(
+                     CASE 
+                         WHEN tipo_promocion = 'descuento' AND valor_descuento IS NOT NULL 
+                         THEN precio * (1 - valor_descuento / 100)
+                         WHEN tipo_promocion = '2x1'
+                         THEN precio * 0.5
+                         ELSE precio
+                     END
+                   ) as precio_ordenamiento
             FROM v_producto_detalle
             WHERE producto_id IN (SELECT producto_id FROM productos_filtrados)
             GROUP BY producto_id
         ),
         paginados AS (
             SELECT pf.producto_id, 
+                   pg.precio_base,
+                   pg.precio_ordenamiento,
                    ROW_NUMBER() OVER(ORDER BY ${orderLogic}) as sort_order
             FROM productos_filtrados pf
             LEFT JOIN opiniones_global og ON pf.producto_id = og.producto_id
@@ -134,7 +138,8 @@ export const ProductoRepository = {
             ORDER BY ${orderLogic}
             LIMIT $1 OFFSET $2
         )
-        SELECT v.*, p.sort_order, og.promedio_estrellas_real as promedio_estrellas,
+        SELECT v.*, p.sort_order, p.precio_base as rep_precio_base, p.precio_ordenamiento as rep_precio_final,
+               og.promedio_estrellas_real as promedio_estrellas,
                COALESCE(vsa.stock_disponible, v.stock_disponible) as real_stock
         FROM v_producto_detalle v
         INNER JOIN paginados p ON v.producto_id = p.producto_id
@@ -160,17 +165,9 @@ export const ProductoRepository = {
 
       for (const row of result.rows) {
         if (!grouped[row.producto_id]) {
-          const precioBase = Number(row.precio) || 0;
-          let precioFinal = precioBase;
+          const precioBase = Number(row.rep_precio_base) || Number(row.precio) || 0;
+          const precioFinal = Number(row.rep_precio_final) || precioBase;
           const promocionActiva = !!row.tipo_promocion;
-
-          if (promocionActiva) {
-            if (row.tipo_promocion === 'descuento' && row.valor_descuento) {
-              precioFinal = precioBase * (1 - Number(row.valor_descuento) / 100);
-            } else if (row.tipo_promocion === '2x1') {
-              precioFinal = precioBase * 0.5;
-            }
-          }
 
           grouped[row.producto_id] = {
             id: row.producto_id,
@@ -289,7 +286,9 @@ export const ProductoRepository = {
           precio: precioBase,
           precioFinal: precioFinal,
           stock: stockParseado,
-          imagen: row.imagen_principal
+          imagen: row.imagen_principal,
+          promocion: row.tipo_promocion ? { tipo: row.tipo_promocion, descuento: Number(row.valor_descuento) } : null,
+          promocionActiva: !!row.tipo_promocion
         };
       });
 
@@ -405,22 +404,25 @@ export const ProductoRepository = {
   async obtenerProductosDestacados() {
     try {
       const query = `
-        WITH ranked_productos AS (
-            SELECT p.id, COALESCE(SUM(lc.cantidad), 0) as total_ventas
-            FROM producto p
-            LEFT JOIN producto_variante pv ON p.id = pv.producto_id
-            LEFT JOIN linea_de_compra lc ON pv.id = lc.producto_variante_id
-            LEFT JOIN compra c ON lc.compra_id = c.id AND c.estado_pago = 'confirmado'
-            WHERE p.activo = TRUE
-            GROUP BY p.id
-            ORDER BY total_ventas DESC, p.id ASC
-            LIMIT 3
+        WITH destacados AS (
+            SELECT id as producto_id
+            FROM producto
+            WHERE es_destacado = TRUE AND activo = TRUE
+            ORDER BY id DESC
+            LIMIT 4
+        ),
+        opiniones_avg AS (
+            SELECT pv.producto_id, COALESCE(AVG(o.estrellas), NULL)::numeric(2,1) AS promedio_estrellas
+            FROM producto_variante pv
+            LEFT JOIN opinion o ON pv.id = o.producto_variante_id
+            WHERE pv.producto_id IN (SELECT producto_id FROM destacados)
+            GROUP BY pv.producto_id
         )
-        SELECT p.id as producto_id, p.nombre, p.codigo, v.precio, v.imagen_url as imagen_principal
-        FROM producto p
-        JOIN ranked_productos rp ON p.id = rp.id
-        LEFT JOIN producto_variante v ON p.id = v.producto_id
-        ORDER BY rp.total_ventas DESC, p.id ASC, v.id ASC
+        SELECT v.*, oa.promedio_estrellas
+        FROM v_producto_detalle v
+        INNER JOIN destacados d ON v.producto_id = d.producto_id
+        LEFT JOIN opiniones_avg oa ON v.producto_id = oa.producto_id
+        ORDER BY d.producto_id DESC, v.variante_id ASC;
       `;
       const result = await db.query(query);
 
@@ -428,12 +430,28 @@ export const ProductoRepository = {
 
       for (const row of result.rows) {
         if (!grouped[row.producto_id]) {
+          let precioBase = Number(row.precio) || 0;
+          let precioCalculado = precioBase;
+
+          if (row.tipo_promocion?.toLowerCase() === 'descuento' && row.valor_descuento) {
+            precioCalculado = precioBase * (1 - Number(row.valor_descuento) / 100);
+          } else if (row.tipo_promocion?.toLowerCase() === '2x1') {
+            precioCalculado = precioBase * 0.5;
+          }
+
           grouped[row.producto_id] = {
             id: row.producto_id,
             nombre: row.nombre,
             codigo: row.codigo,
-            precioBase: Number(row.precio) || 0,
+            precioBase,
+            precioFinal: precioCalculado,
+            promedio_estrellas: row.promedio_estrellas !== null ? Number(row.promedio_estrellas) : null,
             imagen: row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : "/camisa.png",
+            slug: row.codigo,
+            promocion: row.tipo_promocion ? {
+              tipo: row.tipo_promocion,
+              descuento: Number(row.valor_descuento)
+            } : null
           };
         } else if (grouped[row.producto_id].imagen === "/camisa.png") {
           const fallbackImage = row.imagen_principal && !row.imagen_principal.includes('example.com') ? row.imagen_principal : null;
@@ -443,7 +461,7 @@ export const ProductoRepository = {
         }
       }
 
-      return Object.values(grouped).slice(0, 3);
+      return Object.values(grouped).slice(0, 4);
     } catch (error) {
       console.error("Error al obtener productos destacados:", error);
       return [];

@@ -15,11 +15,11 @@ export default async function CuponesPage() {
     <div className="min-h-screen bg-gray-50/50 pb-20">
       <div className="bg-white border-b border-gray-200 mb-8">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <Link href="/dashboard" className="flex items-center gap-2 text-indigo-600 font-bold hover:underline w-fit mb-6">
+          <Link href="/dashboard" className="flex items-center gap-2 text-[#31572C] font-bold hover:underline w-fit mb-6">
             <ChevronLeft className="w-4 h-4" /> Volver al Dashboard
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <Ticket className="w-6 h-6 text-indigo-600" />
+            <Ticket className="w-6 h-6 text-[#31572C]" />
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">
               Creación de Cupones
             </h1>
@@ -74,7 +74,7 @@ export default async function CuponesPage() {
                               </div>
                             </td>
                             <td className="p-4">
-                              <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md font-medium text-xs">
+                              <span className="inline-flex items-center gap-1.5 bg-[#31572C]/10 text-indigo-700 px-2.5 py-1 rounded-md font-medium text-xs">
                                 {promo.tipo === 'descuento' ? (
                                   <><Percent className="w-3.5 h-3.5" /> {(Number(promo.descuento) * 100).toFixed(0)}% OFF</>
                                 ) : (

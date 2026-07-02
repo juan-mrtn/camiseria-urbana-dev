@@ -5,7 +5,7 @@ export default function Footer() {
         <div>
           <h3 className="font-bold mb-4">La Camisería Urbana</h3>
           <p className="text-sm text-gray-600">Camisas de calidad premium. Envíos a todo el país. Atención personalizada.</p>
-          <p className="text-sm text-indigo-600 mt-2">soporte@camiseria.com</p>
+          <p className="text-sm text-[#31572C] mt-2">soporte@camiseria.com</p>
         </div>
         <div>
           <h4 className="font-bold mb-4 uppercase text-xs tracking-widest">Información</h4>
@@ -18,9 +18,9 @@ export default function Footer() {
         <div>
           <h4 className="font-bold mb-4 uppercase text-xs tracking-widest">Redes Sociales</h4>
           <div className="flex gap-4 text-sm text-gray-600">
-            <a href="#" className="hover:text-indigo-600">Instagram</a>
-            <a href="#" className="hover:text-indigo-600">Facebook</a>
-            <a href="#" className="hover:text-indigo-600">Twitter (X)</a>
+            <a href="#" className="hover:text-[#31572C]">Instagram</a>
+            <a href="#" className="hover:text-[#31572C]">Facebook</a>
+            <a href="#" className="hover:text-[#31572C]">Twitter (X)</a>
           </div>
         </div>
       </div>

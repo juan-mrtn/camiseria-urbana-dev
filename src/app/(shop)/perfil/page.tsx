@@ -54,8 +54,9 @@ export default async function ProfilePage() {
               <input 
                 type="text" 
                 defaultValue={usuarioDb.nombre} 
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none font-medium"
+                className="w-full border border-gray-300 bg-gray-50 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed focus:outline-none font-medium"
                 readOnly
+                disabled
               />
             </div>
             <div>
@@ -63,8 +64,9 @@ export default async function ProfilePage() {
               <input 
                 type="email" 
                 defaultValue={usuarioDb.email} 
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none font-medium"
+                className="w-full border border-gray-300 bg-gray-50 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed focus:outline-none font-medium"
                 readOnly
+                disabled
               />
             </div>
             

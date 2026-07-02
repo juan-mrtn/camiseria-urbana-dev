@@ -3,6 +3,8 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { enviarCorreoPromocional, generarHtmlPromocional } from "@/lib/email";
+import { UsuarioRepository } from "@/repositories/usuario.repository";
 
 export interface PromoData {
   tipo: 'descuento' | '2x1';
@@ -49,6 +51,42 @@ export async function crearCampanaPromocional(promoData: PromoData, varianteIds:
     await client.query(updateQuery, [promocionId, varianteIds]);
 
     await client.query('COMMIT');
+
+    // --- SEND EMAILS ASYNCHRONOUSLY ---
+    const envUserEmail = process.env.EMAIL_USER;
+    if (envUserEmail) {
+      const nombrePromocion = promoData.tipo === '2x1' ? '¡Promoción 2x1!' : `¡Descuento del ${promoData.descuento}%!`;
+      const descripcion = promoData.descripcion;
+      const ctaUrl = `${process.env.NEXTAUTH_URL}/ofertas`;
+
+      try {
+        const usuarios = await UsuarioRepository.obtenerUsuariosSuscritos();
+        if (usuarios.length > 0) {
+          const htmlContent = generarHtmlPromocional(
+            nombrePromocion,
+            descripcion,
+            ctaUrl,
+            promoData.tipo === '2x1' ? '2x1' : `-${promoData.descuento}%`
+          );
+
+          const results = await Promise.allSettled(
+            usuarios.map((user) => 
+              enviarCorreoPromocional(
+                user.email,
+                `¡Nueva Oferta Exclusiva: ${nombrePromocion}!`,
+                htmlContent
+              )
+            )
+          );
+          console.log(`[Newsletter] Se procesaron ${results.length} correos para la promoción usando Nodemailer.`);
+        }
+      } catch (err) {
+        console.error("[Newsletter] Error enviando emails de promoción:", err);
+      }
+    } else {
+      console.warn("[Newsletter] No EMAIL_USER found, correos promocionales omitidos.");
+    }
+    // ----------------------------------
 
     // Invalidar caché público
     revalidatePath("/", "layout");
