@@ -1,5 +1,7 @@
 import { getAdminMetricsAction } from "@/actions/admin.actions";
 import { DollarSign, ShoppingCart, TrendingUp, Package } from "lucide-react";
+import RevenueChart from "@/components/admin/RevenueChart";
+import RecentSalesTable from "@/components/admin/RecentSalesTable";
 
 export default async function MetricasPage() {
   const metrics = await getAdminMetricsAction();
@@ -108,49 +110,11 @@ export default async function MetricasPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Ingresos Mensuales (Gráfico de Barras CSS) */}
-        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-[#31572C]/10 flex items-center justify-center text-[#31572C]">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Histórico de Ingresos</h2>
-              <p className="text-sm text-gray-500">Evolución mensual de ventas confirmadas.</p>
-            </div>
-          </div>
-
-          {metrics.ingresosMensuales.length === 0 ? (
-            <div className="text-center py-10 text-gray-500 bg-gray-50 rounded-xl">
-              No hay datos históricos mensuales.
-            </div>
-          ) : (
-            <div className="flex items-end gap-2 h-64 mt-4">
-              {metrics.ingresosMensuales.map((mesData, idx) => {
-                const maxIngreso = Math.max(...metrics.ingresosMensuales.map(m => m.ingresos), 1);
-                const heightPercent = Math.max(5, Math.round((mesData.ingresos / maxIngreso) * 100));
-                
-                return (
-                  <div key={idx} className="flex-1 flex flex-col justify-end items-center group relative">
-                    {/* Tooltip Hover */}
-                    <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs py-1 px-2 rounded font-bold pointer-events-none whitespace-nowrap z-10">
-                      ${mesData.ingresos.toLocaleString('es-AR')}
-                    </div>
-                    {/* Barra */}
-                    <div 
-                      className="w-full bg-[#31572C]/20 hover:bg-[#90A955] rounded-t-md transition-all duration-500 ease-out cursor-pointer"
-                      style={{ height: `${heightPercent}%` }}
-                    />
-                    {/* Etiqueta Mes */}
-                    <span className="text-xs text-gray-500 mt-2 rotate-45 md:rotate-0 origin-left">
-                      {mesData.mes}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        {/* Ingresos (Gráfico Dinámico Mensual / Semanal) */}
+        <RevenueChart 
+          monthlyData={metrics.ingresosMensuales} 
+          weeklyData={metrics.ingresosSemanales} 
+        />
 
         {/* Top Compradores */}
         <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
@@ -200,6 +164,9 @@ export default async function MetricasPage() {
             </div>
           )}
         </div>
+
+        {/* Audit Trail / Registro Auditado de Transacciones */}
+        <RecentSalesTable ventas={metrics.ventasDetalladas} />
       </div>
     </div>
   );

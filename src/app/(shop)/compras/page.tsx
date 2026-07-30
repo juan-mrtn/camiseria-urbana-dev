@@ -2,7 +2,8 @@ import { getPurchaseHistoryAction } from "@/actions/compra.actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Clock, XCircle, ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
+import OrderStatusBadge from "@/components/shop/OrderStatusBadge";
 
 export const dynamic = 'force-dynamic';
 
@@ -42,9 +43,6 @@ export default async function ComprasPage() {
       ) : (
         <div className="space-y-6">
           {compras.map((compra: any) => {
-            const isConfirmado = compra.estado_pago === 'confirmado';
-            const isRechazado = compra.estado_pago === 'rechazado';
-
             return (
               <div key={compra.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 {/* Header del pedido */}
@@ -58,15 +56,7 @@ export default async function ComprasPage() {
                   </div>
 
                   {/* Badge Estado */}
-                  <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${isConfirmado ? 'bg-green-50 text-green-700 border-green-200' :
-                      isRechazado ? 'bg-red-50 text-red-700 border-red-200' :
-                        'bg-orange-50 text-orange-700 border-orange-200'
-                    }`}>
-                    {isConfirmado && <Check className="w-3.5 h-3.5" />}
-                    {!isConfirmado && !isRechazado && <Clock className="w-3.5 h-3.5" />}
-                    {isRechazado && <XCircle className="w-3.5 h-3.5" />}
-                    {isConfirmado ? 'Pago exitoso' : isRechazado ? 'Rechazado' : 'Procesando'}
-                  </div>
+                  <OrderStatusBadge status={compra.estado_pago} />
                 </div>
 
                 {/* Items del pedido */}

@@ -85,6 +85,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const cartTotal = items.reduce((total, item) => {
+    // Si el producto no tiene stock o la cantidad excede el stock disponible, NO se suma al total
+    if (item.stock_disponible !== undefined && (item.stock_disponible === 0 || item.cantidad > item.stock_disponible)) {
+      return total;
+    }
+
     let lineTotal = item.precio * item.cantidad; // Fallback a precio actual
     
     // Si tenemos el precio original, lo usamos como base para calcular los descuentos reales

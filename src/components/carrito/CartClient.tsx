@@ -37,8 +37,24 @@ export default function CartClient({ dbItems }: CartClientProps) {
 
   // Si dbItems existe (usuario logueado), usamos los datos de la DB como fuente de verdad
   const items = dbItems !== null ? dbItems : localItems;
-  const cartTotalOriginal = items.reduce((total, item) => total + (item.precioOriginal || item.precio) * item.cantidad, 0);
-  const cartTotal = items.reduce((total, item) => total + item.precio * item.cantidad, 0);
+
+  // Filtrar items sin stock / con error de stock para el cálculo del total del carrito
+  const itemsValidos = items.filter(item => !(item.stock_disponible !== undefined && (item.stock_disponible === 0 || item.cantidad > item.stock_disponible)));
+
+  const cartTotalOriginal = itemsValidos.reduce((total, item) => total + (item.precioOriginal || item.precio) * item.cantidad, 0);
+  const cartTotal = itemsValidos.reduce((total, item) => {
+    let lineTotal = item.precio * item.cantidad;
+    const basePrice = item.precioOriginal || item.precio;
+
+    if (item.promocion?.tipo === '2x1') {
+      const pagables = Math.floor(item.cantidad / 2) + (item.cantidad % 2);
+      lineTotal = basePrice * pagables;
+    } else if (item.promocion?.tipo === 'descuento' && item.promocion.descuento) {
+      lineTotal = basePrice * (1 - item.promocion.descuento / 100) * item.cantidad;
+    }
+
+    return total + lineTotal;
+  }, 0);
   const totalDescuento = cartTotalOriginal - cartTotal;
 
   const hasStockErrors = items.some(item => item.stock_disponible !== undefined && item.cantidad > item.stock_disponible);
@@ -170,14 +186,27 @@ export default function CartClient({ dbItems }: CartClientProps) {
                     </div>
                   </div>
                   <div className="flex flex-col items-start">
-                    {item.precioOriginal && item.precioOriginal > item.precio && (
-                      <p className="text-sm text-gray-400 line-through">
-                        ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
-                      </p>
+                    {hasStockError ? (
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200 block">
+                          No sumado al total
+                        </span>
+                        <p className="text-sm text-gray-400 line-through mt-0.5">
+                          ${(item.precio * item.cantidad).toLocaleString('es-AR')}
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {item.precioOriginal && item.precioOriginal > item.precio && (
+                          <p className="text-sm text-gray-400 line-through">
+                            ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
+                          </p>
+                        )}
+                        <p className="font-black text-[#31572C] text-lg">
+                          ${(item.precio * item.cantidad).toLocaleString('es-AR')}
+                        </p>
+                      </>
                     )}
-                    <p className="font-black text-[#31572C] text-lg">
-                      ${(item.precio * item.cantidad).toLocaleString('es-AR')}
-                    </p>
                   </div>
                 </div>
               </div>

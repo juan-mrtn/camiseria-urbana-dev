@@ -52,8 +52,24 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
 
   // Usamos los items de la base de datos si existen (ya que el usuario está logueado en checkout)
   const items = dbCartItems !== null ? dbCartItems : localItems;
-  const cartTotalOriginal = items.reduce((total, item) => total + (item.precioOriginal || item.precio) * item.cantidad, 0);
-  const cartTotal = items.reduce((total, item) => total + item.precio * item.cantidad, 0);
+
+  // Filtrar items sin stock / con error de stock para el cálculo del total del pedido
+  const itemsValidos = items.filter(item => !(item.stock_disponible !== undefined && (item.stock_disponible === 0 || item.cantidad > item.stock_disponible)));
+
+  const cartTotalOriginal = itemsValidos.reduce((total, item) => total + (item.precioOriginal || item.precio) * item.cantidad, 0);
+  const cartTotal = itemsValidos.reduce((total, item) => {
+    let lineTotal = item.precio * item.cantidad;
+    const basePrice = item.precioOriginal || item.precio;
+
+    if (item.promocion?.tipo === '2x1') {
+      const pagables = Math.floor(item.cantidad / 2) + (item.cantidad % 2);
+      lineTotal = basePrice * pagables;
+    } else if (item.promocion?.tipo === 'descuento' && item.promocion.descuento) {
+      lineTotal = basePrice * (1 - item.promocion.descuento / 100) * item.cantidad;
+    }
+
+    return total + lineTotal;
+  }, 0);
   const totalDescuento = cartTotalOriginal - cartTotal;
 
   // Redirigir al catálogo si el carrito está verdaderamente vacío
@@ -193,14 +209,27 @@ export default function CheckoutClient({ session, direcciones, dbCartItems, carr
                   <p className="text-xs text-gray-500 mt-0.5">Talla {item.talle} · Cant. {item.cantidad}</p>
                 </div>
                 <div className="flex flex-col items-end">
-                  {item.precioOriginal && item.precioOriginal > item.precio && (
-                    <span className="text-xs text-gray-400 line-through">
-                      ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
-                    </span>
+                  {item.stock_disponible !== undefined && (item.stock_disponible === 0 || item.cantidad > item.stock_disponible) ? (
+                    <>
+                      <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                        No sumado al total
+                      </span>
+                      <span className="text-xs text-gray-400 line-through mt-0.5">
+                        ${(item.precio * item.cantidad).toLocaleString('es-AR')}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      {item.precioOriginal && item.precioOriginal > item.precio && (
+                        <span className="text-xs text-gray-400 line-through">
+                          ${(item.precioOriginal * item.cantidad).toLocaleString('es-AR')}
+                        </span>
+                      )}
+                      <span className="font-bold text-gray-900">
+                        ${(item.precio * item.cantidad).toLocaleString('es-AR')}
+                      </span>
+                    </>
                   )}
-                  <span className="font-bold text-gray-900">
-                    ${(item.precio * item.cantidad).toLocaleString('es-AR')}
-                  </span>
                 </div>
               </div>
             ))}

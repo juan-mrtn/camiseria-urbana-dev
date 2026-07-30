@@ -3,7 +3,8 @@ import { CompraRepository } from "@/repositories/compra.repository";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Clock, XCircle, ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
+import OrderStatusBadge from "@/components/shop/OrderStatusBadge";
 
 export const dynamic = 'force-dynamic';
 
@@ -20,9 +21,6 @@ export default async function CompraDetallePage({ params }: { params: Promise<{ 
   if (!compra) {
     notFound();
   }
-
-  const isConfirmado = compra.estado_pago === 'confirmado';
-  const isRechazado = compra.estado_pago === 'rechazado';
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 min-h-[70vh]">
@@ -42,15 +40,7 @@ export default async function CompraDetallePage({ params }: { params: Promise<{ 
                 Pedido <span className="font-semibold text-gray-700">#{compra.numero}</span> • {new Date(compra.fecha).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
-            <div className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border ${isConfirmado ? 'bg-green-50 text-green-700 border-green-200' :
-                isRechazado ? 'bg-red-50 text-red-700 border-red-200' :
-                  'bg-orange-50 text-orange-700 border-orange-200'
-              }`}>
-              {isConfirmado && <Check className="w-4 h-4" />}
-              {!isConfirmado && !isRechazado && <Clock className="w-4 h-4" />}
-              {isRechazado && <XCircle className="w-4 h-4" />}
-              {isConfirmado ? 'Pago exitoso' : isRechazado ? 'Rechazado' : 'Procesando pago'}
-            </div>
+            <OrderStatusBadge status={compra.estado_pago} size="md" />
           </div>
         </div>
 

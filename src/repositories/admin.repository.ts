@@ -239,6 +239,78 @@ export const AdminRepository = {
     return result.rows;
   },
 
+  async obtenerIngresosSemanales() {
+    const query = `
+      SELECT 
+        DATE_TRUNC('week', fecha) AS fecha_inicio_semana,
+        SUM(total) AS total_ingresos
+      FROM compra
+      WHERE estado_pago = 'confirmado'
+      GROUP BY DATE_TRUNC('week', fecha)
+      ORDER BY fecha_inicio_semana ASC
+      LIMIT 12;
+    `;
+    const result = await db.query(query);
+    return result.rows.map(row => ({
+      semana: row.fecha_inicio_semana,
+      ingresos: Number(row.total_ingresos)
+    }));
+  },
+
+  async obtenerHistorialVentasDetallado() {
+    const query = `
+      SELECT 
+        c.id AS compra_id,
+        c.numero AS numero_pedido,
+        c.fecha AS fecha_creacion,
+        c.estado_pago AS estado,
+        c.total,
+        u.nombre AS cliente_nombre,
+        u.email AS cliente_email,
+        CASE 
+          WHEN d.id IS NOT NULL THEN CONCAT(d.calle, ' ', d.numero, COALESCE(' Depto ' || d.departamento, ''), ', ', d.ciudad, ', ', d.provincia, ' (CP ', d.codigo_postal, ')')
+          ELSE 'Retiro en Sucursal / Sin dirección'
+        END AS direccion_envio,
+        COALESCE(
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'producto', COALESCE(p.nombre, cb.nombre, 'Producto'),
+              'cantidad', lc.cantidad,
+              'talle', COALESCE(pv.talle, 'Único'),
+              'precio', lc.precio_unitario
+            )
+          ) FILTER (WHERE lc.id IS NOT NULL),
+          '[]'
+        ) AS items
+      FROM compra c
+      JOIN usuario u ON c.usuario_id = u.id
+      LEFT JOIN direccion d ON c.direccion_id = d.id
+      LEFT JOIN linea_de_compra lc ON c.id = lc.compra_id
+      LEFT JOIN producto_variante pv ON lc.producto_variante_id = pv.id
+      LEFT JOIN producto p ON pv.producto_id = p.id
+      LEFT JOIN combo cb ON lc.combo_id = cb.id
+      GROUP BY c.id, c.numero, c.fecha, c.estado_pago, c.total, u.nombre, u.email, d.id, d.calle, d.numero, d.departamento, d.ciudad, d.provincia, d.codigo_postal
+      ORDER BY c.fecha DESC;
+    `;
+    const result = await db.query(query);
+    return result.rows.map(row => ({
+      compra_id: row.compra_id,
+      numero_pedido: row.numero_pedido ? String(row.numero_pedido) : String(row.compra_id).slice(0, 8),
+      fecha_creacion: row.fecha_creacion,
+      estado: row.estado,
+      total: Number(row.total),
+      direccion_envio: row.direccion_envio,
+      cliente_nombre: row.cliente_nombre,
+      cliente_email: row.cliente_email,
+      items: (row.items || []).map((item: any) => ({
+        producto: item.producto,
+        cantidad: Number(item.cantidad),
+        talle: item.talle,
+        precio: Number(item.precio)
+      }))
+    }));
+  },
+
   async obtenerMetricasVentas() {
     const queryMetricas = `
       SELECT 
@@ -274,6 +346,17 @@ export const AdminRepository = {
       ORDER BY mes ASC
     `;
 
+    const querySemanal = `
+      SELECT 
+        DATE_TRUNC('week', fecha) AS fecha_inicio_semana,
+        SUM(total) AS total_ingresos
+      FROM compra
+      WHERE estado_pago = 'confirmado'
+      GROUP BY DATE_TRUNC('week', fecha)
+      ORDER BY fecha_inicio_semana ASC
+      LIMIT 12;
+    `;
+
     const queryTopBuyers = `
       SELECT 
         u.nombre,
@@ -288,11 +371,13 @@ export const AdminRepository = {
       LIMIT 5
     `;
 
-    const [metricasRes, topRes, mensualRes, buyersRes] = await Promise.all([
+    const [metricasRes, topRes, mensualRes, semanalRes, buyersRes, ventasDetalladas] = await Promise.all([
       db.query(queryMetricas),
       db.query(queryTop),
       db.query(queryMensual),
-      db.query(queryTopBuyers)
+      db.query(querySemanal),
+      db.query(queryTopBuyers),
+      this.obtenerHistorialVentasDetallado()
     ]);
 
     return {
@@ -307,12 +392,17 @@ export const AdminRepository = {
         mes: row.mes,
         ingresos: Number(row.ingresos)
       })),
+      ingresosSemanales: semanalRes.rows.map(row => ({
+        semana: row.fecha_inicio_semana,
+        ingresos: Number(row.total_ingresos)
+      })),
       clientesTop: buyersRes.rows.map(row => ({
         nombre: row.nombre,
         email: row.email,
         cantidad_compras: Number(row.cantidad_compras),
         total_gastado: Number(row.total_gastado)
-      }))
+      })),
+      ventasDetalladas
     };
   }
 };

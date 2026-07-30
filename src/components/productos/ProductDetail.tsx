@@ -11,6 +11,7 @@ import BotonFavorito from '@/components/shop/BotonFavorito';
 import { addToCartAction } from '@/actions/carrito.actions';
 import ProductImageGallery from '@/components/shop/ProductImageGallery';
 import ShippingCalculator from '@/components/shop/ShippingCalculator';
+import ReviewList from '@/components/product/ReviewList';
 
 interface ProductDetailProps {
   favoritosIniciales?: string[];
@@ -67,7 +68,7 @@ export default function ProductDetail({ producto, favoritosIniciales = [], userR
   const [flyingDrops, setFlyingDrops] = useState<{ id: number; startX: number; startY: number; targetX: number; targetY: number }[]>([]);
 
   const tallesDisponibles = Array.from(new Set(producto.variantes.map(v => v.talle)));
-  
+
   const precioBase = selectedVariant?.precio ?? producto.precioBase;
   const precioFinal = selectedVariant?.precioFinal ?? producto.precioFinal;
 
@@ -90,9 +91,9 @@ export default function ProductDetail({ producto, favoritosIniciales = [], userR
       const startY = buttonRect ? buttonRect.top + buttonRect.height / 2 - 12 : e.clientY - 12;
       const target = getCartTarget();
       const id = Date.now();
-      
+
       setFlyingDrops(prev => [...prev, { id, startX, startY, targetX: target.x, targetY: target.y }]);
-      
+
       setTimeout(() => {
         setFlyingDrops(prev => prev.filter(drop => drop.id !== id));
       }, 1000);
@@ -132,8 +133,8 @@ export default function ProductDetail({ producto, favoritosIniciales = [], userR
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2">
-        <Link href="/" className="hover:text-[#31572C] transition-colors">Inicio</Link> &gt; 
-        <Link href="/catalogo" className="hover:text-[#31572C] transition-colors">Catálogo</Link> &gt; 
+        <Link href="/" className="hover:text-[#31572C] transition-colors">Inicio</Link> &gt;
+        <Link href="/catalogo" className="hover:text-[#31572C] transition-colors">Catálogo</Link> &gt;
         <span className="text-gray-900 font-medium line-clamp-1">{producto.nombre}</span>
       </nav>
 
@@ -297,29 +298,7 @@ export default function ProductDetail({ producto, favoritosIniciales = [], userR
 
           <div className="mt-8">
             <h3 className="font-bold border-b pb-2 mb-4 text-lg">Opiniones de Clientes</h3>
-            {producto.opiniones && producto.opiniones.length > 0 ? (
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                {producto.opiniones.map((opinion) => (
-                  <div key={opinion.id} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="font-bold text-gray-800 text-sm">{opinion.usuario_nombre || "Usuario Anónimo"}</div>
-                      <div className="text-xs text-gray-400">{new Date(opinion.fecha).toLocaleDateString()}</div>
-                    </div>
-                    <div className="flex mb-2 gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} className={i < Number(opinion.estrellas) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
-                      ))}
-                    </div>
-                    <p className="text-sm text-gray-600 italic">"{opinion.comentario}"</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 text-center">
-                <p className="text-sm text-gray-500">Aún no hay opiniones para este producto.</p>
-                <p className="text-xs text-gray-400 mt-1">¡Sé el primero en comprar y compartir tu experiencia!</p>
-              </div>
-            )}
+            <ReviewList opiniones={producto.opiniones} userRole={userRole} />
           </div>
         </div>
         {showToast && (
